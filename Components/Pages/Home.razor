@@ -1,0 +1,87 @@
+@page "/"
+@using MudBlazor
+@using PRN_MANGA_PROJECT.Services
+@inject IMangaService MangaService
+
+<PageTitle>Home - PRN Manga Project</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+    <MudText Typo="Typo.h3" Class="mb-4">Welcome to PRN Manga Project</MudText>
+    
+    <MudText Typo="Typo.h5" Class="mb-4">Popular Manga</MudText>
+    <MudGrid>
+        @if (popularManga != null)
+        {
+            @foreach (var manga in popularManga)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudCard Elevation="2" Class="pa-4">
+                        <MudCardMedia Image="@(manga.CoverImageUrl ?? "/images/placeholder-manga.jpg")" Height="200" />
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Class="mb-2">@manga.Title</MudText>
+                            <MudText Typo="Typo.body2" Class="mb-2">@manga.Author</MudText>
+                            <MudChip T="string" Color="Color.Primary" Size="Size.Small">@manga.Status</MudChip>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/manga/{manga.Id}")">Read</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        }
+        else
+        {
+            <MudItem xs="12">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            </MudItem>
+        }
+    </MudGrid>
+
+    <MudText Typo="Typo.h5" Class="mb-4 mt-8">Recent Manga</MudText>
+    <MudGrid>
+        @if (recentManga != null)
+        {
+            @foreach (var manga in recentManga)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudCard Elevation="2" Class="pa-4">
+                        <MudCardMedia Image="@(manga.CoverImageUrl ?? "/images/placeholder-manga.jpg")" Height="200" />
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Class="mb-2">@manga.Title</MudText>
+                            <MudText Typo="Typo.body2" Class="mb-2">@manga.Author</MudText>
+                            <MudChip T="string" Color="Color.Primary" Size="Size.Small">@manga.Status</MudChip>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/manga/{manga.Id}")">Read</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        }
+        else
+        {
+            <MudItem xs="12">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<PRN_MANGA_PROJECT.Models.ViewModels.MangaViewModel>? popularManga;
+    private List<PRN_MANGA_PROJECT.Models.ViewModels.MangaViewModel>? recentManga;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            popularManga = (await MangaService.GetPopularMangaAsync(8)).ToList();
+            recentManga = (await MangaService.GetRecentMangaAsync(8)).ToList();
+        }
+        catch (Exception ex)
+        {
+            // Handle error - in a real app, you'd want proper error handling
+            Console.WriteLine($"Error loading manga: {ex.Message}");
+        }
+    }
+}
