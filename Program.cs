@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using PRN_MANGA_PROJECT.Components;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Repositories;
+using PRN_MANGA_PROJECT.Repositories.Auth;
 using PRN_MANGA_PROJECT.Services;
+using PRN_MANGA_PROJECT.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,13 +43,14 @@ builder.Services.AddScoped<IBaseRepository<Tag>, BaseRepository<Tag>>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IBaseRepository<Bookmark>, BaseRepository<Bookmark>>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
-
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Add Services
 builder.Services.AddScoped<IMangaService, MangaService>();
+builder.Services.AddScoped<IUserService , UserService>();
 
 // Add API Controllers
 builder.Services.AddControllers();
-
+builder.Services.AddRazorPages();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -67,10 +69,10 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+
 
 // Map API Controllers
 app.MapControllers();
+app.MapRazorPages();
 
 app.Run();
