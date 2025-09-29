@@ -25,5 +25,10 @@ namespace PRN_MANGA_PROJECT.Services.Auth
             }
             return false;
         }
+
+        public async Task<IdentityResult> Register(User user, string password)
+        {
+            return await _userRepository.CreateUser(user, password);
+        }
     }
 }

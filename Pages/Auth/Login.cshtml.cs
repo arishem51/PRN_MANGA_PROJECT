@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.ViewModels.Auth;
 using PRN_MANGA_PROJECT.Services.Auth;
 
-namespace PRN_MANGA_PROJECT.Pages
+namespace PRN_MANGA_PROJECT.Pages.Auth
 {
     public class LoginModel : PageModel
     {
@@ -35,7 +35,7 @@ namespace PRN_MANGA_PROJECT.Pages
                 return RedirectToPage("/");
             }
 
-            ModelState.AddModelError(string.Empty, "Đăng nhập thất bại.");
+            ModelState.AddModelError(string.Empty, "Username or password are incorrect.");
             return Page();
         }
     }

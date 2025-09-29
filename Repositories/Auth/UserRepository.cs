@@ -21,6 +21,12 @@ namespace PRN_MANGA_PROJECT.Repositories.Auth
             return await _userManager.CheckPasswordAsync(user, password);
         }
 
+        public async Task<IdentityResult> CreateUser(User user, string password)
+        {
+            return await _userManager.CreateAsync(user,password);
+            
+        }
+
         public async Task<User> GetAnAccount(string username)
         {
            return await _userManager.FindByNameAsync(username);

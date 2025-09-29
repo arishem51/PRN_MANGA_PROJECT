@@ -1,11 +1,12 @@
-﻿@page
-@model PRN_MANGA_PROJECT.Pages.LoginModel
+﻿@page "/login"
+@using PRN_MANGA_PROJECT.Pages.Auth
+@model PRN_MANGA_PROJECT.Pages.Auth.LoginModel
 @{
 }
 
 <form method="post">
 	<div>
-		<label>Username</label>
+		<label>Input.Username</label>
 		<input type="text" asp-for="Input.Username" />
 		<div>
 			<span asp-validation-for="Input.Username" class="text-danger"></span>
@@ -32,6 +33,8 @@
 
 
 	<button type="submit">Login</button>
-
+	<div>
+		Dont have Account , <a href="/register">Sign Up</a>Now
+	</div>
 </form>
 
