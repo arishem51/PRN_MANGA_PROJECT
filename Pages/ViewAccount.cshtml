@@ -26,7 +26,13 @@
                 <td>@user.Email</td>
                 <td>
                     <a asp-page="/EditAccount" asp-route-id="@user.Id" class="btn btn-warning btn-sm">Sửa</a>
-                    <a asp-page="/DeleteAccount" asp-route-id="@user.Id" class="btn btn-danger btn-sm">Xóa</a>
+
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" style="display:inline">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Bạn có chắc muốn xóa tài khoản này không?')">
+                            Xóa
+                        </button>
+                    </form>
                 </td>
             </tr>
         }

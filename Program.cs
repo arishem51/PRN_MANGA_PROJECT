@@ -7,6 +7,7 @@ using PRN_MANGA_PROJECT.Repositories;
 using PRN_MANGA_PROJECT.Repositories.Auth;
 using PRN_MANGA_PROJECT.Services;
 using PRN_MANGA_PROJECT.Services.Auth;
+using PRN_MANGA_PROJECT.Services.EmailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +48,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Add Services
 builder.Services.AddScoped<IMangaService, MangaService>();
 builder.Services.AddScoped<IUserService , UserService>();
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 // Add API Controllers
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
