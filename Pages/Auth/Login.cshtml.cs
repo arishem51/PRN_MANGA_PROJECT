@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.ViewModels.Auth;
 using PRN_MANGA_PROJECT.Services.Auth;
 
-namespace PRN_MANGA_PROJECT.Pages
+namespace PRN_MANGA_PROJECT.Pages.Auth
 {
     public class LoginModel : PageModel
     {
@@ -30,12 +30,13 @@ namespace PRN_MANGA_PROJECT.Pages
                 return Page();
             }
             var check = await _userService.Login(Input.Username, Input.Password);
-            if (check)
+            bool checkEmail = await _userService.checkEmailConfirmation(Input.Username);
+            if (check && checkEmail)
             {
-                return RedirectToPage("/");
+                return RedirectToPage("/Index");
             }
 
-            ModelState.AddModelError(string.Empty, "Đăng nhập thất bại.");
+            ModelState.AddModelError(string.Empty, "Username or password are incorrect.");
             return Page();
         }
     }

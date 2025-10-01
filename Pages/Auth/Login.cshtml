@@ -1,5 +1,6 @@
-﻿@page
-@model PRN_MANGA_PROJECT.Pages.LoginModel
+﻿@page "/login"
+@using PRN_MANGA_PROJECT.Pages.Auth
+@model PRN_MANGA_PROJECT.Pages.Auth.LoginModel
 @{
 }
 
@@ -32,6 +33,8 @@
 
 
 	<button type="submit">Login</button>
-
+	<div>
+		Dont have Account , <a href="/register">Sign Up</a>Now
+	</div>
 </form>
 

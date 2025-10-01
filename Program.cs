@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using PRN_MANGA_PROJECT.Data;
@@ -19,19 +20,6 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity
-builder.Services.AddIdentity<User, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
-    options.User.RequireUniqueEmail = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
-
 // Add MudBlazor
 builder.Services.AddMudServices();
 
@@ -44,15 +32,41 @@ builder.Services.AddScoped<IBaseRepository<Tag>, BaseRepository<Tag>>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IBaseRepository<Bookmark>, BaseRepository<Bookmark>>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 // Add Services
 builder.Services.AddScoped<IMangaService, MangaService>();
+
+//Auth Logic
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService , UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+// Add Identity
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.User.RequireUniqueEmail = true;
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
 // Add API Controllers
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 var app = builder.Build();
+
+//Create Default Role
+using (var scope = app.Services.CreateScope())
+{
+    var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
+    await roleService.SeedRole();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
