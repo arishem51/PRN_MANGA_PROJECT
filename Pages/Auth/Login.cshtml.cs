@@ -30,9 +30,10 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                 return Page();
             }
             var check = await _userService.Login(Input.Username, Input.Password);
-            if (check)
+            bool checkEmail = await _userService.checkEmailConfirmation(Input.Username);
+            if (check && checkEmail)
             {
-                return RedirectToPage("/");
+                return RedirectToPage("/Index");
             }
 
             ModelState.AddModelError(string.Empty, "Username or password are incorrect.");
