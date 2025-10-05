@@ -32,9 +32,9 @@ namespace PRN_MANGA_PROJECT.Repositories.Auth
             return await _userManager.CheckPasswordAsync(user, password);
         }
 
-        public Task<IdentityResult> ConfirmEmail(User user, string token)
+        public async Task<IdentityResult> ConfirmEmail(User user, string token)
         {
-            return _userManager.ConfirmEmailAsync(user, token);
+            return await _userManager.ConfirmEmailAsync(user, token);
         }
 
         public async Task<IdentityResult> CreateUser(User user, string password)
@@ -43,10 +43,16 @@ namespace PRN_MANGA_PROJECT.Repositories.Auth
             
         }
 
-        //public async Task<User> FindUserByUsername(string username)
-        //{
-        //    return await _userManager.FindByNameAsync(email);
-        //}
+        public async Task<bool> FindByEmail(string email)
+        {
+            return await _userManager.Users.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> FindByPhoneNumber(string phoneNumber)
+        {
+            return await _userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
+        }
+
 
         public async Task<User> FindUserById(string UserId)
         {
