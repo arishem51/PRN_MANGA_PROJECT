@@ -13,7 +13,7 @@ namespace PRN_MANGA_PROJECT.Services.Auth
         }
         public async Task SeedRole()
         {
-            string[] roleNames = { "Admin", "Reader", "Editor" };
+            string[] roleNames = { "Admin", "Reader", "Author" };
 
             foreach (var roleName in roleNames)
             {

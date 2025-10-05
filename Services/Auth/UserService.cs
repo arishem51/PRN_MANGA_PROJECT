@@ -21,7 +21,7 @@ namespace PRN_MANGA_PROJECT.Services.Auth
             await _userRepository.AddRoleForUser(user, "Reader");
         }
 
-        public async Task<bool> checkEmailConfirmation(string username)
+        public async Task<bool> CheckEmailConfirmation(string username)
         {
             var user = await _userRepository.GetAnAccount(username);
             if (user == null)
@@ -48,12 +48,12 @@ namespace PRN_MANGA_PROJECT.Services.Auth
             return await _userRepository.GenerateToken(user);
         }
 
-        public async Task<bool> Login(string username, string password)
+        public async Task<bool> Login(string username, string password , bool rememberMe)
         {
             var user = await _userRepository.GetAnAccount(username);
             if (user != null && await _userRepository.CheckPassword(user , password))
             {
-                var response = await _signInManager.PasswordSignInAsync(user, password, false, false);
+                var response = await _signInManager.PasswordSignInAsync(user, password, rememberMe, false);
                 return response.Succeeded;
             }
             return false;
@@ -62,6 +62,29 @@ namespace PRN_MANGA_PROJECT.Services.Auth
         public async Task<IdentityResult> Register(User user, string password)
         {
             return await _userRepository.CreateUser(user, password);
+        }
+
+
+        public async Task Logout()
+        {
+            await _signInManager.SignOutAsync();
+        }
+
+        public async Task<bool> IsExistEmail(string email)
+        { 
+            return await _userRepository.FindByEmail(email);
+        }
+
+        public async Task<bool> IsExistUsername(string username)
+        {
+            var checkUsername = await _userRepository.GetAnAccount(username);
+            return checkUsername != null;
+        }
+
+
+        public async Task<bool> IsExistPhone(string phone)
+        {
+            return await _userRepository.FindByPhoneNumber(phone);
         }
     }
 }

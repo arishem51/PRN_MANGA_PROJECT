@@ -1,40 +1,42 @@
 ﻿@page "/login"
-@using PRN_MANGA_PROJECT.Pages.Auth
 @model PRN_MANGA_PROJECT.Pages.Auth.LoginModel
 @{
 }
 
+<h2>Login</h2>
 <form method="post">
-	<div>
-		<label>Username</label>
-		<input type="text" asp-for="Input.Username" />
-		<div>
-			<span asp-validation-for="Input.Username" class="text-danger"></span>
+    <div>
+        <label>Username</label>
+        <input type="text" asp-for="Input.Username" />
+        <span asp-validation-for="Input.Username" class="text-danger"></span>
+    </div>
 
-		</div>
-	</div>
+    <div>
+        <label>Password</label>
+        <input type="password" asp-for="Input.Password" />
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
 
-	<div>
-		<label>Password</label>
-		<input type="password" asp-for="Input.Password" />
-		<div>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-			<span asp-validation-for="Input.Password" class="text-danger"></span>
-		</div>
-	</div>
-	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @if (TempData["GoogleLoginError"] != null)
+    {
+        <div class="text-danger">@TempData["GoogleLoginError"]</div>
+    }
 
+    <div>
+        <input type="checkbox" asp-for="Input.RememberMe" />
+        Remember Me
+    </div>
 
-	<div>
-		<input type="checkbox" asp-for="Input.RememberMe" />
-		Remember Me
-	</div>
-
-
-
-	<button type="submit">Login</button>
-	<div>
-		Dont have Account , <a href="/register">Sign Up</a>Now
-	</div>
+    <div>
+        <button type="submit">Login</button>
+        <button type="submit" asp-page-handler="ExternalLogin" name="provider" value="Google">
+            Login with Google
+        </button>
+    </div>
 </form>
 
+<div>
+    Don't have an account? <a href="/register">Sign Up</a>
+</div>

@@ -42,9 +42,19 @@
 
     <div>
         <label asp-for="Input.Gender"></label>
-        <input asp-for="Input.Gender" type="checkbox" />
-        <span asp-validation-for="Input.Gender" class="text-danger"></span>
+        <div>
+            <label>
+                <input type="radio" asp-for="Input.Gender" value="true"/> Male
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="radio" asp-for="Input.Gender" value="false" /> Female
+            </label>
+        </div>
     </div>
+
+
 
     <div>
         <label asp-for="Input.PhoneNumber"></label>

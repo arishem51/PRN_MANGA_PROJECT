@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels.Auth;
 using PRN_MANGA_PROJECT.Services.Auth;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PRN_MANGA_PROJECT.Pages.Auth
 {
@@ -31,6 +32,34 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             {
                 return Page();
             }
+            //validate phone number exist
+
+            if (await _userService.IsExistPhone(Input.PhoneNumber))
+            {
+                ModelState.AddModelError("Input.PhoneNumber", "Phone number is existed");
+            }
+
+
+            //validate email exist 
+
+            if (await _userService.IsExistEmail(Input.Email))
+            {
+                ModelState.AddModelError("Input.Email", "Email is existed");
+            }
+
+            //validate username exist
+
+            if (await _userService.IsExistUsername(Input.Username))
+            {
+                ModelState.AddModelError("Input.Username", "Username is existed");
+            }
+
+
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
             var newUser = new User
             {
                 FirstName = Input.FirstName,
@@ -38,7 +67,7 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                 Email = Input.Email,
                 UserName = Input.Username,
                 Address = Input.Address,
-                Gender = true,
+                Gender = Input.Gender,
                 PhoneNumber = Input.PhoneNumber,
             };
 

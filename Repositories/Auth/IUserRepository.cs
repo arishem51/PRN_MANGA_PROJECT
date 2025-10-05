@@ -18,8 +18,7 @@ namespace PRN_MANGA_PROJECT.Repositories.Auth
 
         Task<bool> CheckEmailConfirmation(User user);
 
-        //Task<User> FindUserByUsername(string username);
-
-
+        Task<bool> FindByEmail(string email);
+        Task<bool> FindByPhoneNumber(string phoneNumber);
     }
 }

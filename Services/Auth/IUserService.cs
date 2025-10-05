@@ -5,7 +5,7 @@ namespace PRN_MANGA_PROJECT.Services.Auth
 {
     public interface IUserService
     {
-        Task<bool> Login (string username, string password);
+        Task<bool> Login (string username, string password , bool rememberMe);
         Task<IdentityResult> Register (User user , string password);
         
         Task AddRole(User user , string roleName);
@@ -15,6 +15,13 @@ namespace PRN_MANGA_PROJECT.Services.Auth
         public Task<User> FindUserById(string UserId);
         public Task<IdentityResult> ConfirmEmail(User user, string token);
 
-        public Task<bool> checkEmailConfirmation(string username);
+        public Task<bool> CheckEmailConfirmation(string username);
+
+        Task Logout();
+
+        Task<bool> IsExistUsername(string username);
+        Task<bool> IsExistEmail(string email);
+        Task<bool> IsExistPhone(string phone);
+
     }
 }
