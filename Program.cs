@@ -63,13 +63,6 @@ builder.Services.AddAuthentication()
         options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     });
 
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//    options.Cookie.HttpOnly = true;
-//    options.ExpireTimeSpan = TimeSpan.FromDays(30); // Cookie tồn tại 30 ngày nếu Remember Me
-//    options.SlidingExpiration = true;
-//    options.LoginPath = "/login"; // Trang login mặc định
-//});
 // Add API Controllers
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
