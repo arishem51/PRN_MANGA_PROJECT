@@ -9,6 +9,7 @@ using PRN_MANGA_PROJECT.Repositories.Auth;
 using PRN_MANGA_PROJECT.Services;
 using PRN_MANGA_PROJECT.Services.Auth;
 using PRN_MANGA_PROJECT.Services.EmailService;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +66,39 @@ builder.Services.AddAuthentication()
 
 // Add API Controllers
 builder.Services.AddControllers();
-builder.Services.AddRazorPages();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+    {
+        policy.RequireRole("Admin");
+    });
+});
+
+builder.Services.AddRazorPages(options =>
+{
+    // Secure the entire Admin area to Admin role only
+    options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminOnly");
+});
+
+// Redirect unauthenticated and unauthorized users to home page
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/";
+    options.AccessDeniedPath = "/Public/AccessDenied";
+    options.Events = new CookieAuthenticationEvents
+    {
+        OnRedirectToLogin = context =>
+        {
+            context.Response.Redirect("/");
+            return Task.CompletedTask;
+        },
+        OnRedirectToAccessDenied = context =>
+        {
+            context.Response.Redirect("/Public/AccessDenied");
+            return Task.CompletedTask;
+        }
+    };
+});
 var app = builder.Build();
 
 //Create Default Role
