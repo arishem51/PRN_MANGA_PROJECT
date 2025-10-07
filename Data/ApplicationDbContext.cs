@@ -77,5 +77,35 @@ namespace PRN_MANGA_PROJECT.Data
             builder.Entity<Comment>()
                 .HasIndex(c => c.UserId);
         }
+
+        public override int SaveChanges()
+        {
+            UpdateTimestamps();
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            UpdateTimestamps();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void UpdateTimestamps()
+        {
+            var utcNow = DateTime.UtcNow;
+
+            foreach (var entry in ChangeTracker.Entries<IHasTimestamps>())
+            {
+                if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.UpdatedAt = utcNow;
+                }
+                else if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = utcNow;
+                    entry.Entity.UpdatedAt = utcNow;
+                }
+            }
+        }
     }
 }
