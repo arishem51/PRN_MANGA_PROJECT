@@ -424,3 +424,6 @@ $RECYCLE.BIN/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Cursor editor config
+.cursor/
