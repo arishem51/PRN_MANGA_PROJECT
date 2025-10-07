@@ -21,12 +21,22 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="/">Home</a>
-                            <a class="nav-link text-dark" href="/login">Login</a>
-                            <a class="nav-link text-dark" href="/logout">Logout</a>
+                        </li>
+                    </ul>
 
-                        </li>
-                        <li class="nav-item">
-                        </li>
+                    <ul class="navbar-nav">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/login">Login</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
