@@ -14,23 +14,25 @@
             <th>ID</th>
             <th>Tên đăng nhập</th>
             <th>Email</th>
+            <th>Role</th>
+            <th>Trạng thái</th>
             <th>Hành động</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var user in Model.Users)
+        @foreach (var acc in Model.Accounts)
         {
             <tr>
-                <td>@user.Id</td>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
+                <td>@acc.Id</td>
+                <td>@acc.Username</td>
+                <td>@acc.Email</td>
+                <td>@acc.Role</td>
                 <td>
-                    <a asp-page="/EditAccount" asp-route-id="@user.Id" class="btn btn-warning btn-sm">Sửa</a>
-
-                    <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" style="display:inline">
+                    <a asp-page="/EditAccount" asp-route-id="@acc.Id" class="btn btn-warning btn-sm">Sửa</a>
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@acc.Id" style="display:inline">
                         <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Bạn có chắc muốn xóa tài khoản này không?')">
-                            Xóa
+                                onclick="return confirm('Bạn có chắc muốn khóa tài khoản này không?')">
+                            Khóa
                         </button>
                     </form>
                 </td>

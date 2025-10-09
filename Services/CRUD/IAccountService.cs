@@ -7,7 +7,8 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
     {
         Task<IEnumerable<User>> GetAll();
         Task<User> GetById(string id);
-        Task<IdentityResult> Create(string username, string email, string password);
+        Task<IdentityResult> Create(string username, string email, string password, string roleName);
+
         Task<IdentityResult> Update(User user);
         Task<IdentityResult> Delete(string id);
     }

@@ -1,48 +1,66 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
+using PRN_MANGA_PROJECT.Models.ViewModels.CRUD;
+using PRN_MANGA_PROJECT.Services.CRUD;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PRN_MANGA_PROJECT.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class ViewAccountModel : PageModel
     {
+        private readonly IAccountService _accountService;
         private readonly UserManager<User> _userManager;
 
-        public ViewAccountModel(UserManager<User> userManager)
+        public ViewAccountModel(IAccountService accountService)
         {
-            _userManager = userManager;
+            _accountService = accountService;
         }
 
-        public List<User> Users { get; set; } = new List<User>();
+        public List<AccountViewModel> Accounts { get; set; } = new();
 
-        public void OnGet()
+        // ✅ Chỉ lấy các tài khoản đang hoạt động
+        public async Task OnGetAsync()
         {
-            Users = _userManager.Users.ToList();
+            await LoadDataAsync();
         }
 
-        // Xóa user trực tiếp
         public async Task<IActionResult> OnPostDeleteAsync(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
-
-            var result = await _userManager.DeleteAsync(user);
-
+            var result = await _accountService.Delete(id); // gọi soft delete
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError("", error.Description);
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
-            // Load lại danh sách sau khi xóa
-            Users = _userManager.Users.ToList();
+            await LoadDataAsync();
             return Page();
+        }
+        private async Task LoadDataAsync()
+        {
+            Accounts.Clear();
+
+            var users = await _accountService.GetAll(); // đã lọc IsActive=true nếu bạn làm đúng service
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                Accounts.Add(new AccountViewModel
+                {
+                    Id = user.Id,
+                    Username = user.UserName,
+                    Email = user.Email,
+                    Role = roles.Any() ? string.Join(", ", roles) : "(Chưa gán)"
+                });
+            }
         }
     }
 }
