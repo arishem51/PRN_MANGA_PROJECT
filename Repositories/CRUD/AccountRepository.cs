@@ -22,10 +22,10 @@ namespace PRN_MANGA_PROJECT.Repositories.CRUD
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+
                 if (user is not null)
                 {
-                    // Nếu bạn không có property Roles trong model User
-                    // thì bạn có thể chỉ cần gán user.RoleName = roles.FirstOrDefault();
+                   
                     if (user.GetType().GetProperty("Roles") != null)
                     {
                         user.GetType().GetProperty("Roles")?.SetValue(user, roles.ToList());
