@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -9,6 +9,7 @@ using PRN_MANGA_PROJECT.Repositories.Auth;
 using PRN_MANGA_PROJECT.Services;
 using PRN_MANGA_PROJECT.Services.Auth;
 using PRN_MANGA_PROJECT.Services.EmailService;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireLowercase = true;
     options.User.RequireUniqueEmail = true;
     options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedAccount = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
@@ -63,16 +65,42 @@ builder.Services.AddAuthentication()
         options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     });
 
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//    options.Cookie.HttpOnly = true;
-//    options.ExpireTimeSpan = TimeSpan.FromDays(30); // Cookie tồn tại 30 ngày nếu Remember Me
-//    options.SlidingExpiration = true;
-//    options.LoginPath = "/login"; // Trang login mặc định
-//});
+
 // Add API Controllers
 builder.Services.AddControllers();
-builder.Services.AddRazorPages();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+    {
+        policy.RequireRole("Admin");
+    });
+});
+
+builder.Services.AddRazorPages(options =>
+{
+    // Secure the entire Admin area to Admin role only
+    options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminOnly");
+});
+
+// Redirect unauthenticated and unauthorized users to home page
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/";
+    options.AccessDeniedPath = "/Public/AccessDenied";
+    options.Events = new CookieAuthenticationEvents
+    {
+        OnRedirectToLogin = context =>
+        {
+            context.Response.Redirect("/");
+            return Task.CompletedTask;
+        },
+        OnRedirectToAccessDenied = context =>
+        {
+            context.Response.Redirect("/Public/AccessDenied");
+            return Task.CompletedTask;
+        }
+    };
+});
 var app = builder.Build();
 
 //Create Default Role

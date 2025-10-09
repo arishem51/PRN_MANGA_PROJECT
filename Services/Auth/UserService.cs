@@ -86,5 +86,25 @@ namespace PRN_MANGA_PROJECT.Services.Auth
         {
             return await _userRepository.FindByPhoneNumber(phone);
         }
+
+        public async Task<User> FindByEmail(string email)
+        {
+            return await _userRepository.FindUserByEmail(email);
+        }
+
+        public Task<IdentityResult> ResetPassword(User user, string token, string newPassword)
+        {
+            return _userRepository.ResetPassword(user, token, newPassword); 
+        }
+
+        public async Task<string> GenerateResetPasswordToken(User user)
+        {
+            return await _userRepository.GenerateResetPasswordToken(user);
+        }
+
+        public async Task UpdateToken(User user)
+        {
+            await _userRepository.UpdateToken(user);
+        }
     }
 }

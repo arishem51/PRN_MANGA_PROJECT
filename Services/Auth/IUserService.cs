@@ -23,5 +23,11 @@ namespace PRN_MANGA_PROJECT.Services.Auth
         Task<bool> IsExistEmail(string email);
         Task<bool> IsExistPhone(string phone);
 
+        Task<User> FindByEmail(string email);
+        Task<IdentityResult> ResetPassword(User user, string token, string newPassword);
+
+        Task<string> GenerateResetPasswordToken(User user);
+        Task UpdateToken(User user);
+
     }
 }

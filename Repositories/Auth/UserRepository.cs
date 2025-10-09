@@ -53,10 +53,19 @@ namespace PRN_MANGA_PROJECT.Repositories.Auth
             return await _userManager.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
         }
 
+        public async Task<User> FindUserByEmail(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
 
         public async Task<User> FindUserById(string UserId)
         {
             return await _userManager.FindByIdAsync(UserId);
+        }
+
+        public async Task<string> GenerateResetPasswordToken(User user)
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
         }
 
         public async Task<string> GenerateToken(User user)
@@ -69,7 +78,15 @@ namespace PRN_MANGA_PROJECT.Repositories.Auth
            return await _userManager.FindByNameAsync(username);
         }
 
+        public async Task<IdentityResult> ResetPassword(User user , string token , string newPassword)
+        {
+            var decodedToken = System.Web.HttpUtility.UrlDecode(token);
+            return await _userManager.ResetPasswordAsync(user , decodedToken , newPassword);
+        }
 
-        
+        public async Task UpdateToken(User user)
+        {
+           await _userManager.UpdateSecurityStampAsync(user);
+        }
     }
 }

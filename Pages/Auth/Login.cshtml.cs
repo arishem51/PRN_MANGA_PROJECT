@@ -28,14 +28,19 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
         }
 
 
-        public void OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToPage("/Index");
+            }
             // save binding loginDTO when remember Me 
             if (Request.Cookies.ContainsKey("Username"))
             {
                 Input.Username = Request.Cookies["Username"];
                 Input.RememberMe = true; 
             }
+            return Page();
         }
 
         public async Task<IActionResult> OnPost()
