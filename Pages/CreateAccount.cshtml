@@ -19,7 +19,17 @@
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
 
+    <div class="form-group">
+        <label>Vai trò (Role)</label>
+        <select asp-for="Input.RoleName" class="form-control">
+            <option value="">-- Chọn vai trò --</option>
+            <option value="Manager">Manager</option>
+            <option value="Author">Author</option>
+            <option value="Reader">Reader</option>
+        </select>
+        <span asp-validation-for="Input.RoleName" class="text-danger"></span>
+    </div>
+
     <button type="submit" class="btn btn-success">Tạo tài khoản</button>
     <a asp-page="/ViewAccount" class="btn btn-secondary">Hủy</a>
 </form>
-

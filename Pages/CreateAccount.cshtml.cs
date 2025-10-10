@@ -2,23 +2,27 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
-using PRN_MANGA_PROJECT.Services;
+using PRN_MANGA_PROJECT.Services.EmailService;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Linq;
 using System.Threading.Tasks;
-using PRN_MANGA_PROJECT.Services.EmailService;
 
 namespace PRN_MANGA_PROJECT.Pages
 {
     public class CreateAccountModel : PageModel
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
 
-        public CreateAccountModel(UserManager<User> userManager, IEmailService emailService)
+        public CreateAccountModel(
+            UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IEmailService emailService)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _emailService = emailService;
         }
 
@@ -27,44 +31,70 @@ namespace PRN_MANGA_PROJECT.Pages
 
         public class InputModel
         {
-            [Required]
-            [Display(Name = "Tên đăng nhập")]
+            [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
             public string Username { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Email không được để trống")]
             [EmailAddress]
-            [Display(Name = "Email")]
             public string Email { get; set; }
+
+            [Required(ErrorMessage = "Vui lòng chọn vai trò")]
+            public string RoleName { get; set; }
         }
 
         public void OnGet() { }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid)
+                return Page();
 
+            // ✅ Tự sinh mật khẩu ngẫu nhiên
             string password = GenerateRandomPassword();
 
+            // ✅ Tạo user mới
             var user = new User
             {
                 UserName = Input.Username,
-                Email = Input.Email
+                Email = Input.Email,
+                IsActive = true
             };
 
             var result = await _userManager.CreateAsync(user, password);
-
             if (result.Succeeded)
             {
+                // ✅ Nếu role chưa có thì tạo mới
+                if (!await _roleManager.RoleExistsAsync(Input.RoleName))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(Input.RoleName));
+                }
+
+                // ✅ Gán role cho user
+                await _userManager.AddToRoleAsync(user, Input.RoleName);
+
+                // ✅ Gửi email thông báo tài khoản
                 string subject = "Tài khoản mới của bạn";
-                string body = $"Xin chào,\n\nTài khoản của bạn đã được tạo.\nTên đăng nhập: {Input.Username}\nMật khẩu: {password}\n\nVui lòng đăng nhập và đổi mật khẩu ngay.";
+                string body = $"""
+                Xin chào {Input.Username},
+
+                Tài khoản của bạn đã được tạo thành công.
+
+                🔹 Tên đăng nhập: {Input.Username}
+                🔹 Mật khẩu: {password}
+                🔹 Vai trò: {Input.RoleName}
+
+                Vui lòng đăng nhập và đổi mật khẩu ngay sau khi đăng nhập.
+                """;
+
                 await _emailService.SendEmailAsync(Input.Email, subject, body);
 
+                TempData["SuccessMessage"] = "✅ Tạo tài khoản thành công!";
                 return RedirectToPage("/ViewAccount");
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError("", error.Description);
+                ModelState.AddModelError(string.Empty, error.Description);
             }
 
             return Page();

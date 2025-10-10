@@ -7,8 +7,9 @@ namespace PRN_MANGA_PROJECT.Repositories.CRUD
     {
         Task<IEnumerable<User>> GetAllAsync();
         Task<User> GetByIdAsync(string id);
-        Task<IdentityResult> CreateAsync(User user, string password);
+        Task<IdentityResult> CreateAsync(User user, string password, string? roleName);
         Task<IdentityResult> UpdateAsync(User user);
         Task<IdentityResult> DeleteAsync(string id);
+        Task<IdentityResult> AssignRoleAsync(User user, string roleName);
     }
 }

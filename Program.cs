@@ -10,6 +10,8 @@ using PRN_MANGA_PROJECT.Services;
 using PRN_MANGA_PROJECT.Services.Auth;
 using PRN_MANGA_PROJECT.Services.EmailService;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using PRN_MANGA_PROJECT.Repositories.CRUD;
+using PRN_MANGA_PROJECT.Services.CRUD;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +37,8 @@ builder.Services.AddScoped<IBaseRepository<Bookmark>, BaseRepository<Bookmark>>(
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 // Add Services
 builder.Services.AddScoped<IMangaService, MangaService>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 //Auth Logic
 builder.Services.AddScoped<IUserRepository, UserRepository>();
