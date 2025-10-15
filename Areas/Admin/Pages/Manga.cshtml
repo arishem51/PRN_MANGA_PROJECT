@@ -1,6 +1,149 @@
 @page
 @{
+    ViewData["Title"] = "Manga Management";
+    
+    // Fake manga data for UI demonstration
+    var fakeManga = new[]
+    {
+        new { Id = 1, Title = "One Piece", Author = "Eiichiro Oda", Status = "Ongoing", Chapters = 1095, Rating = 9.5, CoverImage = "https://via.placeholder.com/150x200/FF6B6B/FFFFFF?text=OP" },
+        new { Id = 2, Title = "Naruto", Author = "Masashi Kishimoto", Status = "Completed", Chapters = 700, Rating = 9.2, CoverImage = "https://via.placeholder.com/150x200/4ECDC4/FFFFFF?text=N" },
+        new { Id = 3, Title = "Attack on Titan", Author = "Hajime Isayama", Status = "Completed", Chapters = 139, Rating = 9.7, CoverImage = "https://via.placeholder.com/150x200/45B7D1/FFFFFF?text=AOT" },
+        new { Id = 4, Title = "Demon Slayer", Author = "Koyoharu Gotouge", Status = "Completed", Chapters = 205, Rating = 9.3, CoverImage = "https://via.placeholder.com/150x200/96CEB4/FFFFFF?text=DS" },
+        new { Id = 5, Title = "My Hero Academia", Author = "Kohei Horikoshi", Status = "Ongoing", Chapters = 414, Rating = 8.9, CoverImage = "https://via.placeholder.com/150x200/FFEAA7/FFFFFF?text=MHA" },
+        new { Id = 6, Title = "Jujutsu Kaisen", Author = "Gege Akutami", Status = "Ongoing", Chapters = 250, Rating = 9.1, CoverImage = "https://via.placeholder.com/150x200/DDA0DD/FFFFFF?text=JJK" },
+        new { Id = 7, Title = "Tokyo Ghoul", Author = "Sui Ishida", Status = "Completed", Chapters = 179, Rating = 8.8, CoverImage = "https://via.placeholder.com/150x200/98D8C8/FFFFFF?text=TG" },
+        new { Id = 8, Title = "Death Note", Author = "Tsugumi Ohba", Status = "Completed", Chapters = 108, Rating = 9.4, CoverImage = "https://via.placeholder.com/150x200/F7DC6F/FFFFFF?text=DN" }
+    };
 }
-admin manga page
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manga Management</h2>
+    <button class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Manga
+    </button>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search manga..." value="">
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select">
+            <option value="">All Status</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
+            <option value="hiatus">Hiatus</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select">
+            <option value="">Sort by</option>
+            <option value="title">Title A-Z</option>
+            <option value="rating">Rating</option>
+            <option value="chapters">Chapters</option>
+        </select>
+    </div>
+</div>
+
+<!-- Manga Grid -->
+<div class="row mb-2">
+    @foreach (var manga in fakeManga)
+    {
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="position-relative">
+                    <img src="@manga.CoverImage" class="card-img-top" alt="@manga.Title" style="height: 250px; object-fit: cover;">
+                    <span class="badge bg-@(manga.Status == "Ongoing" ? "success" : "secondary") position-absolute top-0 end-0 m-2">
+                        @manga.Status
+                    </span>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-truncate" title="@manga.Title">@manga.Title</h5>
+                    <p class="card-text text-muted small">by @manga.Author</p>
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">Chapters</small>
+                            <div class="fw-bold">@manga.Chapters</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Rating</small>
+                            <div class="fw-bold text-warning">@manga.Rating</div>
+                        </div>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="btn-group w-100" role="group">
+                            <button class="btn btn-outline-primary btn-sm" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Manga pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">Previous</a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="#">Next</a>
+        </li>
+    </ul>
+</nav>
+
+<!-- Statistics Cards -->
+<div class="row mt-2">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3>@fakeManga.Length</h3>
+                <p class="mb-0">Total Manga</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3>@fakeManga.Count(m => m.Status == "Ongoing")</h3>
+                <p class="mb-0">Ongoing</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body text-center">
+                <h3>@fakeManga.Count(m => m.Status == "Completed")</h3>
+                <p class="mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h3>@fakeManga.Average(m => m.Rating).ToString("F1")</h3>
+                <p class="mb-0">Avg Rating</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 
