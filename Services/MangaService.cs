@@ -17,6 +17,12 @@ namespace PRN_MANGA_PROJECT.Services
 
         public async Task<IEnumerable<MangaViewModel>> GetAllMangaAsync()
         {
+            var mangas = await _mangaRepository.GetAllMangaWithTagsAsync();
+            return mangas.Select(MapToViewModel);
+        }
+
+        public async Task<IEnumerable<MangaViewModel>> GetActiveMangaAsync()
+        {
             var mangas = await _mangaRepository.GetMangaWithTagsAsync();
             return mangas.Select(MapToViewModel);
         }
@@ -62,6 +68,7 @@ namespace PRN_MANGA_PROJECT.Services
             var manga = new Manga
             {
                 Title = mangaViewModel.Title,
+                MangaDexId = mangaViewModel.MangaDexId,
                 Author = mangaViewModel.Author,
                 Artist = mangaViewModel.Artist,
                 Description = mangaViewModel.Description,
@@ -97,6 +104,16 @@ namespace PRN_MANGA_PROJECT.Services
             if (manga != null)
             {
                 manga.IsActive = false;
+                await _mangaRepository.UpdateAsync(manga);
+            }
+        }
+
+        public async Task ActivateMangaAsync(int id)
+        {
+            var manga = await _mangaRepository.GetByIdAsync(id);
+            if (manga != null)
+            {
+                manga.IsActive = true;
                 await _mangaRepository.UpdateAsync(manga);
             }
         }
@@ -138,6 +155,7 @@ namespace PRN_MANGA_PROJECT.Services
             {
                 Id = manga.Id,
                 Title = manga.Title,
+                MangaDexId = manga.MangaDexId,
                 Author = manga.Author,
                 Artist = manga.Artist,
                 Description = manga.Description,
@@ -145,6 +163,7 @@ namespace PRN_MANGA_PROJECT.Services
                 CoverImageUrl = manga.CoverImageUrl,
                 CreatedAt = manga.CreatedAt,
                 UpdatedAt = manga.UpdatedAt,
+                IsActive = manga.IsActive,
                 Tags = manga.MangaTags.Select(mt => new TagViewModel
                 {
                     Id = mt.Tag.Id,
