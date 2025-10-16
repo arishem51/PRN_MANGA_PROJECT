@@ -46,7 +46,7 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 await _mangaService.CreateMangaAsync(mangaViewModel);
 
                 TempData["SuccessMessage"] = $"Manga '{Input.Title}' has been created successfully!";
-                return RedirectToPage("/Admin/Manga");
+                return Redirect("/admin/manga");
             }
             catch (Exception ex)
             {
