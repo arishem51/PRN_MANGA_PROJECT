@@ -12,6 +12,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
         public string? CoverImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool IsActive { get; set; }
         public List<TagViewModel> Tags { get; set; } = new List<TagViewModel>();
         public int ChapterCount { get; set; }
         public bool IsBookmarked { get; set; }

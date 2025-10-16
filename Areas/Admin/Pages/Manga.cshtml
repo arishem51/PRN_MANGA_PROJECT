@@ -4,6 +4,10 @@
     ViewData["Title"] = "Manga Management";
 }
 
+<form method="post">
+    @Html.AntiForgeryToken()
+</form>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Manga Management</h2>
     <a href="/admin/manga/create" class="btn btn-primary">
@@ -49,6 +53,7 @@
                 <th>Title</th>
                 <th>Author</th>
                 <th>Status</th>
+                <th>Active</th>
                 <th>Chapters</th>
                 <th>Rating</th>
                 <th>Actions</th>
@@ -71,6 +76,11 @@
                             @(manga.Status ?? "-")
                         </span>
                     </td>
+                    <td>
+                        <span class="badge bg-@(manga.IsActive ? "success" : "danger")">
+                            @(manga.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </td>
                     <td>@manga.ChapterCount</td>
                     <td>
                         <span class="text-muted">-</span>
@@ -80,9 +90,18 @@
                             <a class="btn btn-outline-warning btn-sm" title="Edit" href="/admin/manga/@manga.Id">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                            <button class="btn btn-outline-danger btn-sm" title="Delete">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
+                            @if (manga.IsActive)
+                            {
+                                <button class="btn btn-outline-danger btn-sm delete-btn" title="Delete" data-id="@manga.Id">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-success btn-sm activate-btn" title="Activate" data-id="@manga.Id">
+                                    <i class="fas fa-check"></i> Activate
+                                </button>
+                            }
                         </div>
                     </td>
                 </tr>
@@ -121,4 +140,160 @@
         </div>
     </div>
 </footer>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle delete button clicks
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mangaId = this.getAttribute('data-id');
+                    const mangaTitle = this.closest('tr').querySelector('td:nth-child(3) strong').textContent;
+                    
+                    if (confirm(`Are you sure you want to delete "${mangaTitle}"?`)) {
+                        deleteManga(mangaId, this);
+                    }
+                });
+            });
+
+            // Handle activate button clicks
+            document.querySelectorAll('.activate-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const mangaId = this.getAttribute('data-id');
+                    const mangaTitle = this.closest('tr').querySelector('td:nth-child(3) strong').textContent;
+                    
+                    if (confirm(`Are you sure you want to activate "${mangaTitle}"?`)) {
+                        activateManga(mangaId, this);
+                    }
+                });
+            });
+
+            function deleteManga(id, button) {
+                fetch('/admin/manga?handler=Delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `id=${id}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Update the row to show activate button
+                        updateRowAfterAction(button, false);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'An error occurred while deleting the manga.');
+                });
+            }
+
+            function activateManga(id, button) {
+                fetch('/admin/manga?handler=Activate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `id=${id}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        // Update the row to show delete button
+                        updateRowAfterAction(button, true);
+                    } else {
+                        showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'An error occurred while activating the manga.');
+                });
+            }
+
+            function updateRowAfterAction(button, isActive) {
+                const row = button.closest('tr');
+                const activeCell = row.querySelector('td:nth-child(6)');
+                const actionsCell = row.querySelector('td:nth-child(9)');
+                
+                // Update active status badge
+                if (isActive) {
+                    activeCell.innerHTML = '<span class="badge bg-success">Active</span>';
+                } else {
+                    activeCell.innerHTML = '<span class="badge bg-danger">Inactive</span>';
+                }
+                
+                // Update action button
+                const btnGroup = actionsCell.querySelector('.btn-group');
+                const editBtn = btnGroup.querySelector('a');
+                btnGroup.innerHTML = '';
+                btnGroup.appendChild(editBtn);
+                
+                if (isActive) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-outline-danger btn-sm delete-btn';
+                    deleteBtn.title = 'Delete';
+                    deleteBtn.setAttribute('data-id', button.getAttribute('data-id'));
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+                    deleteBtn.addEventListener('click', function() {
+                        const mangaId = this.getAttribute('data-id');
+                        const mangaTitle = this.closest('tr').querySelector('td:nth-child(3) strong').textContent;
+                        
+                        if (confirm(`Are you sure you want to delete "${mangaTitle}"?`)) {
+                            deleteManga(mangaId, this);
+                        }
+                    });
+                    btnGroup.appendChild(deleteBtn);
+                } else {
+                    const activateBtn = document.createElement('button');
+                    activateBtn.className = 'btn btn-outline-success btn-sm activate-btn';
+                    activateBtn.title = 'Activate';
+                    activateBtn.setAttribute('data-id', button.getAttribute('data-id'));
+                    activateBtn.innerHTML = '<i class="fas fa-check"></i> Activate';
+                    activateBtn.addEventListener('click', function() {
+                        const mangaId = this.getAttribute('data-id');
+                        const mangaTitle = this.closest('tr').querySelector('td:nth-child(3) strong').textContent;
+                        
+                        if (confirm(`Are you sure you want to activate "${mangaTitle}"?`)) {
+                            activateManga(mangaId, this);
+                        }
+                    });
+                    btnGroup.appendChild(activateBtn);
+                }
+            }
+
+            function showAlert(type, message) {
+                // Remove existing alerts
+                const existingAlerts = document.querySelectorAll('.alert');
+                existingAlerts.forEach(alert => alert.remove());
+                
+                // Create new alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                // Insert alert at the top of the page
+                const container = document.querySelector('.container-fluid') || document.querySelector('.container');
+                container.insertBefore(alertDiv, container.firstChild);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+        });
+    </script>
+}
 

@@ -17,6 +17,12 @@ namespace PRN_MANGA_PROJECT.Services
 
         public async Task<IEnumerable<MangaViewModel>> GetAllMangaAsync()
         {
+            var mangas = await _mangaRepository.GetAllMangaWithTagsAsync();
+            return mangas.Select(MapToViewModel);
+        }
+
+        public async Task<IEnumerable<MangaViewModel>> GetActiveMangaAsync()
+        {
             var mangas = await _mangaRepository.GetMangaWithTagsAsync();
             return mangas.Select(MapToViewModel);
         }
@@ -102,6 +108,16 @@ namespace PRN_MANGA_PROJECT.Services
             }
         }
 
+        public async Task ActivateMangaAsync(int id)
+        {
+            var manga = await _mangaRepository.GetByIdAsync(id);
+            if (manga != null)
+            {
+                manga.IsActive = true;
+                await _mangaRepository.UpdateAsync(manga);
+            }
+        }
+
         public async Task<bool> BookmarkMangaAsync(string userId, int mangaId)
         {
             var existingBookmark = await _bookmarkRepository.FirstOrDefaultAsync(b => b.UserId == userId && b.MangaId == mangaId);
@@ -147,6 +163,7 @@ namespace PRN_MANGA_PROJECT.Services
                 CoverImageUrl = manga.CoverImageUrl,
                 CreatedAt = manga.CreatedAt,
                 UpdatedAt = manga.UpdatedAt,
+                IsActive = manga.IsActive,
                 Tags = manga.MangaTags.Select(mt => new TagViewModel
                 {
                     Id = mt.Tag.Id,
