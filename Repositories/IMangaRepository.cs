@@ -5,6 +5,7 @@ namespace PRN_MANGA_PROJECT.Repositories
     public interface IMangaRepository : IBaseRepository<Manga>
     {
         Task<IEnumerable<Manga>> GetMangaWithTagsAsync();
+        Task<IEnumerable<Manga>> GetAllMangaWithTagsAsync();
         Task<Manga?> GetMangaWithTagsByIdAsync(int id);
         Task<IEnumerable<Manga>> SearchMangaAsync(string searchTerm);
         Task<IEnumerable<Manga>> GetMangaByTagAsync(int tagId);
