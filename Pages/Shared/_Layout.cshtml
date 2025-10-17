@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="~/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PRN_MANGA_PROJECT.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     @{
         var path = Context?.Request?.Path.Value?.ToLowerInvariant() ?? string.Empty;
         var isAdmin = path.StartsWith("/admin");
@@ -55,7 +55,7 @@
                 <a class="list-group-item list-group-item-action @(isManga ? "active" : "")" href="/admin/manga">Manga</a>
             </div>
         </aside>
-        <div class="container-fluid">
+        <div class="container-fluid flex-grow-1">
             <main role="main" class="p-4" style="margin-left:@cssMainMarginLeft;">
                 @RenderBody()
             </main>
@@ -63,7 +63,7 @@
     }
     else
     {
-        <div class="container">
+        <div class="container flex-grow-1">
             <main role="main" class="pb-3">
                 @RenderBody()
                 
@@ -71,7 +71,7 @@
         </div>
     }
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-auto">
         <div class="container">
             &copy; 2025 - Manga - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
