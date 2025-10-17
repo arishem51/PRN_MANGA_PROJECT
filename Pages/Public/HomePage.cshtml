@@ -1,5 +1,31 @@
-﻿@page "/home"
+﻿@page
 @model PRN_MANGA_PROJECT.Pages.Public.HomePageModel
 @{
+    Layout = "_Layout";
+    ViewData["Title"] = "HomePage";
 }
-home
+
+<h2 class="mb-3">Manga List</h2>
+
+@if (Model.MangaList.Count == 0)
+{
+    <p>Đang tải dữ liệu từ MangaDex...</p>
+}
+else
+{
+    <div class="row clearfix">
+        @foreach (var item in Model.MangaList)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="@item.CoverUrl" class="card-img-top" alt="@item.Title"
+                         style="height:250px;object-fit:cover;">
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">@item.Title</h5>
+                        <p class="card-text text-muted small text-truncate">@item.Description</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

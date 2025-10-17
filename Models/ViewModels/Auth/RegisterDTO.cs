@@ -43,6 +43,26 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.Auth
         [Required(ErrorMessage = "Address is required")]
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters")]
         public string? Address { get; set; }
+
+        [DataType(DataType.Date)]
+        [CustomValidation(typeof(RegisterDTO), nameof(ValidateBirthDateRange))]
+        public DateTime? BirthDate { get; set; }
+
+        public static ValidationResult ValidateBirthDateRange(DateTime? birthDate, ValidationContext context)
+        {
+            if (birthDate == null)
+                return new ValidationResult("Birthdate is required");
+
+            var minDate = new DateTime(1940, 1, 1);
+            var maxDate = DateTime.Today; 
+
+            if (birthDate < minDate || birthDate > maxDate)
+                return new ValidationResult($"Birthdate must be between {minDate:yyyy-MM-dd} and {maxDate:yyyy-MM-dd}");
+
+            return ValidationResult.Success;
+        }
+
         public bool IsActive { get; set; } = true;
+
     }
 }

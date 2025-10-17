@@ -1,72 +1,95 @@
 ﻿@page "/register"
 @model PRN_MANGA_PROJECT.Pages.Auth.RegisterModel
 @{
+    ViewData["Title"] = "Register";
 }
-<h2>Sign Up</h2>
-<form method="post">
-    <div>
-        <label asp-for="Input.FirstName"></label>
-        <input asp-for="Input.FirstName" />
-        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-    </div>
 
-    <div>
-        <label asp-for="Input.LastName"></label>
-        <input asp-for="Input.LastName" />
-        <span asp-validation-for="Input.LastName" class="text-danger"></span>
-    </div>
 
-    <div>
-        <label asp-for="Input.Username"></label>
-        <input asp-for="Input.Username" />
-        <span asp-validation-for="Input.Username" class="text-danger"></span>
-    </div>
+<div class="register-page d-flex justify-content-center align-items-center min-vh-100 py-5">
+    <div class="card shadow-lg p-4" style="width: 450px; border-radius: 1rem; background-color: rgba(255, 255, 255, 0.95);">
+        <h3 class="text-center mb-4 text-primary fw-bold">Create Account</h3>
 
-    <div>
-        <label asp-for="Input.Password"></label>
-        <input asp-for="Input.Password" type="password" />
-        <span asp-validation-for="Input.Password" class="text-danger"></span>
-    </div>
+        <form method="post">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.FirstName" class="form-label">First Name</label>
+                    <input asp-for="Input.FirstName" class="form-control" placeholder="Enter first name" />
+                    <span asp-validation-for="Input.FirstName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.LastName" class="form-label">Last Name</label>
+                    <input asp-for="Input.LastName" class="form-control" placeholder="Enter last name" />
+                    <span asp-validation-for="Input.LastName" class="text-danger small"></span>
+                </div>
+            </div>
 
-    <div>
-        <label asp-for="Input.ConfirmPassword"></label>
-        <input asp-for="Input.ConfirmPassword" type="password" />
-        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-    </div>
+            <div class="mb-3">
+                <label asp-for="Input.Username" class="form-label">Username</label>
+                <input asp-for="Input.Username" class="form-control" placeholder="Choose a username" />
+                <span asp-validation-for="Input.Username" class="text-danger small"></span>
+            </div>
 
-    <div>
-        <label asp-for="Input.Email"></label>
-        <input asp-for="Input.Email" />
-        <span asp-validation-for="Input.Email" class="text-danger"></span>
-    </div>
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label">Email</label>
+                <input asp-for="Input.Email" class="form-control" placeholder="Enter your email" />
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+            </div>
 
-    <div>
-        <label asp-for="Input.Gender"></label>
-        <div>
-            <label>
-                <input type="radio" asp-for="Input.Gender" value="true"/> Male
-            </label>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <input asp-for="Input.Password" type="password" class="form-control" placeholder="Enter password" />
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
+                    <input asp-for="Input.ConfirmPassword" type="password" class="form-control" placeholder="Re-enter password" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Gender" class="form-label">Gender</label><br />
+                <div class="form-check form-check-inline">
+                    <input type="radio" asp-for="Input.Gender" value="true" class="form-check-input" id="male" />
+                    <label class="form-check-label" for="male">Male</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input type="radio" asp-for="Input.Gender" value="false" class="form-check-input" id="female" />
+                    <label class="form-check-label" for="female">Female</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.BirthDate" class="form-label">Birth Date</label>
+                    <input asp-for="Input.BirthDate" type="date" class="form-control" />
+                    <span asp-validation-for="Input.BirthDate" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.PhoneNumber" class="form-label">Phone</label>
+                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Address" class="form-label">Address</label>
+                <input asp-for="Input.Address" class="form-control" placeholder="Enter your address" />
+                <span asp-validation-for="Input.Address" class="text-danger small"></span>
+            </div>
+
+            <div class="d-grid gap-2 mt-3 mb-2">
+                <button type="submit" class="btn btn-primary fw-semibold">Sign Up</button>
+                <a asp-page-handler="GoogleLogin" class="btn btn-outline-danger fw-semibold">
+                    <i class="bi bi-google me-1"></i> Sign up with Google
+                </a>
+            </div>
+        </form>
+
+        <div class="text-center mt-3">
+            <span class="small">Already have an account?</span>
+            <a href="/login" class="text-decoration-none fw-semibold">Sign In</a>
         </div>
-        <div>
-            <label>
-                <input type="radio" asp-for="Input.Gender" value="false" /> Female
-            </label>
-        </div>
     </div>
-
-
-
-    <div>
-        <label asp-for="Input.PhoneNumber"></label>
-        <input asp-for="Input.PhoneNumber" />
-        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-    </div>
-
-    <div>
-        <label asp-for="Input.Address"></label>
-        <input asp-for="Input.Address" />
-        <span asp-validation-for="Input.Address" class="text-danger"></span>
-    </div>
-
-    <button type="submit">Sign Up</button>
-</form>
+</div>

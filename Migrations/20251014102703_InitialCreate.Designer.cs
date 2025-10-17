@@ -12,7 +12,7 @@ using PRN_MANGA_PROJECT.Data;
 namespace PRN_MANGA_PROJECT.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250928023305_InitialCreate")]
+    [Migration("20251014102703_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -338,6 +338,10 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("MangaDexId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -454,6 +458,9 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()

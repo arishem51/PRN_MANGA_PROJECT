@@ -72,6 +72,11 @@ builder.Services.AddAuthentication()
 
 // Add API Controllers
 builder.Services.AddControllers();
+builder.Services.AddHttpClient("MangaDexClient", client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; MangaProject/1.0)");
+    client.BaseAddress = new Uri("https://api.mangadex.org/");
+});
 
 //Authorization
 builder.Services.AddAuthorization(options =>
