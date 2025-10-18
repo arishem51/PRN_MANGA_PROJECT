@@ -41,6 +41,15 @@ button.accept-policy {
 }
 
 .footer {
+    position: static;
+    bottom: auto;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
+}
+
+html, body {
+    height: 100%;
   position: fixed;
   background: #ffffff;
   bottom: 0;
