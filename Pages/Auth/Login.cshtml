@@ -40,13 +40,15 @@
 
             <div class="d-grid gap-2 mb-3">
                 <button type="submit" class="btn btn-primary fw-semibold">Login</button>
-                <button type="submit" asp-page-handler="ExternalLogin" name="provider" value="Google"
-                        class="btn btn-outline-danger fw-semibold">
+            </div>
+        </form>
+        <form method="post" asp-page-handler="ExternalLogin">
+            <div class="d-grid gap-2 mb-3">
+                <button type="submit" name="provider" value="Google" class="btn btn-outline-danger fw-semibold">
                     <i class="bi bi-google me-1"></i> Login with Google
                 </button>
             </div>
         </form>
-
         <div class="text-center mt-3">
             <span class="small">Don't have an account? </span>
             <a href="/register" class="text-decoration-none fw-semibold">Sign Up</a>

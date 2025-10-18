@@ -4,28 +4,24 @@
     Layout = "_Layout";
     ViewData["Title"] = "HomePage";
 }
+@section Styles {
+    <link rel="stylesheet" href="~/css/Comment.css" />
+}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 
 <h2 class="mb-3">Manga List</h2>
 
-@if (Model.MangaList.Count == 0)
-{
-    <p>Đang tải dữ liệu từ MangaDex...</p>
-}
-else
-{
-    <div class="row clearfix">
-        @foreach (var item in Model.MangaList)
-        {
-            <div class="col-md-3 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <img src="@item.CoverUrl" class="card-img-top" alt="@item.Title"
-                         style="height:250px;object-fit:cover;">
-                    <div class="card-body">
-                        <h5 class="card-title text-truncate">@item.Title</h5>
-                        <p class="card-text text-muted small text-truncate">@item.Description</p>
-                    </div>
-                </div>
-            </div>
-        }
+<div class="panel">
+    <div class="panel-body">
+        <textarea class="form-control" rows="2" placeholder="What are you thinking?"></textarea>
+        <div class="mar-top clearfix">
+            <button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Share</button>
+            <a class="btn btn-trans btn-icon fa fa-video-camera add-tooltip" href="#"></a>
+            <a class="btn btn-trans btn-icon fa fa-camera add-tooltip" href="#"></a>
+            <a class="btn btn-trans btn-icon fa fa-file add-tooltip" href="#"></a>
+        </div>
     </div>
-}
+</div>
+
+<partial name="~/Pages/Shared/Partial/_CommentPartial.cshtml" />
+
