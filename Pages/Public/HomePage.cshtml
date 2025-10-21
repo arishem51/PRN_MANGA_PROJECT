@@ -1,62 +1,47 @@
 ﻿@page
 @model PRN_MANGA_PROJECT.Pages.Public.HomePageModel
 @{
-    Layout = "_Layout";
-    ViewData["Title"] = "HomePage";
+	Layout = "_Layout";
+	ViewData["Title"] = "HomePage";
 }
-@section Styles {
-    <link rel="stylesheet" href="~/css/Comment.css" />
-}
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-
-<h2 class="mb-3">Manga List</h2>
-
-<div class="panel">
-    <div class="panel-body">
-        <textarea class="form-control" rows="2" placeholder="What are you thinking?"></textarea>
-        <div class="mar-top clearfix">
-            <button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Share</button>
-            <a class="btn btn-trans btn-icon fa fa-video-camera add-tooltip" href="#"></a>
-            <a class="btn btn-trans btn-icon fa fa-camera add-tooltip" href="#"></a>
-            <a class="btn btn-trans btn-icon fa fa-file add-tooltip" href="#"></a>
-        </div>
-    </div>
-</div>
-
-<partial name="~/Pages/Shared/Partial/_CommentPartial.cshtml" />
 
 <div class="container mt-4">
-    <h2 class="mb-4 text-center">Manga Library</h2>
+	<h2 class="mb-4 text-center">Manga Library</h2>
 
-    <!-- Search box -->
-    <form method="get" class="d-flex justify-content-center mb-4">
-        <input type="text" name="SearchTerm" value="@Model.SearchTerm"
-               class="form-control w-50" placeholder="Search manga, author, or artist..." />
-        <button type="submit" class="btn btn-primary ms-2">Search</button>
-    </form>
+	<!-- Search box -->
+	<form method="get" class="d-flex justify-content-center mb-4">
+		<input type="text" name="SearchTerm" value="@Model.SearchTerm"
+			   class="form-control w-50" placeholder="Search manga, author, or artist..." />
+		<button type="submit" class="btn btn-primary ms-2">Search</button>
+	</form>
 
-    <!-- Manga List -->
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-        @foreach (var manga in Model.Mangas)
-        {
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="@manga.CoverImageUrl" class="card-img-top" alt="@manga.Title" style="height:300px; object-fit:cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">@manga.Title</h5>
-                        <p class="card-text text-muted">
-                            <strong>@manga.Author</strong><br />
-                            <small>@(manga.Description?.Length > 80 ? manga.Description.Substring(0, 80) + "..." : manga.Description)</small>
-                        </p>
-                        <span class="badge bg-info">@manga.Status</span>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
+	<!-- Manga List -->
+	<div class="row row-cols-1 row-cols-md-4 g-4">
+		@foreach (var manga in Model.Mangas)
+		{
+			<div class="col">
+				<div class="card h-100 shadow-sm">
+					<a asp-page="/Public/Manga/Detail" asp-route-mangaId="@manga.Id">
+						<img src="@manga.CoverImageUrl"
+							 class="card-img-top"
+							 alt="@manga.Title"
+							 style="height:300px; object-fit:cover; cursor:pointer;">
+					</a>
+					<div class="card-body">
+						<h5 class="card-title">@manga.Title</h5>
+						<p class="card-text text-muted">
+							<strong>@manga.Author</strong><br />
+							<small>@(manga.Description?.Length > 80 ? manga.Description.Substring(0, 80) + "..." : manga.Description)</small>
+						</p>
+						<span class="badge bg-info">@manga.Status</span>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
 
-    @if (!Model.Mangas.Any())
-    {
-        <p class="text-center text-muted mt-4">No manga found.</p>
-    }
+	@if (!Model.Mangas.Any())
+	{
+		<p class="text-center text-muted mt-4">No manga found.</p>
+	}
 </div>

@@ -19,7 +19,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
 
-        public IEnumerable<Manga> Mangas { get; set; } = new List<Manga>();
+        public IEnumerable<PRN_MANGA_PROJECT.Models.Entities.Manga> Mangas { get; set; } = new List<PRN_MANGA_PROJECT.Models.Entities.Manga>();
 
         public async Task OnGetAsync()
         {
@@ -29,7 +29,6 @@ namespace PRN_MANGA_PROJECT.Pages.Public
             }
             else
             {
-                // Hiển thị 10 truyện mới nhất nếu không có tìm kiếm
                 Mangas = await _mangaRepository.GetRecentMangaAsync(10);
             }
         }
