@@ -17,14 +17,16 @@
             <option value="">-- Tất cả vai trò --</option>
             @foreach (var role in Model.AllRoles)
             {
-                <option value="@role" selected="@(Model.RoleFilter == role)">
-                    @role
-                </option>
+                <option value="@role" selected="@(Model.RoleFilter == role)">@role</option>
             }
         </select>
     </div>
     <div class="col-md-2">
         <button type="submit" class="btn btn-success w-100">Lọc</button>
+    </div>
+    <div class="col-md-2">
+        <!-- ✅ Nút reset để xóa search và lọc -->
+        <a asp-page="/ViewAccount" class="btn btn-secondary w-100">Reset</a>
     </div>
 </form>
 
@@ -52,12 +54,25 @@
                     <td>@(acc.IsActive ? "Hoạt động" : "Khóa")</td>
                     <td>
                         <a asp-page="/EditAccount" asp-route-id="@acc.Id" class="btn btn-warning btn-sm">Sửa</a>
-                        <form method="post" asp-page-handler="Delete" asp-route-id="@acc.Id" style="display:inline">
-                            <button type="submit" class="btn btn-danger btn-sm"
-                                    onclick="return confirm('Bạn có chắc muốn khóa tài khoản này không?')">
-                                Khóa
-                            </button>
-                        </form>
+
+                        @if (acc.IsActive)
+                        {
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@acc.Id" style="display:inline">
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Bạn có chắc muốn khóa tài khoản này không?')">
+                                    Khóa
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="Unlock" asp-route-id="@acc.Id" style="display:inline">
+                                <button type="submit" class="btn btn-success btn-sm"
+                                        onclick="return confirm('Bạn có chắc muốn mở khóa tài khoản này không?')">
+                                    Mở khóa
+                                </button>
+                            </form>
+                        }
                     </td>
                 </tr>
             }

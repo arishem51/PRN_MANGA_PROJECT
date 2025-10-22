@@ -1,57 +1,66 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
+using PRN_MANGA_PROJECT.Models.ViewModels.CRUD;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace PRN_MANGA_PROJECT.Pages
 {
-    public class EditAccountModel : PageModel
+    public class EditAccountPageModel : PageModel
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public EditAccountModel(UserManager<User> userManager)
+        public EditAccountPageModel(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         [BindProperty]
-        public InputModel Input { get; set; } = new InputModel();
+        public EditAccountModel Input { get; set; } = new EditAccountModel();
 
-        public class InputModel
-        {
-            public string Id { get; set; }
+        public List<string> AllRoles { get; set; } = new List<string>();
 
-            [Required]
-            [Display(Name = "Tên đăng nhập")]
-            public string Username { get; set; }
-
-            [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
-        }
-
-        // Load user để edit
+        // ✅ Load thông tin user + lọc bỏ role "admin"
         public async Task<IActionResult> OnGetAsync(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            Input = new InputModel
+            // ✅ Chỉ lấy các role được phép hiển thị
+            AllRoles = _roleManager.Roles
+                .Select(r => r.Name!)
+                .Where(r => r != "admin")
+                .ToList();
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            Input = new EditAccountModel
             {
                 Id = user.Id,
                 Username = user.UserName,
-                Email = user.Email
+                Email = user.Email,
+                Role = userRoles.FirstOrDefault() ?? ""
             };
 
             return Page();
         }
 
-        // Submit form sửa user
+        // ✅ Cập nhật user + role
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid)
+            {
+                AllRoles = _roleManager.Roles
+                    .Select(r => r.Name!)
+                    .Where(r => r != "admin")
+                    .ToList();
+                return Page();
+            }
 
             var user = await _userManager.FindByIdAsync(Input.Id);
             if (user == null) return NotFound();
@@ -59,19 +68,34 @@ namespace PRN_MANGA_PROJECT.Pages
             user.UserName = Input.Username;
             user.Email = Input.Email;
 
-            var result = await _userManager.UpdateAsync(user);
-
-            if (result.Succeeded)
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
             {
-                return RedirectToPage("/ViewAccount");
+                foreach (var error in updateResult.Errors)
+                    ModelState.AddModelError("", error.Description);
+
+                AllRoles = _roleManager.Roles
+                    .Select(r => r.Name!)
+                    .Where(r => r != "admin")
+                    .ToList();
+                return Page();
             }
 
-            foreach (var error in result.Errors)
+            // ✅ Cập nhật role
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Any())
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+            // Ngăn admin role bị thêm vào bằng cách kiểm tra trước
+            if (Input.Role != "admin")
             {
-                ModelState.AddModelError("", error.Description);
+                if (!await _roleManager.RoleExistsAsync(Input.Role))
+                    await _roleManager.CreateAsync(new IdentityRole(Input.Role));
+
+                await _userManager.AddToRoleAsync(user, Input.Role);
             }
 
-            return Page();
+            return RedirectToPage("/ViewAccount");
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -35,37 +34,44 @@ namespace PRN_MANGA_PROJECT.Pages
 
         public List<string> AllRoles { get; set; } = new();
 
-        public async Task OnGetAsync()
-        {
-            await LoadDataAsync();
-        }
+        public async Task OnGetAsync() => await LoadDataAsync();
 
+        // 🔹 Handler: Khóa tài khoản (IsActive = false)
         public async Task<IActionResult> OnPostDeleteAsync(string id)
         {
-            var result = await _accountService.Delete(id);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            user.IsActive = false;
+            await _userManager.UpdateAsync(user);
 
             await LoadDataAsync();
             return Page();
         }
 
+        // 🔹 Handler: Mở khóa tài khoản (IsActive = true)
+        public async Task<IActionResult> OnPostUnlockAsync(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            user.IsActive = true;
+            await _userManager.UpdateAsync(user);
+
+            await LoadDataAsync();
+            return Page();
+        }
+
+        // 🔹 Load danh sách tài khoản + lọc
         private async Task LoadDataAsync()
         {
             Accounts.Clear();
-
-            // Lấy danh sách role
             AllRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
 
-            // Lấy tất cả user
             var users = await _userManager.Users.ToListAsync();
 
-            // Lọc theo tên
             if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
                 users = users
@@ -78,7 +84,6 @@ namespace PRN_MANGA_PROJECT.Pages
                 var roles = await _userManager.GetRolesAsync(user);
                 var roleName = roles.Any() ? string.Join(", ", roles) : "(Chưa gán)";
 
-                // Lọc theo role
                 if (!string.IsNullOrEmpty(RoleFilter) && !roles.Contains(RoleFilter))
                     continue;
 
