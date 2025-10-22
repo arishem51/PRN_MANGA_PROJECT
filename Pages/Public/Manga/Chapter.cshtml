@@ -1,0 +1,32 @@
+﻿@page "{chapterId:int}"
+@model PRN_MANGA_PROJECT.Pages.Public.Manga.ChapterModel
+@{
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/Comment.css" />
+}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+<div>
+	<h1>@Model.Chapter.Title</h1>
+	<p>@Model.Chapter.Content</p>
+</div>
+
+<form method="post" asp-page-handler="Comment">
+	<div class="panel">
+		<div class="panel-body">
+			<input type="hidden" asp-for="Input.ChapterId" value="@Model.Chapter.Id" />
+			<textarea class="form-control" rows="2" placeholder="What are you thinking?" asp-for="Input.Content"></textarea>
+			<div class="mar-top clearfix">
+				<button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Share</button>
+				<a class="btn btn-trans btn-icon fa fa-video-camera add-tooltip" href="#"></a>
+				<a class="btn btn-trans btn-icon fa fa-camera add-tooltip" href="#"></a>
+				<a class="btn btn-trans btn-icon fa fa-file add-tooltip" href="#"></a>
+			</div>
+		</div>
+	</div>
+</form>
+
+
+<partial name="~/Pages/Shared/Partial/_CommentPartial.cshtml" model="@Model.Comments"/>

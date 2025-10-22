@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using PRN_MANGA_PROJECT.Models.Entities;
 
 namespace PRN_MANGA_PROJECT.Services.Auth
@@ -28,6 +29,13 @@ namespace PRN_MANGA_PROJECT.Services.Auth
 
         Task<string> GenerateResetPasswordToken(User user);
         Task UpdateToken(User user);
+
+        AuthenticationProperties GetExternalAuthenticationProperties(string provider, string redirectUrl);
+        Task<ExternalLoginInfo?> GetExternalLoginInfoAsync();
+        Task<IdentityResult> CreateExternalUserAsync(User user);
+        Task SignInAsync(User user);
+        Task<User?> FindByEmailAsync(string email);
+
 
     }
 }

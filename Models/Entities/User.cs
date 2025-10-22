@@ -13,6 +13,9 @@ namespace PRN_MANGA_PROJECT.Models.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastLoginAt { get; set; }
+
+        public DateTime? BirthDate { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         // Navigation properties

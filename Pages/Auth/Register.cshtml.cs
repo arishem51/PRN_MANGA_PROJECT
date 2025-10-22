@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.DotNet.Scaffolding.Shared;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels.Auth;
 using PRN_MANGA_PROJECT.Services.Auth;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Security.Claims;
+
 
 namespace PRN_MANGA_PROJECT.Pages.Auth
 {
@@ -15,11 +19,13 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
 
         private readonly IUserService _userService;
         private readonly IEmailSender _emailSender;
+        private readonly SignInManager<User> signInManager;
 
-        public RegisterModel(IUserService userService, IEmailSender emailSender)
+        public RegisterModel(IUserService userService, IEmailSender emailSender , SignInManager<User> signInManager)
         {
             _userService = userService;
             _emailSender = emailSender;
+            signInManager = signInManager;
         }
 
         public void OnGet()
@@ -69,6 +75,7 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                 Address = Input.Address,
                 Gender = Input.Gender,
                 PhoneNumber = Input.PhoneNumber,
+                BirthDate = Input.BirthDate,
             };
 
             var response = await _userService.Register(newUser, Input.Password);
@@ -91,6 +98,61 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                    $"Hãy xác nhận email bằng cách click vào link: <a href='{confirmationLink}'>Xác nhận</a>");
             return RedirectToPage("/Auth/RegisterConfirmation");
         }
+
+        public IActionResult OnGetGoogleLogin()
+        {
+            var redirectUrl = Url.Page("/Auth/Register", pageHandler: "GoogleResponse");
+            var properties = _userService.GetExternalAuthenticationProperties("Google" , redirectUrl);
+            return new ChallengeResult("Google", properties);
+        }
+
+        public async Task<IActionResult> OnGetGoogleResponse()
+        {
+            var info = await _userService.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return RedirectToPage("/Auth/Register");
+            }
+
+            var email = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+            var name = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Name);
+            if(email == null)
+            {
+                return RedirectToPage("/Auth/Register");
+            }
+            var existingUser = await _userService.FindByEmailAsync(email);
+            if (existingUser == null)
+            {
+                var newUser = new User
+                {
+                    Email = email,
+                    UserName = email.Split('@')[0],
+                    FirstName = name.Split(' ').First(),
+                    LastName = string.Join(" ", name.Split(' ').Skip(1)),
+                    EmailConfirmed = true
+                };
+
+                var result = await _userService.CreateExternalUserAsync(newUser);
+                if (result.Succeeded)
+                {
+                    await _userService.AddRole(newUser, "Reader");
+                    await _userService.SignInAsync(newUser);
+                    return RedirectToPage("/Index");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Cannot create user from Google login");
+                    return Page();
+                }
+            }
+            else
+            {
+                await _userService.SignInAsync(existingUser);
+                return RedirectToPage("/Index");
+            }
+        }
+
+
     }
 }
 

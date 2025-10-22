@@ -19,6 +19,15 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Manga>> GetAllMangaWithTagsAsync()
+        {
+            return await _dbSet
+                .Include(m => m.MangaTags)
+                .ThenInclude(mt => mt.Tag)
+                .Include(m => m.Chapters)
+                .ToListAsync();
+        }
+
         public async Task<Manga?> GetMangaWithTagsByIdAsync(int id)
         {
             return await _dbSet

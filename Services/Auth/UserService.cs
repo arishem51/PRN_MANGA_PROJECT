@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Repositories.Auth;
@@ -9,11 +10,13 @@ namespace PRN_MANGA_PROJECT.Services.Auth
     {
         private readonly IUserRepository _userRepository;
         private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;    
 
-        public UserService(IUserRepository userRepository, SignInManager<User> signInManager)
+        public UserService(IUserRepository userRepository, SignInManager<User> signInManager , UserManager<User> userManager)
         {
             _userRepository = userRepository;
             _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         public async Task AddRole(User user, string roleName)
@@ -106,5 +109,31 @@ namespace PRN_MANGA_PROJECT.Services.Auth
         {
             await _userRepository.UpdateToken(user);
         }
+
+        public AuthenticationProperties GetExternalAuthenticationProperties(string provider, string redirectUrl)
+        {
+            return _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        }
+
+        public async Task<ExternalLoginInfo?> GetExternalLoginInfoAsync()
+        {
+            return await _signInManager.GetExternalLoginInfoAsync();
+        }
+
+        public async Task<IdentityResult> CreateExternalUserAsync(User user)
+        {
+            return await _userManager.CreateAsync(user);
+        }
+
+        public async Task SignInAsync(User user)
+        {
+            await _signInManager.SignInAsync(user, isPersistent: false);
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+
     }
 }

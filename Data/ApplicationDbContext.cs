@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PRN_MANGA_PROJECT.Models.Entities;
 
@@ -43,7 +43,19 @@ namespace PRN_MANGA_PROJECT.Data
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.NoAction); 
+
+            builder.Entity<Comment>()
+                .HasOne(c => c.Chapter)
+                .WithMany(ch => ch.Comments)
+                .HasForeignKey(c => c.ChapterId)
+                .OnDelete(DeleteBehavior.Cascade); 
 
             // Configure indexes for better performance
             builder.Entity<Manga>()

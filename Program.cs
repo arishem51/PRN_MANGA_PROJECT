@@ -72,11 +72,22 @@ builder.Services.AddAuthentication()
 
 // Add API Controllers
 builder.Services.AddControllers();
+builder.Services.AddHttpClient("MangaDexClient", client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; MangaProject/1.0)");
+    client.BaseAddress = new Uri("https://api.mangadex.org/");
+});
+
+//Authorization
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy =>
     {
         policy.RequireRole("Admin");
+    });
+    options.AddPolicy("UserOnly", policy =>
+    {
+        policy.RequireRole("Reader", "Admin");
     });
 });
 
@@ -84,6 +95,8 @@ builder.Services.AddRazorPages(options =>
 {
     // Secure the entire Admin area to Admin role only
     options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminOnly");
+    options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage", "UserOnly");
+
 });
 
 // Redirect unauthenticated and unauthorized users to home page
@@ -103,6 +116,7 @@ builder.Services.ConfigureApplicationCookie(options =>
             context.Response.Redirect("/Public/AccessDenied");
             return Task.CompletedTask;
         }
+
     };
 });
 var app = builder.Build();
