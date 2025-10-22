@@ -45,6 +45,7 @@ builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 
 // Add Services
 builder.Services.AddScoped<IMangaService, MangaService>();
+builder.Services.AddScoped<IChapterService, ChapterService>();
 
 // Add API Controllers
 builder.Services.AddControllers();

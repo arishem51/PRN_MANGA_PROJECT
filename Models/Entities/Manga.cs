@@ -10,6 +10,9 @@ namespace PRN_MANGA_PROJECT.Models.Entities
         [StringLength(200)]
         public string Title { get; set; } = string.Empty;
         
+        [StringLength(50)]
+        public string? MangaDexId { get; set; }
+        
         [StringLength(100)]
         public string? Author { get; set; }
         
