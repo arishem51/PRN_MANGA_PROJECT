@@ -120,7 +120,7 @@
                             </div>
                         </div>
                         <div class="chapter-card-footer">
-                            <button class="btn btn-primary btn-sm">
+                            <button class="btn btn-primary btn-sm" @onclick="() => NavigateToChapter(chapter.Id)" @onclick:stopPropagation="true">
                                 <i class="fas fa-play"></i>
                                 @(chapter.ReadingProgress > 0 ? "Continue Reading" : "Read Chapter")
                             </button>

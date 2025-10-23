@@ -1,7 +1,7 @@
 @page "/manga/{MangaId:int}"
 @using PRN_MANGA_PROJECT.Models.ViewModels
 @using PRN_MANGA_PROJECT.Services
-@inject ChapterUIService ChapterService
+@inject IChapterService ChapterService
 @inject NavigationManager Navigation
 
 <PageTitle>@MangaTitle - Manga Details</PageTitle>
@@ -159,7 +159,7 @@
         try
         {
             var chapters = await ChapterService.GetChaptersByMangaIdAsync(MangaId);
-            RecentChapters = chapters.OrderByDescending(c => c.CreatedAt).ToList();
+            RecentChapters = chapters.OrderBy(c => c.ChapterNumber).ToList();
             TotalChapters = RecentChapters.Count;
         }
         catch (Exception ex)
