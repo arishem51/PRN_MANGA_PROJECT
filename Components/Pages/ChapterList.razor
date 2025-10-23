@@ -1,0 +1,253 @@
+@page "/manga/{MangaId:int}/chapters"
+@using PRN_MANGA_PROJECT.Models.ViewModels
+@using PRN_MANGA_PROJECT.Services
+@inject IChapterService ChapterService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Chapters - @MangaTitle</PageTitle>
+
+<div class="chapter-list-container">
+    <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="chapter-header mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Home</a></li>
+                            <li class="breadcrumb-item"><a href="/manga/@MangaId">@MangaTitle</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Chapters</li>
+                        </ol>
+                    </nav>
+                    <h1 class="manga-title">@MangaTitle</h1>
+                    <p class="manga-subtitle">Total Chapters: @Chapters.Count()</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="chapter-controls">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary" @onclick="ToggleSortOrder">
+                                <i class="fas fa-sort-@(sortDescending ? "down" : "up")-alt"></i>
+                                @(sortDescending ? "Newest First" : "Oldest First")
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" @onclick="ToggleViewMode">
+                                <i class="fas fa-@(isGridView ? "list" : "th")"></i>
+                                @(isGridView ? "List View" : "Grid View")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading chapters...</span>
+                </div>
+                <p class="mt-2">Loading chapters...</p>
+            </div>
+        }
+
+        <!-- Error State -->
+        @if (!isLoading && !Chapters.Any())
+        {
+            <div class="text-center py-5">
+                <div class="empty-state">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <h3>No Chapters Found</h3>
+                    <p class="text-muted">This manga doesn't have any chapters yet.</p>
+                </div>
+            </div>
+        }
+
+        <!-- Chapter List -->
+        @if (!isLoading && Chapters.Any())
+        {
+            <div class="@(isGridView ? "chapters-grid" : "chapters-list")">
+                @foreach (var chapter in Chapters)
+                {
+                    <div class="chapter-card @(isGridView ? "" : "list-item") fade-in-up" @onclick="() => NavigateToChapter(chapter.Id)">
+                        <div class="chapter-card-body">
+                            <div class="chapter-info">
+                                <h5 class="chapter-title">@chapter.Title</h5>
+                                @if (!string.IsNullOrEmpty(chapter.ChapterNumber))
+                                {
+                                    <span class="chapter-number">Chapter @chapter.ChapterNumber</span>
+                                }
+                                @if (chapter.ReadingProgress > 0)
+                                {
+                                    <div class="reading-progress">
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: @(chapter.ReadingProgress)%" 
+                                                 aria-valuenow="@chapter.ReadingProgress" aria-valuemin="0" aria-valuemax="100">
+                                                @chapter.ReadingProgress%
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="chapter-meta">
+                                <div class="chapter-stats">
+                                    @if (chapter.PageCount.HasValue)
+                                    {
+                                        <span class="page-count">
+                                            <i class="fas fa-images"></i>
+                                            @chapter.PageCount pages
+                                        </span>
+                                    }
+                                    @if (chapter.ImageCount > 0)
+                                    {
+                                        <span class="image-count">
+                                            <i class="fas fa-photo-video"></i>
+                                            @chapter.ImageCount images
+                                        </span>
+                                    }
+                                    @if (chapter.IsBookmarked)
+                                    {
+                                        <span class="bookmark-indicator">
+                                            <i class="fas fa-bookmark text-warning"></i>
+                                            Bookmarked
+                                        </span>
+                                    }
+                                </div>
+                                <div class="chapter-date">
+                                    <i class="fas fa-calendar"></i>
+                                    @chapter.CreatedAt.ToString("MMM dd, yyyy")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chapter-card-footer">
+                            <button class="btn btn-primary btn-sm">
+                                <i class="fas fa-play"></i>
+                                @(chapter.ReadingProgress > 0 ? "Continue Reading" : "Read Chapter")
+                            </button>
+                            @if (chapter.ReadingProgress > 0)
+                            {
+                                <button class="btn btn-outline-secondary btn-sm" @onclick="() => MarkAsUnread(chapter.Id)" @onclick:stopPropagation="true">
+                                    <i class="fas fa-undo"></i>
+                                    Mark Unread
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (TotalPages > 1)
+            {
+                <nav aria-label="Chapter pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)" disabled="@(CurrentPage == 1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </li>
+                        
+                        @for (int i = Math.Max(1, CurrentPage - 2); i <= Math.Min(TotalPages, CurrentPage + 2); i++)
+                        {
+                            <li class="page-item @(i == CurrentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(i)">@i</button>
+                            </li>
+                        }
+                        
+                        <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)" disabled="@(CurrentPage == TotalPages)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int MangaId { get; set; }
+
+    private IEnumerable<ChapterViewModel> Chapters = new List<ChapterViewModel>();
+    private string MangaTitle = "Loading...";
+    private bool isLoading = true;
+    private int CurrentPage = 1;
+    private int TotalPages = 1;
+    private const int PageSize = 12;
+    private bool sortDescending = false;
+    private bool isGridView = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadChapters();
+    }
+
+    private async Task LoadChapters()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var paginationParams = new PaginationParams
+            {
+                Page = CurrentPage,
+                PageSize = PageSize,
+                SortBy = "ChapterNumber",
+                SortDescending = sortDescending
+            };
+            
+            var result = await ChapterService.GetChaptersByMangaIdPagedAsync(MangaId, paginationParams);
+            Chapters = result.Data;
+            TotalPages = (int)Math.Ceiling((double)result.TotalCount / PageSize);
+            
+            // For now, set a default manga title - you might want to fetch this from MangaService
+            MangaTitle = $"Manga #{MangaId}";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading chapters: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ChangePage(int page)
+    {
+        if (page >= 1 && page <= TotalPages)
+        {
+            CurrentPage = page;
+            await LoadChapters();
+        }
+    }
+
+    private async Task ToggleSortOrder()
+    {
+        sortDescending = !sortDescending;
+        await LoadChapters();
+    }
+
+    private void NavigateToChapter(int chapterId)
+    {
+        Navigation.NavigateTo($"/chapter/{chapterId}");
+    }
+
+    private async Task ToggleViewMode()
+    {
+        isGridView = !isGridView;
+        StateHasChanged();
+    }
+
+    private async Task MarkAsUnread(int chapterId)
+    {
+        // Implement mark as unread functionality
+        Console.WriteLine($"Mark chapter {chapterId} as unread");
+        StateHasChanged();
+    }
+}

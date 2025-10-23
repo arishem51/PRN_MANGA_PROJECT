@@ -13,6 +13,8 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
         public int ImageCount { get; set; }
         public List<ChapterImageViewModel> ChapterImages { get; set; } = new List<ChapterImageViewModel>();
         public string MangaTitle { get; set; } = string.Empty;
+        public double ReadingProgress { get; set; } = 0;
+        public bool IsBookmarked { get; set; } = false;
     }
 
     public class CreateChapterViewModel

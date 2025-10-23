@@ -47,6 +47,15 @@ builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 builder.Services.AddScoped<IMangaService, MangaService>();
 builder.Services.AddScoped<IChapterService, ChapterService>();
 
+// Add HttpClient for ChapterUIService
+builder.Services.AddHttpClient<ChapterUIService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5274/");
+});
+
+// Add ChapterUIService
+builder.Services.AddScoped<ChapterUIService>();
+
 // Add API Controllers
 builder.Services.AddControllers();
 

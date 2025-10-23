@@ -1,0 +1,198 @@
+@page "/manga/{MangaId:int}"
+@using PRN_MANGA_PROJECT.Models.ViewModels
+@using PRN_MANGA_PROJECT.Services
+@inject ChapterUIService ChapterService
+@inject NavigationManager Navigation
+
+<PageTitle>@MangaTitle - Manga Details</PageTitle>
+
+<div class="manga-detail-container">
+    <div class="container-fluid">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading manga...</span>
+                </div>
+                <p class="mt-2">Loading manga details...</p>
+            </div>
+        }
+        else
+        {
+            <!-- Manga Header -->
+            <div class="manga-header">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="manga-cover">
+                            <img src="@CoverImageUrl" alt="@MangaTitle" class="cover-image" />
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="manga-info">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">@MangaTitle</li>
+                                </ol>
+                            </nav>
+                            <h1 class="manga-title">@MangaTitle</h1>
+                            <p class="manga-author">By @Author</p>
+                            <div class="manga-meta">
+                                <span class="badge bg-primary">@Status</span>
+                                <span class="badge bg-secondary">@Genre</span>
+                                <span class="badge bg-info">@TotalChapters chapters</span>
+                            </div>
+                            <div class="manga-description">
+                                <p>@Description</p>
+                            </div>
+                            <div class="manga-actions">
+                                <button class="btn btn-primary btn-lg" @onclick="StartReading">
+                                    <i class="fas fa-play"></i>
+                                    Start Reading
+                                </button>
+                                <button class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-bookmark"></i>
+                                    Bookmark
+                                </button>
+                                <button class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-share"></i>
+                                    Share
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter Navigation Component -->
+            <div class="chapter-navigation-section">
+                <ChapterNavigation MangaId="@MangaId" 
+                                  CurrentChapterId="0" 
+                                  IsBookmarked="false"
+                                  OnChapterChanged="OnChapterChanged" />
+            </div>
+
+            <!-- Quick Chapter List -->
+            <div class="quick-chapters mt-4">
+                <div class="section-header">
+                    <h3>All Chapters</h3>
+                    <a href="@($"/manga/{MangaId}/chapters")" class="btn btn-outline-primary">
+                        View All Chapters
+                    </a>
+                </div>
+                
+                @if (RecentChapters.Any())
+                {
+                    <div class="chapters-grid">
+                        @foreach (var chapter in RecentChapters.Take(12))
+                        {
+                            <div class="chapter-card" @onclick="() => NavigateToChapter(chapter.Id)">
+                                <div class="chapter-card-body">
+                                    <h5 class="chapter-title">@chapter.Title</h5>
+                                    @if (!string.IsNullOrEmpty(chapter.ChapterNumber))
+                                    {
+                                        <span class="chapter-number">Chapter @chapter.ChapterNumber</span>
+                                    }
+                                    <div class="chapter-meta">
+                                        <span class="page-count">@(chapter.PageCount ?? chapter.ImageCount) pages</span>
+                                        <span class="date">@chapter.CreatedAt.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="no-chapters">
+                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                        <h4>No Chapters Available</h4>
+                        <p class="text-muted">This manga doesn't have any chapters yet.</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int MangaId { get; set; }
+
+    private string MangaTitle = "Loading...";
+    private string Author = "";
+    private string Status = "";
+    private string Genre = "";
+    private string Description = "";
+    private string CoverImageUrl = "/images/placeholder-manga.jpg";
+    private int TotalChapters = 0;
+    private List<ChapterViewModel> RecentChapters = new List<ChapterViewModel>();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMangaDetails();
+        await LoadRecentChapters();
+    }
+
+    private async Task LoadMangaDetails()
+    {
+        try
+        {
+            // For demo purposes, using mock data
+            // In a real app, you would call MangaService.GetMangaByIdAsync(MangaId)
+            MangaTitle = $"Sample Manga #{MangaId}";
+            Author = "Sample Author";
+            Status = "Ongoing";
+            Genre = "Action, Adventure";
+            Description = "This is a sample manga description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            CoverImageUrl = "/images/placeholder-manga.jpg";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading manga details: {ex.Message}");
+        }
+    }
+
+    private async Task LoadRecentChapters()
+    {
+        try
+        {
+            var chapters = await ChapterService.GetChaptersByMangaIdAsync(MangaId);
+            RecentChapters = chapters.OrderByDescending(c => c.CreatedAt).ToList();
+            TotalChapters = RecentChapters.Count;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading recent chapters: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void StartReading()
+    {
+        if (RecentChapters.Any())
+        {
+            var firstChapter = RecentChapters.OrderBy(c => c.ChapterNumber).First();
+            NavigateToChapter(firstChapter.Id);
+        }
+        else
+        {
+            Navigation.NavigateTo($"/manga/{MangaId}/chapters");
+        }
+    }
+
+    private void NavigateToChapter(int chapterId)
+    {
+        Navigation.NavigateTo($"/chapter/{chapterId}");
+    }
+
+    private async Task OnChapterChanged(int chapterId)
+    {
+        NavigateToChapter(chapterId);
+    }
+}
