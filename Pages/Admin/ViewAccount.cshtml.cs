@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PRN_MANGA_PROJECT.Pages
+namespace PRN_MANGA_PROJECT.Pages.Admin
 {
     public class ViewAccountModel : PageModel
     {
@@ -44,7 +44,7 @@ namespace PRN_MANGA_PROJECT.Pages
                 return NotFound();
 
             user.IsActive = false;
-            await _userManager.UpdateAsync(user);
+            await _accountService.Update(user); // ✅ dùng service để phát SignalR
 
             await LoadDataAsync();
             return Page();
@@ -58,7 +58,7 @@ namespace PRN_MANGA_PROJECT.Pages
                 return NotFound();
 
             user.IsActive = true;
-            await _userManager.UpdateAsync(user);
+            await _accountService.Update(user); // ✅ dùng service để phát SignalR
 
             await LoadDataAsync();
             return Page();

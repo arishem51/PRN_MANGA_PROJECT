@@ -1,0 +1,119 @@
+﻿@using PRN_MANGA_PROJECT.Models.ViewModels
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Manga Website">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - Manga</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="~/css/elegant-icons.css" />
+    <link rel="stylesheet" href="~/css/plyr.css" />
+    <link rel="stylesheet" href="~/css/nice-select.css" />
+    <link rel="stylesheet" href="~/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/css/slicknav.min.css" />
+    <link rel="stylesheet" href="~/css/style.css" />
+    
+
+    @RenderSection("Styles", required: false)  <!-- Cho phép thêm các style từ các trang con -->
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Logo -->
+                <div class="col-md-2">
+                    <a asp-page="/Public/HomePage"><img src="~/img/logo.png" alt="Logo" style="max-width: 100%; height: auto;"></a>
+                </div>
+
+                <!-- Thanh tìm kiếm -->
+                <div class="col-md-8">
+                    <form method="get" class="w-100">
+                        <input type="text" name="SearchTerm" value="@ViewData["SearchTerm"]"
+                               class="form-control" placeholder="Search manga..." style="max-width: 100%;">
+                    </form>
+                </div>
+
+                <!-- Icon tìm kiếm và tài khoản -->
+                <div class="col-md-2 text-end">
+                    <a href="#" class="search-switch"><span class="icon_search"></span></a>
+                    <a asp-page="/Login"><span class="icon_profile"></span></a>
+                </div>
+            </div>
+        </div>
+    
+       
+        <div class="header__nav">
+            <nav class="header__menu mobile-menu">
+                <ul>
+                    <li class="active"><a asp-page="/Public/HomePage">Homepage</a></li>
+                    <li><a href="#">Thể Loại</a></li>
+                    <li><a href="#">Lịch Sử</a></li>
+                    <li><a href="#">Theo Dõi</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+
+    <!-- Body -->
+    <main role="main">
+        @RenderBody()  <!-- Content for the current page -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5">
+        <div class="page-up">
+            <a href="#" id="scrollToTopButton"><span class="arrow_carrot-up"></span></a>
+        </div>
+        <div class="container text-center">
+            <p>
+                Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+                All rights reserved | Manga Project
+            </p>
+        </div>
+    </footer>
+
+    <!-- Tag Modal -->
+    <div class="modal fade" id="tagModal" tabindex="-1" aria-labelledby="tagModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tagModalLabel">Chọn Thể Loại</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        @foreach (var tag in ViewData["Tags"] as IEnumerable<TagViewModel>)
+                        {
+                            <div class="col-md-3 col-6 mb-2">
+                                <a asp-page="/Public/HomePage" asp-route-tagId="@tag.Id"
+                                   class="btn btn-outline-primary w-100">@tag.Name</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JS Files -->
+    <script src="~/js/jquery-3.3.1.min.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/player.js"></script>
+    <script src="~/js/jquery.nice-select.min.js"></script>
+    <script src="~/js/mixitup.min.js"></script>
+    <script src="~/js/jquery.slicknav.js"></script>
+    <script src="~/js/owl.carousel.min.js"></script>
+    <script src="~/js/main.js"></script>
+    @RenderSection("Scripts", required: false)  <!-- Cho phép thêm các script từ các trang con -->
+</body>
+</html>

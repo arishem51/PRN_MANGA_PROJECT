@@ -3,21 +3,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels.CRUD;
+using PRN_MANGA_PROJECT.Services.CRUD;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace PRN_MANGA_PROJECT.Pages
+namespace PRN_MANGA_PROJECT.Pages.Admin
 {
     public class EditAccountPageModel : PageModel
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IAccountService _accountService; // ✅ Thêm service để phát SignalR
 
-        public EditAccountPageModel(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public EditAccountPageModel(
+            UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IAccountService accountService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _accountService = accountService;
         }
 
         [BindProperty]
@@ -31,7 +37,6 @@ namespace PRN_MANGA_PROJECT.Pages
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            // ✅ Chỉ lấy các role được phép hiển thị
             AllRoles = _roleManager.Roles
                 .Select(r => r.Name!)
                 .Where(r => r != "admin")
@@ -68,7 +73,8 @@ namespace PRN_MANGA_PROJECT.Pages
             user.UserName = Input.Username;
             user.Email = Input.Email;
 
-            var updateResult = await _userManager.UpdateAsync(user);
+            // ✅ Gọi qua AccountService để update (service này gọi repo → phát SignalR)
+            var updateResult = await _accountService.Update(user);
             if (!updateResult.Succeeded)
             {
                 foreach (var error in updateResult.Errors)
@@ -81,20 +87,13 @@ namespace PRN_MANGA_PROJECT.Pages
                 return Page();
             }
 
-            // ✅ Cập nhật role
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            if (currentRoles.Any())
-                await _userManager.RemoveFromRolesAsync(user, currentRoles);
-
-            // Ngăn admin role bị thêm vào bằng cách kiểm tra trước
+            // ✅ Cập nhật role qua service (có phát SignalR)
             if (Input.Role != "admin")
             {
-                if (!await _roleManager.RoleExistsAsync(Input.Role))
-                    await _roleManager.CreateAsync(new IdentityRole(Input.Role));
-
-                await _userManager.AddToRoleAsync(user, Input.Role);
+                await _accountService.AssignRoleAsync(user, Input.Role);
             }
 
+            TempData["SuccessMessage"] = "✅ Cập nhật tài khoản thành công!";
             return RedirectToPage("/ViewAccount");
         }
     }

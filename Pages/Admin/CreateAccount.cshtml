@@ -1,10 +1,11 @@
 ﻿@page "/createaccount"
-@model PRN_MANGA_PROJECT.Pages.CreateAccountModel
+@model PRN_MANGA_PROJECT.Pages.Admin.CreateAccountModel
 @{
     ViewData["Title"] = "Thêm tài khoản";
 }
 
 <h2 class="mb-4">@ViewData["Title"]</h2>
+
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
@@ -25,8 +26,12 @@
     <div class="alert alert-success">
         @TempData["SuccessMessage"]
     </div>
-}
 
+    <script>
+        // ✅ Sau khi tạo thành công, tự động quay lại danh sách tài khoản
+        setTimeout(() => window.location.href = '/viewaccount', 1500);
+    </script>
+}
 
 <form method="post">
     <div class="form-group mb-3">

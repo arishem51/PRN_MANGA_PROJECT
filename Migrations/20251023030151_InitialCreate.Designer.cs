@@ -12,7 +12,7 @@ using PRN_MANGA_PROJECT.Data;
 namespace PRN_MANGA_PROJECT.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251021162106_InitialCreate")]
+    [Migration("20251023030151_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

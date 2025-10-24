@@ -1,5 +1,5 @@
 ﻿@page "/viewaccount"
-@model PRN_MANGA_PROJECT.Pages.ViewAccountModel
+@model PRN_MANGA_PROJECT.Pages.Admin.ViewAccountModel
 @{
     ViewData["Title"] = "Danh sách tài khoản";
 }
@@ -85,3 +85,23 @@
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/accountHub")
+            .build();
+
+        // Khi có tín hiệu từ server → reload lại trang
+        connection.on("ReloadUsers", () => {
+            console.log("🔁 Có thay đổi tài khoản, reload lại danh sách...");
+            location.reload();
+        });
+
+        connection.start()
+            .then(() => console.log("✅ Đã kết nối tới AccountHub"))
+            .catch(err => console.error("❌ Lỗi SignalR:", err));
+    </script>
+}
+

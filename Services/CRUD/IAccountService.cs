@@ -13,5 +13,6 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
 
         Task<IdentityResult> Update(User user);
         Task<IdentityResult> Delete(string id);
+        Task<IdentityResult> AssignRoleAsync(User user, string roleName);
     }
 }

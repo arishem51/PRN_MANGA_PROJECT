@@ -1,5 +1,6 @@
 
-﻿using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Repositories;

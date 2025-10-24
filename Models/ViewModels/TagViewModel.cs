@@ -6,6 +6,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? Color { get; set; }
+        public bool IsActive { get; set; }
         public int MangaCount { get; set; }
     }
 }

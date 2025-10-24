@@ -45,6 +45,9 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
         public Task<IdentityResult> Update(User user) => _repo.UpdateAsync(user);
         public Task<IdentityResult> Delete(string id) => _repo.DeleteAsync(id);
 
-
+        public async Task<IdentityResult> AssignRoleAsync(User user, string roleName)
+        {
+            return await _repo.AssignRoleAsync(user, roleName);
+        }
     }
 }

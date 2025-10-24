@@ -4,27 +4,31 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels.CRUD;
 using PRN_MANGA_PROJECT.Services.EmailService;
+using PRN_MANGA_PROJECT.Services.CRUD;
 using System.Security.Cryptography;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace PRN_MANGA_PROJECT.Pages
+namespace PRN_MANGA_PROJECT.Pages.Admin
 {
     public class CreateAccountModel : PageModel
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
+        private readonly IAccountService _accountService; // ✅ Thêm Service để kích hoạt SignalR
 
         public CreateAccountModel(
             UserManager<User> userManager,
             RoleManager<IdentityRole> roleManager,
-            IEmailService emailService)
+            IEmailService emailService,
+            IAccountService accountService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _emailService = emailService;
+            _accountService = accountService;
         }
 
         [BindProperty]
@@ -42,74 +46,39 @@ namespace PRN_MANGA_PROJECT.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // ✅ Load lại danh sách role
+            // ✅ Load lại danh sách role khi submit
             AllRoles = _roleManager.Roles
                 .Select(r => r.Name!)
                 .Where(r => r != "admin")
                 .ToList();
 
             if (!ModelState.IsValid)
-            {
-                Console.WriteLine("❌ ModelState không hợp lệ:");
-                foreach (var err in ModelState)
-                {
-                    foreach (var valErr in err.Value.Errors)
-                        Console.WriteLine($" - {err.Key}: {valErr.ErrorMessage}");
-                }
                 return Page();
-            }
 
             // ✅ Kiểm tra username/email trùng
             if (await _userManager.FindByNameAsync(Input.Username) != null)
             {
                 ModelState.AddModelError("", "Tên đăng nhập đã tồn tại.");
-                Console.WriteLine($"❌ Username '{Input.Username}' đã tồn tại.");
                 return Page();
             }
 
             if (await _userManager.FindByEmailAsync(Input.Email) != null)
             {
                 ModelState.AddModelError("", "Email đã được sử dụng.");
-                Console.WriteLine($"❌ Email '{Input.Email}' đã tồn tại.");
                 return Page();
             }
 
             // ✅ Sinh mật khẩu ngẫu nhiên
             string password = GenerateRandomPassword();
-            Console.WriteLine($"🔐 Mật khẩu sinh tự động: {password}");
 
-            // ✅ Tạo user mới
-            var user = new User
-            {
-                UserName = Input.Username,
-                Email = Input.Email,
-                IsActive = true
-            };
-
-            var result = await _userManager.CreateAsync(user, password);
+            // ✅ Gọi AccountService để tạo user (service này sẽ kích hoạt SignalR)
+            var result = await _accountService.Create(Input.Username, Input.Email, password, Input.Role);
 
             if (!result.Succeeded)
             {
-                Console.WriteLine("❌ Lỗi khi tạo tài khoản:");
                 foreach (var error in result.Errors)
-                {
-                    Console.WriteLine($"   - {error.Code}: {error.Description}");
                     ModelState.AddModelError("", error.Description);
-                }
                 return Page();
-            }
-
-            // ✅ Tạo và gán role (nếu có)
-            if (!string.IsNullOrEmpty(Input.Role) && Input.Role != "admin")
-            {
-                if (!await _roleManager.RoleExistsAsync(Input.Role))
-                {
-                    await _roleManager.CreateAsync(new IdentityRole(Input.Role));
-                    Console.WriteLine($"✅ Role mới được tạo: {Input.Role}");
-                }
-
-                await _userManager.AddToRoleAsync(user, Input.Role);
-                Console.WriteLine($"✅ User '{Input.Username}' được gán role '{Input.Role}'");
             }
 
             // ✅ Gửi email thông báo
@@ -127,13 +96,12 @@ namespace PRN_MANGA_PROJECT.Pages
             """;
 
             await _emailService.SendEmailAsync(Input.Email, subject, body);
-            Console.WriteLine($"📧 Đã gửi email thông báo đến {Input.Email}");
 
             TempData["SuccessMessage"] = "✅ Tạo tài khoản thành công!";
             return RedirectToPage("/ViewAccount");
         }
 
-        // ✅ Sinh mật khẩu hợp lệ cho ASP.NET Identity
+        // ✅ Hàm sinh mật khẩu hợp lệ cho ASP.NET Identity
         private string GenerateRandomPassword(int length = 10)
         {
             const string lower = "abcdefghijklmnopqrstuvwxyz";
