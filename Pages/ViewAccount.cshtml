@@ -1,0 +1,72 @@
+﻿@page "/viewaccount"
+@model PRN_MANGA_PROJECT.Pages.ViewAccountModel
+@{
+    ViewData["Title"] = "Danh sách tài khoản";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a asp-page="/CreateAccount" class="btn btn-primary mb-2">+ Thêm tài khoản</a>
+
+<form method="get" class="row mb-3">
+    <div class="col-md-4">
+        <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên đăng nhập..." />
+    </div>
+    <div class="col-md-3">
+        <select name="roleFilter" class="form-select">
+            <option value="">-- Tất cả vai trò --</option>
+            @foreach (var role in Model.AllRoles)
+            {
+                <option value="@role" selected="@(Model.RoleFilter == role)">
+                    @role
+                </option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-success w-100">Lọc</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên đăng nhập</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Accounts.Any())
+        {
+            @foreach (var acc in Model.Accounts)
+            {
+                <tr>
+                    <td>@acc.Id</td>
+                    <td>@acc.Username</td>
+                    <td>@acc.Email</td>
+                    <td>@acc.Role</td>
+                    <td>@(acc.IsActive ? "Hoạt động" : "Khóa")</td>
+                    <td>
+                        <a asp-page="/EditAccount" asp-route-id="@acc.Id" class="btn btn-warning btn-sm">Sửa</a>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@acc.Id" style="display:inline">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Bạn có chắc muốn khóa tài khoản này không?')">
+                                Khóa
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center text-muted">Không có tài khoản nào phù hợp.</td>
+            </tr>
+        }
+    </tbody>
+</table>

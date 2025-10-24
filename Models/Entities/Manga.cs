@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PRN_MANGA_PROJECT.Models.Entities
 {
-    public class Manga
+    public class Manga : IHasTimestamps
     {
         public int Id { get; set; }
         
@@ -10,8 +10,9 @@ namespace PRN_MANGA_PROJECT.Models.Entities
         [StringLength(200)]
         public string Title { get; set; } = string.Empty;
         
+        [Required]
         [StringLength(50)]
-        public string? MangaDexId { get; set; }
+        public string MangaDexId { get; set; } = string.Empty;
         
         [StringLength(100)]
         public string? Author { get; set; }

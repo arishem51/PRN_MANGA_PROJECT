@@ -5,6 +5,7 @@ namespace PRN_MANGA_PROJECT.Services
     public interface IMangaService
     {
         Task<IEnumerable<MangaViewModel>> GetAllMangaAsync();
+        Task<IEnumerable<MangaViewModel>> GetActiveMangaAsync();
         Task<MangaViewModel?> GetMangaByIdAsync(int id);
         Task<IEnumerable<MangaViewModel>> SearchMangaAsync(string searchTerm);
         Task<IEnumerable<MangaViewModel>> GetMangaByTagAsync(int tagId);
@@ -14,6 +15,7 @@ namespace PRN_MANGA_PROJECT.Services
         Task<MangaViewModel> CreateMangaAsync(MangaViewModel manga);
         Task<MangaViewModel> UpdateMangaAsync(MangaViewModel manga);
         Task DeleteMangaAsync(int id);
+        Task ActivateMangaAsync(int id);
         Task<bool> BookmarkMangaAsync(string userId, int mangaId);
         Task<bool> RemoveBookmarkAsync(string userId, int mangaId);
         Task<bool> IsBookmarkedAsync(string userId, int mangaId);

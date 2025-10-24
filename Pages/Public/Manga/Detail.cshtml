@@ -1,0 +1,35 @@
+﻿@page "{mangaId:int}"
+@model PRN_MANGA_PROJECT.Pages.Public.Manga.DetailModel
+@{
+}
+
+<div class="container mt-4">
+	<div class="card shadow-sm p-3">
+		<div class="row">
+			<div class="col-md-4">
+				<img src="@Model.Manga.CoverImageUrl" class="img-fluid rounded" alt="@Model.Manga.Title">
+			</div>
+			<div class="col-md-8">
+				<h2>@Model.Manga.Title</h2>
+				<p><strong>Tác giả:</strong> @Model.Manga.Author</p>
+				<p><strong>Trạng thái:</strong> @Model.Manga.Status</p>
+				<p>@Model.Manga.Description</p>
+				<a asp-page="/Public/HomePage" class="btn btn-secondary mt-3">⬅ Quay lại</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div>
+	<h2>Chapters Of @Model.Manga.Title</h2>
+	@foreach (var chapter in Model.chapters)
+	{
+		<a asp-page="/Public/Manga/Chapter"
+		   asp-route-chapterId="@chapter.Id"
+		   class="list-group-item list-group-item-action">
+			Chương @chapter.ChapterNumber - @chapter.Title
+		</a>
+	}
+</div>
+
