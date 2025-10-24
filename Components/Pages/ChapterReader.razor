@@ -520,9 +520,10 @@
         StateHasChanged();
     }
 
-    private async Task SetupKeyboardShortcuts()
+    private Task SetupKeyboardShortcuts()
     {
         // This will be handled by JavaScript
+        return Task.CompletedTask;
     }
 
     [JSInvokable]

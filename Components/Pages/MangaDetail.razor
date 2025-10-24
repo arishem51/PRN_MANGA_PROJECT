@@ -2,6 +2,7 @@
 @using PRN_MANGA_PROJECT.Models.ViewModels
 @using PRN_MANGA_PROJECT.Services
 @inject IChapterService ChapterService
+@inject IMangaService MangaService
 @inject NavigationManager Navigation
 
 <PageTitle>@MangaTitle - Manga Details</PageTitle>
@@ -21,6 +22,13 @@
         {
             <!-- Manga Header -->
             <div class="manga-header">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Trang Chủ</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@MangaTitle</li>
+                    </ol>
+                </nav>
+                
                 <div class="row">
                     <div class="col-md-3">
                         <div class="manga-cover">
@@ -29,74 +37,89 @@
                     </div>
                     <div class="col-md-9">
                         <div class="manga-info">
-                            <nav aria-label="breadcrumb">
-                                <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="/">Home</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">@MangaTitle</li>
-                                </ol>
-                            </nav>
                             <h1 class="manga-title">@MangaTitle</h1>
-                            <p class="manga-author">By @Author</p>
-                            <div class="manga-meta">
-                                <span class="badge bg-primary">@Status</span>
-                                <span class="badge bg-secondary">@Genre</span>
-                                <span class="badge bg-info">@TotalChapters chapters</span>
+                            <p class="manga-author">Tác Giả: @Author</p>
+                            <p class="manga-translator">Nhóm Dịch: Manga Theo Yêu Cầu</p>
+                            <p class="manga-status">Trạng Thái: @Status</p>
+                            <p class="manga-views">Lượt Xem: 457,994,786</p>
+                            <p class="manga-follows">Theo Dõi: 2,445</p>
+                            <div class="manga-rating">
+                                <span class="rating-text">Bình Chọn: 3.7/5 - 217 Lượt</span>
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
                             </div>
-                            <div class="manga-description">
-                                <p>@Description</p>
+                            <div class="manga-genres">
+                                @if (Manga?.Tags != null && Manga.Tags.Any())
+                                {
+                                    @foreach (var tag in Manga.Tags)
+                                    {
+                                        <span class="genre-tag" style="background-color: @(tag.Color ?? "#f8f9fa");">@tag.Name</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="genre-tag">Action</span>
+                                    <span class="genre-tag">Adventure</span>
+                                    <span class="genre-tag">Comedy</span>
+                                    <span class="genre-tag">Drama</span>
+                                    <span class="genre-tag">Fantasy</span>
+                                    <span class="genre-tag">Shounen</span>
+                                    <span class="genre-tag">Supernatural</span>
+                                }
                             </div>
                             <div class="manga-actions">
-                                <button class="btn btn-primary btn-lg" @onclick="StartReading">
-                                    <i class="fas fa-play"></i>
-                                    Start Reading
+                                <button class="btn btn-success btn-lg" @onclick="StartReading">
+                                    <i class="fas fa-book"></i>
+                                    Đọc Từ Đầu
                                 </button>
-                                <button class="btn btn-outline-secondary btn-lg">
-                                    <i class="fas fa-bookmark"></i>
-                                    Bookmark
-                                </button>
-                                <button class="btn btn-outline-secondary btn-lg">
-                                    <i class="fas fa-share"></i>
-                                    Share
+                                <button class="btn btn-primary btn-lg">
+                                    <i class="fas fa-star"></i>
+                                    Theo Dõi
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <div class="manga-description mt-4">
+                    <h5>@MangaTitle:</h5>
+                    <p>@Description</p>
+                    <button class="btn btn-warning btn-sm">
+                        Xem Thêm
+                    </button>
+                </div>
             </div>
 
-            <!-- Chapter Navigation Component -->
-            <div class="chapter-navigation-section">
-                <ChapterNavigation MangaId="@MangaId" 
-                                  CurrentChapterId="0" 
-                                  IsBookmarked="false"
-                                  OnChapterChanged="OnChapterChanged" />
-            </div>
 
-            <!-- Quick Chapter List -->
-            <div class="quick-chapters mt-4">
+            <!-- Chapter List -->
+            <div class="quick-chapters mt-3">
                 <div class="section-header">
-                    <h3>All Chapters</h3>
-                    <a href="@($"/manga/{MangaId}/chapters")" class="btn btn-outline-primary">
-                        View All Chapters
-                    </a>
+                    <h3>Danh Sách Chương</h3>
+                    <div class="chapter-sort-controls">
+                        <span class="sort-label">Số Chương</span>
+                        <button class="btn btn-outline-secondary sort-toggle-btn" @onclick="ToggleSortOrder" title="@(sortDescending ? "Click để xem cũ nhất" : "Click để xem mới nhất")">
+                            <i class="fas @(sortDescending ? "fa-sort-amount-down" : "fa-sort-amount-up")"></i>
+                            <span class="sort-text">@(sortDescending ? "Mới nhất" : "Cũ nhất")</span>
+                        </button>
+                    </div>
                 </div>
                 
                 @if (RecentChapters.Any())
                 {
-                    <div class="chapters-grid">
-                        @foreach (var chapter in RecentChapters.Take(12))
+                    <div class="chapter-list">
+                        @foreach (var chapter in RecentChapters)
                         {
-                            <div class="chapter-card" @onclick="() => NavigateToChapter(chapter.Id)">
-                                <div class="chapter-card-body">
-                                    <h5 class="chapter-title">@chapter.Title</h5>
-                                    @if (!string.IsNullOrEmpty(chapter.ChapterNumber))
-                                    {
-                                        <span class="chapter-number">Chapter @chapter.ChapterNumber</span>
-                                    }
-                                    <div class="chapter-meta">
-                                        <span class="page-count">@(chapter.PageCount ?? chapter.ImageCount) pages</span>
-                                        <span class="date">@chapter.CreatedAt.ToString("MMM dd, yyyy")</span>
-                                    </div>
+                            <div class="chapter-item" @onclick="() => NavigateToChapter(chapter.Id)">
+                                <div class="chapter-number">
+                                    Chương @(string.IsNullOrEmpty(chapter.ChapterNumber) ? chapter.Id.ToString() : chapter.ChapterNumber)
+                                </div>
+                                <div class="chapter-date">
+                                    @chapter.CreatedAt.ToString("dd/MM/yyyy")
                                 </div>
                             </div>
                         }
@@ -106,8 +129,8 @@
                 {
                     <div class="no-chapters">
                         <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
-                        <h4>No Chapters Available</h4>
-                        <p class="text-muted">This manga doesn't have any chapters yet.</p>
+                        <h4>Chưa Có Chương</h4>
+                        <p class="text-muted">Manga này chưa có chương nào.</p>
                     </div>
                 }
             </div>
@@ -119,6 +142,7 @@
     [Parameter]
     public int MangaId { get; set; }
 
+    private MangaViewModel? Manga;
     private string MangaTitle = "Loading...";
     private string Author = "";
     private string Status = "";
@@ -128,6 +152,7 @@
     private int TotalChapters = 0;
     private List<ChapterViewModel> RecentChapters = new List<ChapterViewModel>();
     private bool isLoading = true;
+    private bool sortDescending = true; // Default to descending (newest first)
 
     protected override async Task OnInitializedAsync()
     {
@@ -139,18 +164,34 @@
     {
         try
         {
-            // For demo purposes, using mock data
-            // In a real app, you would call MangaService.GetMangaByIdAsync(MangaId)
-            MangaTitle = $"Sample Manga #{MangaId}";
-            Author = "Sample Author";
-            Status = "Ongoing";
-            Genre = "Action, Adventure";
-            Description = "This is a sample manga description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
-            CoverImageUrl = "/images/placeholder-manga.jpg";
+            Manga = await MangaService.GetMangaByIdAsync(MangaId);
+            if (Manga != null)
+            {
+                MangaTitle = Manga.Title;
+                Author = Manga.Author;
+                Status = Manga.Status;
+                Description = Manga.Description;
+                CoverImageUrl = Manga.CoverImageUrl ?? "/images/placeholder-manga.jpg";
+            }
+            else
+            {
+                // Fallback to mock data if manga not found
+                MangaTitle = $"Sample Manga #{MangaId}";
+                Author = "Sample Author";
+                Status = "Ongoing";
+                Description = "This is a sample manga description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+                CoverImageUrl = "/images/placeholder-manga.jpg";
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading manga details: {ex.Message}");
+            // Fallback to mock data on error
+            MangaTitle = $"Sample Manga #{MangaId}";
+            Author = "Sample Author";
+            Status = "Ongoing";
+            Description = "This is a sample manga description. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+            CoverImageUrl = "/images/placeholder-manga.jpg";
         }
     }
 
@@ -159,7 +200,12 @@
         try
         {
             var chapters = await ChapterService.GetChaptersByMangaIdAsync(MangaId);
-            RecentChapters = chapters.OrderBy(c => c.ChapterNumber).ToList();
+            // Remove duplicates and sort
+            RecentChapters = chapters
+                .GroupBy(c => c.ChapterNumber)
+                .Select(g => g.First())
+                .OrderByDescending(c => c.ChapterNumber)
+                .ToList();
             TotalChapters = RecentChapters.Count;
         }
         catch (Exception ex)
@@ -191,8 +237,18 @@
         Navigation.NavigateTo($"/chapter/{chapterId}");
     }
 
-    private async Task OnChapterChanged(int chapterId)
+    private async Task ToggleSortOrder()
     {
-        NavigateToChapter(chapterId);
+        sortDescending = !sortDescending;
+        Console.WriteLine($"ToggleSortOrder: sortDescending = {sortDescending}");
+        
+        // Re-sort the existing chapters
+        RecentChapters = sortDescending 
+            ? RecentChapters.OrderByDescending(c => c.ChapterNumber).ToList()
+            : RecentChapters.OrderBy(c => c.ChapterNumber).ToList();
+            
+        Console.WriteLine($"Chapters after sort: {string.Join(", ", RecentChapters.Select(c => c.ChapterNumber))}");
+        StateHasChanged();
     }
+
 }

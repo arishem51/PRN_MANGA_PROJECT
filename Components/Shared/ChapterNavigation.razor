@@ -93,7 +93,6 @@
     private IEnumerable<ChapterViewModel> Chapters = new List<ChapterViewModel>();
     private int? PreviousChapterId;
     private int? NextChapterId;
-    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -123,7 +122,6 @@
         }
         finally
         {
-            isLoading = false;
             StateHasChanged();
         }
     }
