@@ -1,4 +1,4 @@
-﻿@page "{chapterId:int}"
+﻿@page "{chapterId}"
 @model PRN_MANGA_PROJECT.Pages.Public.Manga.ChapterModel
 @{
 }
@@ -8,25 +8,93 @@
 }
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 
-<div>
-	<h1>@Model.Chapter.Title</h1>
-	<p>@Model.Chapter.Content</p>
+
+<div class="container mt-4">
+	<h2>@Model.Chapter.Title</h2>
+    <a asp-page="/Public/Manga/Detail" asp-route-mangaId="@Model.Chapter.MangaId" class="btn btn-secondary"
+    style="margin-right:10px;">← Back</a>
+
+    @if (Model.ChapterImages != null && Model.ChapterImages.Any())
+    {
+         <div style="text-align:center; margin-bottom: 20px;">
+            @if (!string.IsNullOrEmpty(Model.PreviousChapterId))
+            {
+                <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.PreviousChapterId" class="btn btn-secondary" style="margin-right:10px;">← Previous Chapter</a>
+            }
+            else
+            {
+                <button class="btn btn-secondary" style="margin-right:10px;" disabled>← Previous Chapter</button>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.NextChapterId))
+            {
+                <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.NextChapterId" class="btn btn-secondary">Next Chapter →</a>
+            }
+            else
+            {
+                <button class="btn btn-secondary" disabled>Next Chapter →</button>
+            }
+         </div>
+        <div id="reader" style="text-align:center;">
+            @foreach (var img in Model.ChapterImages)
+            {
+                <img data-src="@img" class="lazy-img" alt="Page" style="max-width:100%; margin-bottom:10px; display:block;" />
+            }
+        </div>
+
+        <script>
+            const imgs = document.querySelectorAll('.lazy-img');
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.getAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            imgs.forEach(img => observer.observe(img));
+        </script>
+
+        <div style="text-align:center; margin-bottom: 20px;">
+            @if (!string.IsNullOrEmpty(Model.PreviousChapterId))
+            {
+                <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.PreviousChapterId" class="btn btn-secondary" style="margin-right:10px;">← Previous Chapter</a>
+            }
+            else
+            {
+                <button class="btn btn-secondary" style="margin-right:10px;" disabled>← Previous Chapter</button>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.NextChapterId))
+            {
+                <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.NextChapterId" class="btn btn-secondary">Next Chapter →</a>
+            }
+            else
+            {
+                <button class="btn btn-secondary" disabled>Next Chapter →</button>
+            }
+        </div>
+    }
+    else
+    {
+        <p><i>Something Went Wrong</i></p>
+    }
 </div>
 
-<form method="post" asp-page-handler="Comment">
-	<div class="panel">
-		<div class="panel-body">
-			<input type="hidden" asp-for="Input.ChapterId" value="@Model.Chapter.Id" />
-			<textarea class="form-control" rows="2" placeholder="What are you thinking?" asp-for="Input.Content"></textarea>
-			<div class="mar-top clearfix">
-				<button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Share</button>
-				<a class="btn btn-trans btn-icon fa fa-video-camera add-tooltip" href="#"></a>
-				<a class="btn btn-trans btn-icon fa fa-camera add-tooltip" href="#"></a>
-				<a class="btn btn-trans btn-icon fa fa-file add-tooltip" href="#"></a>
-			</div>
-		</div>
-	</div>
-</form>
 
+<form class="comment-form" data-chapter-id="@Model.Chapter.Id" data-mangadexchapter-id="@Model.Chapter.MangaDexChapterId">
+    <div class="panel">
+        <div class="panel-body">
+            <textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Content"></textarea>
+            <div class="mar-top clearfix">
+                <button class="btn btn-sm btn-primary pull-right" type="submit">
+                    <i class="fa fa-pencil fa-fw"></i> Comment
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
 
 <partial name="~/Pages/Shared/Partial/_CommentPartial.cshtml" model="@Model.Comments"/>

@@ -19,6 +19,8 @@ namespace PRN_MANGA_PROJECT.Data
         public DbSet<Bookmark> Bookmarks { get; set; }
         public DbSet<ReadingHistory> ReadingHistories { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<CommentLike> CommentLikes { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

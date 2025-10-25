@@ -11,10 +11,10 @@
 			</div>
 			<div class="col-md-8">
 				<h2>@Model.Manga.Title</h2>
-				<p><strong>Tác giả:</strong> @Model.Manga.Author</p>
-				<p><strong>Trạng thái:</strong> @Model.Manga.Status</p>
+				<p><strong>Author:</strong> @Model.Manga.Author</p>
+				<p><strong>Status:</strong> @Model.Manga.Status</p>
 				<p>@Model.Manga.Description</p>
-				<a asp-page="/Public/HomePage" class="btn btn-secondary mt-3">⬅ Quay lại</a>
+				<a asp-page="/Public/HomePage" class="btn btn-secondary mt-3">⬅ Back</a>
 			</div>
 		</div>
 	</div>
@@ -26,9 +26,9 @@
 	@foreach (var chapter in Model.chapters)
 	{
 		<a asp-page="/Public/Manga/Chapter"
-		   asp-route-chapterId="@chapter.Id"
+		   asp-route-chapterId="@chapter.MangaDexChapterId"
 		   class="list-group-item list-group-item-action">
-			Chương @chapter.ChapterNumber - @chapter.Title
+			Chapter @chapter.ChapterNumber - @chapter.Title
 		</a>
 	}
 </div>

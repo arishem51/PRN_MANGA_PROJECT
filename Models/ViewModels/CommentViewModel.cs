@@ -6,6 +6,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
         public string UserId { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public int ChapterId { get; set; }
+        public string MangaDexChapterId { get; set; }
         public string Content { get; set; } = string.Empty;
         public int? ParentCommentId { get; set; }
         public DateTime CreatedAt { get; set; }
