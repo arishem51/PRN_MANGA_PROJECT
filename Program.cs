@@ -50,17 +50,6 @@ builder.Services.AddScoped<IBaseRepository<Bookmark>, BaseRepository<Bookmark>>(
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 // Add Services
 builder.Services.AddScoped<IMangaService, MangaService>();
-builder.Services.AddScoped<IChapterService, ChapterService>();
-
-// Add HttpClient for ChapterUIService
-builder.Services.AddHttpClient<ChapterUIService>(client =>
-{
-    client.BaseAddress = new Uri("http://localhost:5274/");
-});
-
-// Add ChapterUIService
-builder.Services.AddScoped<ChapterUIService>();
-
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
@@ -104,6 +93,7 @@ else
     // Add authentication without Google provider if credentials are not configured
     builder.Services.AddAuthentication();
 }
+
 
 // Add API Controllers
 builder.Services.AddControllers();
