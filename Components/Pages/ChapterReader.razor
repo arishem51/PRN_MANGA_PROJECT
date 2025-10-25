@@ -1,0 +1,571 @@
+@page "/chapter/{ChapterId:int}"
+@using PRN_MANGA_PROJECT.Models.ViewModels
+@using PRN_MANGA_PROJECT.Services
+@inject ChapterUIService ChapterService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<PageTitle>@ChapterTitle - Chapter Reader</PageTitle>
+
+<div class="chapter-reader-container @(isDarkTheme ? "dark-theme" : "light-theme")">
+    <!-- Top Navigation Bar -->
+    <div class="reader-navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <button class="btn btn-link reader-text-color" @onclick="GoBack">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <div class="chapter-info">
+                    <h5 class="chapter-title">@ChapterTitle</h5>
+                    @if (!string.IsNullOrEmpty(ChapterNumber))
+                    {
+                        <span class="chapter-number">Chapter @ChapterNumber</span>
+                    }
+                </div>
+            </div>
+            <div class="navbar-center">
+                <div class="chapter-navigation">
+                    <button class="btn btn-outline-light btn-sm" @onclick="PreviousChapter" disabled="@(PreviousChapterId == null)">
+                        <i class="fas fa-chevron-left"></i>
+                        Previous
+                    </button>
+                    <span class="chapter-counter reader-text-color">@(CurrentImageIndex + 1) / @TotalImages</span>
+                    <button class="btn btn-outline-light btn-sm" @onclick="NextChapter" disabled="@(NextChapterId == null)">
+                        Next
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <div class="reader-controls">
+                    <button class="btn btn-link reader-text-color" @onclick="ToggleTheme" title="Toggle Theme">
+                        <i class="fas fa-@(isDarkTheme ? "sun" : "moon")"></i>
+                    </button>
+                    <button class="btn btn-link reader-text-color" @onclick="ToggleFullscreen" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="btn btn-link reader-text-color" @onclick="ToggleSettings" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="btn btn-link reader-text-color" @onclick="ToggleBookmark" title="Bookmark">
+                        <i class="fas fa-bookmark @(isBookmarked ? "text-warning" : "")"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reader Settings Panel -->
+    @if (showSettings)
+    {
+        <div class="settings-panel">
+            <div class="settings-content">
+                <h6>Reader Settings</h6>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label>Reading Mode:</label>
+                        <select class="form-select" @bind="readingMode" @bind:after="OnReadingModeChanged">
+                            <option value="single">Single Page</option>
+                            <option value="double">Double Page</option>
+                            <option value="webtoon">Webtoon (Vertical)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Auto Scroll Speed:</label>
+                        <input type="range" class="form-range" min="1" max="10" @bind="autoScrollSpeed" />
+                        <span>@autoScrollSpeed</span>
+                    </div>
+                    <div class="setting-group">
+                        <button class="btn btn-sm btn-primary" @onclick="ToggleAutoScroll">
+                            @(isAutoScrolling ? "Stop" : "Start") Auto Scroll
+                        </button>
+                    </div>
+                    <div class="setting-group">
+                        <label>Reading Progress:</label>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: @(readingProgress)%" 
+                                 aria-valuenow="@readingProgress" aria-valuemin="0" aria-valuemax="100">
+                                @readingProgress%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="keyboard-shortcuts">
+                    <h6>Keyboard Shortcuts</h6>
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item">
+                            <kbd>←</kbd> <span>Previous Page</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>→</kbd> <span>Next Page</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Space</kbd> <span>Auto Scroll</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>F</kbd> <span>Fullscreen</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>S</kbd> <span>Settings</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>B</kbd> <span>Bookmark</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>T</kbd> <span>Toggle Theme</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Esc</kbd> <span>Hide Controls</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Main Reader Area -->
+    <div class="reader-main" @onclick="ToggleControls">
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading chapter...</span>
+                </div>
+                <p class="mt-2">Loading chapter...</p>
+            </div>
+        }
+        else if (Chapter != null && Chapter.ChapterImages.Any())
+        {
+            @if (readingMode == "webtoon")
+            {
+                <!-- Webtoon Mode -->
+                <div class="webtoon-container">
+                    @foreach (var image in Chapter.ChapterImages.OrderBy(x => x.Order))
+                    {
+                        <div class="webtoon-page">
+                            <img src="@image.ImageUrl" 
+                                 alt="@ChapterTitle - Page @image.Order" 
+                                 class="webtoon-image"
+                                 loading="lazy" />
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Single/Double Page Mode -->
+                <div class="page-container @(readingMode == "double" ? "double-page" : "single-page")">
+                    @if (readingMode == "double" && CurrentImageIndex + 1 < Chapter.ChapterImages.Count)
+                    {
+                        <!-- Double Page Layout -->
+                        <div class="double-page-layout">
+                            <div class="page left-page">
+                                <img src="@Chapter.ChapterImages.ElementAt(CurrentImageIndex).ImageUrl" 
+                                     alt="@ChapterTitle - Page @(CurrentImageIndex + 1)" 
+                                     class="page-image" />
+                            </div>
+                            <div class="page right-page">
+                                <img src="@Chapter.ChapterImages.ElementAt(CurrentImageIndex + 1).ImageUrl" 
+                                     alt="@ChapterTitle - Page @(CurrentImageIndex + 2)" 
+                                     class="page-image" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Single Page Layout -->
+                        <div class="single-page-layout">
+                            <img src="@Chapter.ChapterImages.ElementAt(CurrentImageIndex).ImageUrl" 
+                                 alt="@ChapterTitle - Page @(CurrentImageIndex + 1)" 
+                                 class="page-image" />
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="error-container">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <h3>Chapter Not Found</h3>
+                <p>This chapter doesn't exist or has no images.</p>
+                <button class="btn btn-primary" @onclick="GoBack">Go Back</button>
+            </div>
+        }
+    </div>
+
+    <!-- Bottom Navigation -->
+    @if (Chapter != null && Chapter.ChapterImages.Any() && readingMode != "webtoon")
+    {
+        <div class="reader-bottom-nav">
+            <div class="page-navigation">
+                <button class="btn btn-outline-light" @onclick="PreviousPage" disabled="@(CurrentImageIndex == 0)">
+                    <i class="fas fa-chevron-left"></i>
+                    Previous
+                </button>
+                <div class="page-info">
+                    <span>Page @(CurrentImageIndex + 1) of @TotalImages</span>
+                </div>
+                <button class="btn btn-outline-light" @onclick="NextPage" disabled="@(CurrentImageIndex >= TotalImages - 1)">
+                    Next
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="page-thumbnails">
+                @for (int i = Math.Max(0, CurrentImageIndex - 2); i < Math.Min(TotalImages, CurrentImageIndex + 3); i++)
+                {
+                    <button class="thumbnail @(i == CurrentImageIndex ? "active" : "")" 
+                            @onclick="() => GoToPage(i)">
+                        <img src="@Chapter.ChapterImages.ElementAt(i).ImageUrl" alt="Page @(i + 1)" />
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public int ChapterId { get; set; }
+
+    private ChapterViewModel? Chapter;
+    private string ChapterTitle = "Loading...";
+    private string ChapterNumber = "";
+    private int CurrentImageIndex = 0;
+    private int TotalImages = 0;
+    private bool isLoading = true;
+    private bool showSettings = false;
+    private string readingMode = "single";
+    private int autoScrollSpeed = 5;
+    private bool isAutoScrolling = false;
+    private int? PreviousChapterId;
+    private int? NextChapterId;
+    private bool isDarkTheme = true;
+    private bool isBookmarked = false;
+    private double readingProgress = 0;
+    private bool controlsVisible = true;
+    private System.Threading.Timer? autoScrollTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadChapter();
+        await LoadThemePreference();
+        await LoadReadingProgress();
+        await SetupKeyboardShortcuts();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("setupKeyboardShortcuts", DotNetObjectReference.Create(this));
+        }
+    }
+
+    private async Task LoadChapter()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            Chapter = await ChapterService.GetChapterWithImagesAsync(ChapterId);
+            if (Chapter != null)
+            {
+                ChapterTitle = Chapter.Title;
+                ChapterNumber = Chapter.ChapterNumber ?? "";
+                TotalImages = Chapter.ChapterImages.Count;
+                CurrentImageIndex = 0;
+
+                // Load navigation chapters
+                await LoadNavigationChapters();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading chapter: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadNavigationChapters()
+    {
+        if (Chapter == null) return;
+
+        try
+        {
+            var nextChapter = await ChapterService.GetNextChapterAsync(ChapterId, Chapter.MangaId);
+            var previousChapter = await ChapterService.GetPreviousChapterAsync(ChapterId, Chapter.MangaId);
+
+            NextChapterId = nextChapter?.Id;
+            PreviousChapterId = previousChapter?.Id;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading navigation chapters: {ex.Message}");
+        }
+    }
+
+    private void GoBack()
+    {
+        if (Chapter != null)
+        {
+            Navigation.NavigateTo($"/manga/{Chapter.MangaId}/chapters");
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (CurrentImageIndex > 0)
+        {
+            CurrentImageIndex--;
+            await SaveReadingProgress();
+            StateHasChanged();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (CurrentImageIndex < TotalImages - 1)
+        {
+            CurrentImageIndex++;
+            await SaveReadingProgress();
+            StateHasChanged();
+        }
+    }
+
+    private async Task GoToPage(int pageIndex)
+    {
+        if (pageIndex >= 0 && pageIndex < TotalImages)
+        {
+            CurrentImageIndex = pageIndex;
+            await SaveReadingProgress();
+            StateHasChanged();
+        }
+    }
+
+    private async Task PreviousChapter()
+    {
+        if (PreviousChapterId.HasValue)
+        {
+            Navigation.NavigateTo($"/chapter/{PreviousChapterId.Value}");
+        }
+    }
+
+    private async Task NextChapter()
+    {
+        if (NextChapterId.HasValue)
+        {
+            Navigation.NavigateTo($"/chapter/{NextChapterId.Value}");
+        }
+    }
+
+    private async Task ToggleFullscreen()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("toggleFullscreen");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error toggling fullscreen: {ex.Message}");
+        }
+    }
+
+    private void ToggleSettings()
+    {
+        showSettings = !showSettings;
+        StateHasChanged();
+    }
+
+    private void OnReadingModeChanged()
+    {
+        CurrentImageIndex = 0;
+        StateHasChanged();
+    }
+
+    private async Task ToggleAutoScroll()
+    {
+        isAutoScrolling = !isAutoScrolling;
+        
+        if (isAutoScrolling)
+        {
+            try
+            {
+                if (readingMode == "webtoon")
+                {
+                    autoScrollTimer = new System.Threading.Timer(async _ => {
+                        await InvokeAsync(async () => {
+                            if (CurrentImageIndex < TotalImages - 1)
+                            {
+                                await NextPage();
+                            }
+                            else
+                            {
+                                isAutoScrolling = false;
+                                autoScrollTimer?.Dispose();
+                                autoScrollTimer = null;
+                                StateHasChanged();
+                            }
+                        });
+                    }, null, 0, 2000 / autoScrollSpeed);
+                }
+                else
+                {
+                    await JSRuntime.InvokeVoidAsync("startAutoScroll", autoScrollSpeed);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error starting auto scroll: {ex.Message}");
+                isAutoScrolling = false;
+            }
+        }
+        else
+        {
+            autoScrollTimer?.Dispose();
+            autoScrollTimer = null;
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("stopAutoScroll");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error stopping auto scroll: {ex.Message}");
+            }
+        }
+        
+        StateHasChanged();
+    }
+
+    private void ToggleControls()
+    {
+        controlsVisible = !controlsVisible;
+        StateHasChanged();
+    }
+
+    private async Task LoadThemePreference()
+    {
+        try
+        {
+            var theme = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "mangaReaderTheme");
+            isDarkTheme = theme != "light";
+            StateHasChanged();
+        }
+        catch
+        {
+            isDarkTheme = true; // Default to dark theme
+        }
+    }
+
+    private async Task LoadReadingProgress()
+    {
+        try
+        {
+            var progress = await JSRuntime.InvokeAsync<string>("localStorage.getItem", $"readingProgress_{ChapterId}");
+            if (double.TryParse(progress, out double progressValue))
+            {
+                readingProgress = progressValue;
+            }
+        }
+        catch
+        {
+            readingProgress = 0;
+        }
+    }
+
+    private async Task SaveReadingProgress()
+    {
+        try
+        {
+            readingProgress = TotalImages > 0 ? (double)(CurrentImageIndex + 1) / TotalImages * 100 : 0;
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", $"readingProgress_{ChapterId}", readingProgress.ToString());
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving reading progress: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkTheme = !isDarkTheme;
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "mangaReaderTheme", isDarkTheme ? "dark" : "light");
+        StateHasChanged();
+    }
+
+    private async Task ToggleBookmark()
+    {
+        isBookmarked = !isBookmarked;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", $"bookmark_{ChapterId}", isBookmarked.ToString());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving bookmark: {ex.Message}");
+        }
+        StateHasChanged();
+    }
+
+    private Task SetupKeyboardShortcuts()
+    {
+        // This will be handled by JavaScript
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public async Task HandleKeyPress(string key)
+    {
+        switch (key.ToLower())
+        {
+            case "arrowleft":
+                if (readingMode != "webtoon")
+                    await PreviousPage();
+                break;
+            case "arrowright":
+                if (readingMode != "webtoon")
+                    await NextPage();
+                break;
+            case " ":
+                await ToggleAutoScroll();
+                break;
+            case "f":
+                await ToggleFullscreen();
+                break;
+            case "s":
+                ToggleSettings();
+                break;
+            case "b":
+                await ToggleBookmark();
+                break;
+            case "t":
+                await ToggleTheme();
+                break;
+            case "escape":
+                if (showSettings)
+                    showSettings = false;
+                else
+                    ToggleControls();
+                StateHasChanged();
+                break;
+        }
+    }
+
+    public void Dispose()
+    {
+        autoScrollTimer?.Dispose();
+    }
+}
