@@ -1,5 +1,6 @@
 ﻿@page
 @model PRN_MANGA_PROJECT.Pages.Public.HomePageModel
+
 @{
 	Layout = "_Layout";
 	ViewData["Title"] = "HomePage";
@@ -8,14 +9,30 @@
 <div class="container mt-4">
 	<h2 class="mb-4 text-center">Manga Library</h2>
 
-	<!-- Search box -->
+	<!-- ======= Thanh chức năng ======= -->
+	<div class="d-flex justify-content-center gap-3 mb-4">
+		<a asp-page="/Public/User/ReadingHistory" class="btn btn-outline-secondary">
+			<i class="bi bi-clock-history"></i> Lịch sử đọc
+		</a>
+
+		<a asp-page="/Public/User/Bookmarks" class="btn btn-outline-secondary">
+			<i class="bi bi-bookmark-heart"></i> Lưu truyện
+		</a>
+
+		<!-- Nút mở popup thể loại -->
+		<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tagModal">
+			<i class="bi bi-tags"></i> Thể loại
+		</button>
+	</div>
+
+	<!-- ======= Ô tìm kiếm ======= -->
 	<form method="get" class="d-flex justify-content-center mb-4">
 		<input type="text" name="SearchTerm" value="@Model.SearchTerm"
-			   class="form-control w-50" placeholder="Search manga, author, or artist..." />
-		<button type="submit" class="btn btn-primary ms-2">Search</button>
+			   class="form-control w-50" placeholder="Tìm manga, tác giả, hoặc artist..." />
+		<button type="submit" class="btn btn-primary ms-2">Tìm kiếm</button>
 	</form>
 
-	<!-- Manga List -->
+	<!-- ======= Danh sách manga ======= -->
 	<div class="row row-cols-1 row-cols-md-4 g-4">
 		@foreach (var manga in Model.Mangas)
 		{
@@ -42,6 +59,37 @@
 
 	@if (!Model.Mangas.Any())
 	{
-		<p class="text-center text-muted mt-4">No manga found.</p>
+		<p class="text-center text-muted mt-4">Không tìm thấy truyện nào.</p>
 	}
+</div>
+
+<!-- ======= POPUP CHỌN THỂ LOẠI ======= -->
+<div class="modal fade" id="tagModal" tabindex="-1" aria-labelledby="tagModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="tagModalLabel">Chọn thể loại</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				@if (Model.Tags != null && Model.Tags.Any())
+				{
+					<div class="d-flex flex-wrap gap-2">
+						@foreach (var tag in Model.Tags)
+						{
+							<a asp-page="/Public/HomePage" asp-route-tagId="@tag.Id"
+							   class="badge rounded-pill"
+							   style="background-color:@tag.Color; cursor:pointer; font-size:1rem; padding:10px;">
+								@tag.Name
+							</a>
+						}
+					</div>
+				}
+				else
+				{
+					<p>Không có thể loại nào được kích hoạt.</p>
+				}
+			</div>
+		</div>
+	</div>
 </div>

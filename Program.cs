@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using PRN_MANGA_PROJECT;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
@@ -20,14 +21,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Add Entity Framework
+// ===== Database =====
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add MudBlazor
+// ===== MudBlazor + SignalR =====
 builder.Services.AddMudServices();
 builder.Services.AddSignalR();
-// Add Repositories
+
+// ===== Repositories =====
 builder.Services.AddScoped<IBaseRepository<Manga>, BaseRepository<Manga>>();
 builder.Services.AddScoped<IMangaRepository, MangaRepository>();
 builder.Services.AddScoped<IBaseRepository<Chapter>, BaseRepository<Chapter>>();
@@ -37,19 +39,19 @@ builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IBaseRepository<Bookmark>, BaseRepository<Bookmark>>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
 
-// Add Services
+// ===== Services =====
 builder.Services.AddScoped<IMangaService, MangaService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ITagService, TagService>();
-//Auth Logic
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService , UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
-// Add Identity
+
+// ===== Identity =====
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -58,12 +60,12 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
     options.User.RequireUniqueEmail = true;
-    options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedAccount = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
-// Add GG
+
+// ===== Google Auth =====
 builder.Services.AddAuthentication()
     .AddGoogle("Google", options =>
     {
@@ -71,37 +73,28 @@ builder.Services.AddAuthentication()
         options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     });
 
-
-// Add API Controllers
-builder.Services.AddControllers();
+// ===== HTTP Client for MangaDex API =====
 builder.Services.AddHttpClient("MangaDexClient", client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; MangaProject/1.0)");
     client.BaseAddress = new Uri("https://api.mangadex.org/");
 });
 
-//Authorization
+// ===== Authorization =====
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy =>
-    {
-        policy.RequireRole("Admin");
-    });
-    options.AddPolicy("UserOnly", policy =>
-    {
-        policy.RequireRole("Reader", "Admin");
-    });
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("Reader", "Admin"));
 });
 
+// ===== Razor Pages Auth Rules =====
 builder.Services.AddRazorPages(options =>
 {
-    // Secure the entire Admin area to Admin role only
     options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminOnly");
     options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage", "UserOnly");
-
 });
 
-// Redirect unauthenticated and unauthorized users to home page
+// ===== Cookie Redirect Handling =====
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/";
@@ -118,38 +111,40 @@ builder.Services.ConfigureApplicationCookie(options =>
             context.Response.Redirect("/Public/AccessDenied");
             return Task.CompletedTask;
         }
-
     };
 });
+
 var app = builder.Build();
 
-//Create Default Role
+// ===== SEED DATABASE & ROLES =====
 using (var scope = app.Services.CreateScope())
 {
-    var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+
+    // G?i SeedData (thêm Manga, Tag, MangaTag)
+    SeedData.Initialize(context);
+
+    // G?i Role seeding
+    var roleService = services.GetRequiredService<IRoleService>();
     await roleService.SeedRole();
 }
 
-// Configure the HTTP request pipeline.
+// ===== Middleware =====
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-
-
-// Map API Controllers
 app.MapControllers();
 app.MapRazorPages();
 app.MapHub<AccountHub>("/accountHub");
+
 app.Run();
