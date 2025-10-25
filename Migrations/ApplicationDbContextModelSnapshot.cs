@@ -185,7 +185,7 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.HasIndex("UserId", "MangaId")
                         .IsUnique();
 
-                    b.ToTable("Bookmarks");
+                    b.ToTable("Bookmarks", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Chapter", b =>
@@ -210,10 +210,6 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MangaDexChapterId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("MangaId")
                         .HasColumnType("int");
@@ -235,7 +231,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("MangaId");
 
-                    b.ToTable("Chapters");
+                    b.ToTable("Chapters", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.ChapterImage", b =>
@@ -264,7 +260,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("ChapterId");
 
-                    b.ToTable("ChapterImages");
+                    b.ToTable("ChapterImages", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Comment", b =>
@@ -312,7 +308,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Manga", b =>
@@ -345,10 +341,6 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MangaDexId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)
@@ -368,7 +360,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("Title");
 
-                    b.ToTable("Mangas");
+                    b.ToTable("Mangas", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.MangaTag", b =>
@@ -386,7 +378,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("MangaTags");
+                    b.ToTable("MangaTags", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.ReadingHistory", b =>
@@ -421,7 +413,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ReadingHistories");
+                    b.ToTable("ReadingHistories", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Tag", b =>
@@ -453,7 +445,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.User", b =>

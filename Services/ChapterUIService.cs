@@ -107,5 +107,33 @@ namespace PRN_MANGA_PROJECT.Services
                 return null;
             }
         }
+
+        public async Task<int?> GetNextChapterIdAsync(int chapterId, int mangaId)
+        {
+            try
+            {
+                var nextChapter = await GetNextChapterAsync(chapterId, mangaId);
+                return nextChapter?.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching next chapter ID for {chapterId}: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<int?> GetPreviousChapterIdAsync(int chapterId, int mangaId)
+        {
+            try
+            {
+                var previousChapter = await GetPreviousChapterAsync(chapterId, mangaId);
+                return previousChapter?.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching previous chapter ID for {chapterId}: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

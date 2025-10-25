@@ -21,7 +21,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             _context = context;
         }
 
-        public Chapter Chapter { get; set; } = new Chapter();
+        public Models.Entities.Chapter Chapter { get; set; } = new Models.Entities.Chapter();
         public List<Comment> Comments { get; set; } = new List<Comment>();
         public List<Comment> ChildComments { get; set; } = new List<Comment>();
         public async Task<IActionResult> OnGet(int chapterId)

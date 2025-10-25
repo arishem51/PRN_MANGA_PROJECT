@@ -15,6 +15,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
         public string MangaTitle { get; set; } = string.Empty;
         public double ReadingProgress { get; set; } = 0;
         public bool IsBookmarked { get; set; } = false;
+        public MangaViewModel? Manga { get; set; }
     }
 
     public class CreateChapterViewModel
