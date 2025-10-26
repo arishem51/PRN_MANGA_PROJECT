@@ -1,35 +1,221 @@
 ﻿@page "{mangaId:int}"
 @model PRN_MANGA_PROJECT.Pages.Public.Manga.DetailModel
 @{
+    ViewData["Title"] = Model.Manga.Title;
 }
 
 <div class="container mt-4">
-	<div class="card shadow-sm p-3">
-		<div class="row">
-			<div class="col-md-4">
-				<img src="@Model.Manga.CoverImageUrl" class="img-fluid rounded" alt="@Model.Manga.Title">
-			</div>
-			<div class="col-md-8">
-				<h2>@Model.Manga.Title</h2>
-				<p><strong>Tác giả:</strong> @Model.Manga.Author</p>
-				<p><strong>Trạng thái:</strong> @Model.Manga.Status</p>
-				<p>@Model.Manga.Description</p>
-				<a asp-page="/Public/HomePage" class="btn btn-secondary mt-3">⬅ Quay lại</a>
-			</div>
-		</div>
-	</div>
+    <!-- Manga Detail Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="@Model.Manga.CoverImageUrl" class="img-fluid rounded shadow" alt="@Model.Manga.Title" style="max-height: 400px; object-fit: cover;">
+                </div>
+                <div class="col-md-8">
+                    <h1 class="card-title text-primary mb-3">@Model.Manga.Title</h1>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <p class="mb-2"><strong><i class="fas fa-user"></i> Tác giả:</strong> @(Model.Manga.Author ?? "Chưa cập nhật")</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-2"><strong><i class="fas fa-palette"></i> Họa sĩ:</strong> @(Model.Manga.Artist ?? "Chưa cập nhật")</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="mb-2"><strong><i class="fas fa-info-circle"></i> Trạng thái:</strong> 
+                            <span class="badge bg-@(Model.Manga.Status == "Ongoing" ? "success" : Model.Manga.Status == "Completed" ? "primary" : "warning")">
+                                @(Model.Manga.Status ?? "Chưa cập nhật")
+                            </span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><strong>Thể loại:</strong></h6>
+                        @if (Model.Tags != null && Model.Tags.Any())
+                        {
+                            @foreach (var tag in Model.Tags)
+                            {
+                                <span class="badge me-2 mb-2" style="background-color: @tag.Color; color: #fff;">
+                                    @tag.Name
+                                </span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa cập nhật</span>
+                        }
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><strong>Mô tả:</strong></h6>
+                        <p class="text-muted">@(Model.Manga.Description ?? "Chưa có mô tả")</p>
+                    </div>
+                    
+                    <a asp-page="/Public/HomePage" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter List Card -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-book-open me-2"></i>
+                Danh sách chương - @Model.Manga.Title
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.chapters != null && Model.chapters.Any())
+            {
+                <div class="chapter-list-container">
+                    @foreach (var chapter in Model.chapters)
+                    {
+                        <a asp-page="/Public/Manga/Chapter"
+                           asp-route-chapterId="@chapter.Id"
+                           class="chapter-item">
+                            <div class="chapter-info">
+                                <h6 class="mb-1">Chương @(chapter.ChapterNumber ?? chapter.Id.ToString()) - @chapter.Title</h6>
+                                @if (!string.IsNullOrEmpty(chapter.Content))
+                                {
+                                    <small class="text-muted">@(chapter.Content.Length > 100 ? chapter.Content.Substring(0, 100) + "..." : chapter.Content)</small>
+                                }
+                            </div>
+                            <div class="chapter-meta">
+                                @if (chapter.PageCount.HasValue)
+                                {
+                                    <small class="text-muted me-2">@chapter.PageCount trang</small>
+                                }
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có chapter nào</h5>
+                    <p class="text-muted">Manga này chưa có chapter nào được thêm vào.</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
+<style>
+    /* Chapter List Container với Scroll */
+    .chapter-list-container {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden; /* Loại bỏ scrollbar ngang */
+        background-color: #fff;
+    }
 
-<div>
-	<h2>Chapters Of @Model.Manga.Title</h2>
-	@foreach (var chapter in Model.chapters)
-	{
-		<a asp-page="/Public/Manga/Chapter"
-		   asp-route-chapterId="@chapter.Id"
-		   class="list-group-item list-group-item-action">
-			Chương @chapter.ChapterNumber - @chapter.Title
-		</a>
-	}
-</div>
+    /* Custom Scrollbar */
+    .chapter-list-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chapter-list-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .chapter-list-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .chapter-list-container::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Chapter Item Styling */
+    .chapter-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        background-color: #fff;
+        width: 100%;
+        box-sizing: border-box; /* Đảm bảo padding được tính trong width */
+    }
+
+    .chapter-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+        text-decoration: none;
+    }
+
+    .chapter-item:last-child {
+        border-bottom: none;
+    }
+
+    .chapter-info {
+        flex: 1;
+        min-width: 0; /* Cho phép flex item shrink */
+        overflow: hidden; /* Ẩn nội dung tràn */
+    }
+
+    .chapter-info h6 {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chapter-info small {
+        color: #666;
+        line-height: 1.4;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chapter-meta {
+        display: flex;
+        align-items: center;
+        color: #666;
+        flex-shrink: 0; /* Không cho phép shrink */
+        margin-left: 10px;
+    }
+
+    .chapter-meta i {
+        color: #999;
+        font-size: 0.8em;
+    }
+
+           /* Responsive */
+           @@media (max-width: 768px) {
+        .chapter-list-container {
+            max-height: 400px; /* Giảm chiều cao trên thiết bị nhỏ */
+        }
+        .chapter-item {
+            padding: 10px 15px;
+        }
+        .chapter-info h6 {
+            font-size: 1rem;
+        }
+        .chapter-info small {
+            font-size: 0.85rem;
+        }
+        .chapter-meta small {
+            font-size: 0.8rem;
+        }
+    }
+</style>
 

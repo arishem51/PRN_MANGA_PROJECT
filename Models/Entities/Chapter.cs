@@ -15,9 +15,6 @@ namespace PRN_MANGA_PROJECT.Models.Entities
         
         [StringLength(50)]
         public string? ChapterNumber { get; set; }
-        [Required]
-        [StringLength(100)]
-        public string MangaDexChapterId { get; set; } = string.Empty;
         
         [StringLength(1000)]
         public string? Content { get; set; } // For text-based chapters

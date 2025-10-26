@@ -35,7 +35,6 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 var mangaViewModel = new MangaViewModel
                 {
                     Title = Input.Title,
-                    MangaDexId = Input.MangaDexId,
                     Author = Input.Author,
                     Artist = Input.Artist,
                     Description = Input.Description,
@@ -58,9 +57,6 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
 
     public class CreateMangaInputModel
     {
-        [Required(ErrorMessage = "MangaDex ID is required")]
-        [StringLength(100, ErrorMessage = "MangaDex ID cannot exceed 100 characters")]
-        public string MangaDexId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Title is required")]
         [StringLength(200, ErrorMessage = "Title cannot exceed 200 characters")]
