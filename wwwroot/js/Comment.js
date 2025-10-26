@@ -4,6 +4,7 @@
 
         const commentId = form.dataset.commentId;
         const chapterId = form.dataset.chapterId;
+        const parentId = form.dataset.parentId;
         const mangadexChapterId = form.dataset.mangadexChapterId;
         const content = form.querySelector("textarea").value.trim();
         if (!content) return;
@@ -14,7 +15,7 @@
                 "Content-Type": "application/json",
                 "RequestVerificationToken": document.querySelector("input[name='__RequestVerificationToken']").value
             },
-            body: JSON.stringify({ commentId, content, chapterId })
+            body: JSON.stringify({ commentId, content, chapterId, parentId })
         });
 
         if (!response.ok) {
@@ -100,7 +101,10 @@
 					<div class="media-body">
 						<div class="panel">
 							<div class="panel-body">
-								<form class="reply-form" data-comment-id="${data.id}" data-chapter-id="${data.chapterId}" data-mangadexchapter-id="${data.mangadexChapterId}">
+								<form class="reply-form" data-comment-id="${data.id}" data-chapter-id="${data.chapterId}""
+                                                                        data-parent-id="${data.parentCommentId}"
+
+                                >
 									<textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
 									<div class="mar-top clearfix">
 										<button class="btn btn-sm btn-primary pull-right" type="submit">
@@ -529,13 +533,10 @@ document.addEventListener("submit", async (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. 🔥 LẤY USER ID CỦA NGƯỜI DÙNG ĐANG ĐĂNG NHẬP
-    // Giả định bạn đã thêm <input type="hidden" id="current-user-id" value="..."> vào HTML
+    
     const currentUserIdElement = document.getElementById("current-user-id");
     const currentUserId = currentUserIdElement ? currentUserIdElement.value : null;
 
-    // ⚠️ CHÚ Ý: Đảm bảo các hàm attachLikeDislike, attachDelete, attachEdit, attachReply 
-    // đã được định nghĩa và có thể truy cập được trong phạm vi này.
 
     document.querySelectorAll(".btn-show-more").forEach(button => {
         button.addEventListener("click", async () => {
@@ -544,26 +545,21 @@ document.addEventListener("DOMContentLoaded", () => {
             let skip = parseInt(button.dataset.skip, 10);
 
             if (isShowMore) {
-                // --- Xử lý SHOW MORE / LOAD MORE ---
                 try {
-                    // Gọi API để tải thêm phản hồi (handler=MoreReplies)
                     const res = await fetch(`?handler=MoreReplies&parentCommentId=${parentId}&skip=${skip}`);
                     const data = await res.json();
-
+                    console.log(data)
                     const container = document.querySelector(`.replies[data-parent-id='${parentId}']`);
 
-                    // Thêm các phản hồi mới vào container
                     data.forEach(reply => {
-                        // 2. 🔥 XÁC ĐỊNH isOwner TRÊN FRONT-END & Chuẩn bị dữ liệu
-                        const isOwner = currentUserId && (reply.userId === currentUserId);
+                        const isOwner =  reply.userId === currentUserId;
                         const createdAtFormatted = new Date(reply.createdAt).toLocaleString();
                         const userAvatarUrl = reply.userAvatarUrl ?? 'https://www.svgrepo.com/show/452030/avatar-default.svg';
-                        const likesCount = reply.likesCount || 0;
-                        const dislikesCount = reply.dislikesCount || 0;
+                        const likesCount = reply.likes.filter(r => r.reactionType === 1).length;
+                        const dislikesCount = reply.likes.filter(r => r.reactionType === -1).length;
                         const chapterId = reply.chapterId || '';
                         const mangadexChapterId = reply.mangaDexChapterId || '';
-
-                        // Phần Dropdown Menu (Chỉ hiển thị nếu là Owner)
+                        const parentId = reply.parentCommentId;
                         const ownerMenu = isOwner
                             ? `
                             <div class="dropdown">
@@ -640,7 +636,8 @@ document.addEventListener("DOMContentLoaded", () => {
                                             <div class="media-body">
                                                 <div class="panel">
                                                     <div class="panel-body">
-                                                        <form class="reply-form" data-comment-id="${reply.id}" data-chapter-id="${chapterId}" data-mangadexchapter-id="${mangadexChapterId}">
+                                                            <form class="reply-form" data-comment-id="${reply.id}" data-chapter-id="${reply.chapterId}""
+                                                                        data-parent-id="${parentId}">
                                                             <textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
                                                             <div class="mar-top clearfix">
                                                                 <button class="btn btn-sm btn-primary pull-right" type="submit">
@@ -730,7 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
             } else {
-                // --- Xử lý SHOW LESS (Giữ nguyên) ---
+                // --- Xử lý SHOW LESS ---
                 const container = document.querySelector(`.replies[data-parent-id='${parentId}']`);
                 const allReplies = Array.from(container.querySelectorAll(".reply-block"));
 
@@ -738,7 +735,60 @@ document.addEventListener("DOMContentLoaded", () => {
                 const repliesToShow = allReplies.slice(0, 2);
                 container.innerHTML = repliesToShow.map(el => el.outerHTML).join('');
 
-                // Chuyển nút lại thành "Show More" và reset skip về 2
+                container.querySelectorAll(".reply-block").forEach(newReplyBlock => {
+                    const isOwner = newReplyBlock.querySelector(".edit-form") !== null;
+
+                    // Gắn sự kiện Like/Dislike/Reply Submit (Luôn gắn)
+                    newReplyBlock.querySelectorAll(".like-form, .dislike-form").forEach(f => {
+                        if (typeof attachLikeDislike === 'function') attachLikeDislike(f);
+                    });
+                    newReplyBlock.querySelectorAll(".reply-form").forEach(f => {
+                        if (typeof attachReply === 'function') attachReply(f);
+                    });
+
+                    // Gắn sự kiện Edit/Delete/Cancel (Chỉ gắn nếu là Owner)
+                    if (isOwner) {
+                        newReplyBlock.querySelectorAll(".delete-comment-form").forEach(f => {
+                            if (typeof attachDelete === 'function') attachDelete(f);
+                        });
+                        const contentEl = newReplyBlock.querySelector(".comment-content");
+                        const editForm = newReplyBlock.querySelector(".edit-form");
+
+                        if (editForm) {
+                            if (typeof attachEdit === 'function') attachEdit(editForm);
+                        }
+
+                        const editBtn = newReplyBlock.querySelector(".btn-edit");
+                        const cancelBtn = newReplyBlock.querySelector(".btn-cancel-edit");
+
+                        if (editBtn && editForm && contentEl) {
+                            editBtn.addEventListener("click", (e) => {
+                                e.preventDefault();
+                                contentEl.style.display = "none";
+                                editForm.style.display = "block";
+                            });
+                        }
+                        if (cancelBtn && editForm && contentEl) {
+                            cancelBtn.addEventListener("click", () => {
+                                editForm.style.display = "none";
+                                contentEl.style.display = "block";
+                            });
+                        }
+                    }
+
+                    const replyBtn = newReplyBlock.querySelector(".btn-reply");
+                    const replyContainer = newReplyBlock.querySelector(".reply-container");
+
+                    if (replyBtn && replyContainer) {
+                        replyBtn.addEventListener("click", () => {
+                            replyContainer.style.display =
+                                replyContainer.style.display === "none" || replyContainer.style.display === ""
+                                    ? "block"
+                                    : "none";
+                        });
+                    }
+                });
+
                 button.textContent = "Show More";
                 button.dataset.skip = 2;
             }

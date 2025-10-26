@@ -144,16 +144,14 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return RedirectToPage("/Auth/Login");
-
-            var parentComment = await _context.Comments.FindAsync(request.CommentId);
-            if (parentComment == null) return NotFound();
+            
 
             var reply = new Comment
             {
                 UserId = userId,
                 Content = request.Content,
                 ChapterId = request.ChapterId,
-                ParentCommentId = parentComment.Id,
+                ParentCommentId = request.ParentId,
                 CreatedAt = DateTime.Now
             };
 
@@ -168,7 +166,8 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 content = reply.Content,
                 userName = user?.UserName ?? "Anonymous",
                 chapterId = request?.ChapterId,
-                createdAt = reply.CreatedAt.ToLocalTime()
+                createdAt = reply.CreatedAt.ToLocalTime(),
+                parentCommentId = reply.ParentCommentId,
             });
         }
 
@@ -179,7 +178,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
             public int ChapterId { get; set; }
             public string MangaDexChapterId { get; set; }
-
+            public int? ParentId { get; set; }
 
         }
 
@@ -190,21 +189,14 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             if (comment == null)
                 return new JsonResult(new { success = false, message = "Comment not found." });
 
-            // Lấy tất cả comment con trực tiếp
-            var replies = await _context.Comments
-                .Where(r => r.ParentCommentId == comment.Id)
-                .ToListAsync();
-
-            // Xóa tất cả reply
-            _context.Comments.RemoveRange(replies);
-
-            // Xóa comment gốc
+            // Chỉ cần xóa comment gốc, EF Core sẽ tự cascade xóa replies
             _context.Comments.Remove(comment);
 
             await _context.SaveChangesAsync();
 
             return new JsonResult(new { success = true });
         }
+
 
 
 
@@ -320,6 +312,9 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                                       r.User.UserName,
                                       r.UserId,
                                       r.CreatedAt,
+                                      r.ChapterId,
+                                      r.ParentCommentId,
+                                      r.Chapter.MangaDexChapterId,
                                       Likes = r.Likes.Select(l => new { l.ReactionType })
                                   })
                                   .ToList();

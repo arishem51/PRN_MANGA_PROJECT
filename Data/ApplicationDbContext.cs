@@ -45,7 +45,7 @@ namespace PRN_MANGA_PROJECT.Data
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Comment>()
                 .HasOne(c => c.User)
