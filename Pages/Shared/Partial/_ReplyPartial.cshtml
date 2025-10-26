@@ -29,7 +29,16 @@
                     </div>
 
                     <p class="comment-content">@reply.Content</p>
-
+                    <form method="post" asp-page="Chapter" asp-page-handler="EditComment" class="edit-form" style="display: none;">
+                        <textarea name="Input.Content" class="form-control" rows="2">@reply.Content</textarea>
+                        <input type="hidden" name="Input.Id" value="@reply.Id" />
+                        <input type="hidden" name="Input.ChapterId" value="@reply.ChapterId" />
+                        <input type="hidden" name="Input.MangaDexChapterId" value="@reply.Chapter.MangaDexChapterId" />
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            <button type="button" class="btn btn-sm btn-secondary btn-cancel-edit">Cancel</button>
+                        </div>
+                    </form>
                     <div class="pad-ver">
                         <div class="btn-group comment-item">
                             <form class="like-form" data-comment-id="@reply.Id">
@@ -82,7 +91,7 @@
                                 <div class="panel">
                                     <div class="panel-body">
                                         <form class="reply-form" data-comment-id="@reply.Id" data-chapter-id="@reply.ChapterId"
-                                              data-parent-id="@reply.ParentCommentId" data-mangadexchapter-id="@reply.">
+                                              data-parent-id="@reply.ParentCommentId" data-mangadexchapter-id="@reply.Chapter?.MangaDexChapterId">
                                             <textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
                                             <div class="mar-top clearfix">
                                                 <button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Reply</button>

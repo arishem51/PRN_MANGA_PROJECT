@@ -93,7 +93,7 @@
 											<div class="panel">
 												<div class="panel-body">
 												<form class="reply-form" data-comment-id="@comment.Id" data-chapter-id="@comment.ChapterId"
-													  data-parent-id="@comment.Id">
+													   data-parent-id="@comment.Id" data-mangadexchapter-id="@comment.Chapter.MangaDexChapterId">
 													<textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
 													<div class="mar-top clearfix">
 														<button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Reply</button>
@@ -106,7 +106,7 @@
 									</div>
 								</div>
 
-							<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies.OrderBy(r => r.CreatedAt).Take(2)" />
+							<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies.OrderByDescending(r => r.CreatedAt).Take(2)" />
 						</div>
 					</div>
 				</div>
@@ -116,54 +116,4 @@
 </div>
 
 <script src="/js/Comment.js"></script>
-<script>
-	const commentButtons = document.querySelectorAll(".btn-reply");
 
-		commentButtons.forEach(button => {
-		button.addEventListener("click", function () {
-			const parentCommentId = this.dataset.commentId;
-
-			// tìm container comment hoặc reply
-			const container = button.closest(".reply-block, .panel-body");
-			if (!container) return;
-
-			const replyContainer = container.querySelector(".reply-container");
-			if (!replyContainer) {
-				console.warn("Không tìm thấy reply-container cho comment ID:", parentCommentId);
-				return;
-			}
-
-			replyContainer.style.display =
-				(replyContainer.style.display === "none" || replyContainer.style.display === "")
-					? "block"
-					: "none";
-		});
-	});
-
-
-
-	const editButtons = document.querySelectorAll(".btn-edit");
-
-	editButtons.forEach(btn => {
-		btn.addEventListener("click", function (e) {
-			e.preventDefault();
-
-			const block = btn.closest(".reply-block, .comment-block");
-			if (!block) return;
-
-			const content = block.querySelector(".comment-content");
-			const editForm = block.querySelector(".edit-form");
-
-			if (!content || !editForm) return;
-
-			content.style.display = "none";
-			editForm.style.display = "block";
-
-			const cancelBtn = editForm.querySelector(".btn-cancel-edit");
-			cancelBtn.addEventListener("click", () => {
-				editForm.style.display = "none";
-				content.style.display = "block";
-			});
-		});
-	});
-</script>

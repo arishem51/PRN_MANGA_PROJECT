@@ -168,6 +168,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 chapterId = request?.ChapterId,
                 createdAt = reply.CreatedAt.ToLocalTime(),
                 parentCommentId = reply.ParentCommentId,
+                userId = reply.UserId,
             });
         }
 
@@ -185,12 +186,41 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
         public async Task<IActionResult> OnPostDeleteCommentAsync()
         {
-            var comment = await _context.Comments.FindAsync(Input.Id);
-            if (comment == null)
+            var commentToDelete = await _context.Comments.FindAsync(Input.Id);
+            if (commentToDelete == null)
+            {
                 return new JsonResult(new { success = false, message = "Comment not found." });
+            }
 
-            // Chỉ cần xóa comment gốc, EF Core sẽ tự cascade xóa replies
-            _context.Comments.Remove(comment);
+            // Tạo một danh sách để chứa TẤT CẢ các comment cần xóa (bao gồm cả cha và con)
+            var allCommentsToDelete = new List<Comment>();
+
+            // Tạo một hàng đợi (queue) để duyệt theo chiều rộng (BFS)
+            var queue = new Queue<Comment>();
+            queue.Enqueue(commentToDelete);
+
+            while (queue.Any())
+            {
+                // Lấy comment hiện tại ra khỏi hàng đợi và thêm vào danh sách xóa
+                var currentComment = queue.Dequeue();
+                allCommentsToDelete.Add(currentComment);
+
+                // Tìm tất cả các con trực tiếp của comment này
+                var children = await _context.Comments
+                                             .Where(c => c.ParentCommentId == currentComment.Id)
+                                             .ToListAsync();
+
+                // Thêm tất cả các con vào hàng đợi để xử lý ở vòng lặp tiếp theo
+                foreach (var child in children)
+                {
+                    queue.Enqueue(child);
+                }
+            }
+
+            // Bây giờ 'allCommentsToDelete' chứa comment cha và tất cả con, cháu...
+            // Xóa tất cả chúng trong một giao dịch
+            // EF Core sẽ tự động sắp xếp thứ tự DELETE (con trước, cha sau)
+            _context.Comments.RemoveRange(allCommentsToDelete);
 
             await _context.SaveChangesAsync();
 
@@ -302,8 +332,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
         {
             var replies = _context.Comments
                                   .Where(r => r.ParentCommentId == parentCommentId)
-                                  .OrderBy(r => r.CreatedAt)
-                                  .Skip(skip)
+                                  .OrderByDescending(r => r.CreatedAt).Skip(skip)
                                   .Take(take)
                                   .Select(r => new
                                   {
