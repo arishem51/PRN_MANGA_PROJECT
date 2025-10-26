@@ -1,105 +1,113 @@
 ﻿@using System.Security.Claims
 @model IEnumerable<PRN_MANGA_PROJECT.Models.Entities.Comment>
 
-<div class="replies" style="margin-left: 40px;">
-	@foreach (var reply in Model)
-	{
+@{
+    // Lấy parentCommentId (ID của comment gốc)
+    int? parentCommentId = Model.FirstOrDefault()?.ParentCommentId;
 
-		<div class="reply-block">
-			<div class="media-block">
-				<a class="media-left" href="#"><img class="img-circle img-sm" alt="Profile Picture" src="https://www.svgrepo.com/show/452030/avatar-default.svg"></a>
-				<div class="media-body">
-					<div class="mar-btm">
-						<a href="#" class="btn-link text-semibold media-heading box-inline">@reply.User.UserName</a>
-						<p class="text-muted text-sm">@reply.User.CreatedAt</p>
-					</div>
-					<p class="comment-content">@reply.Content</p>
-					<form method="post" asp-page="Chapter" asp-page-handler="EditComment" class="edit-form" style="display: none;">
-						<textarea name="Input.Content" class="form-control" rows="2">@reply.Content</textarea>
-						<input type="hidden" name="Input.Id" value="@reply.Id" />
-						<input type="hidden" name="Input.ChapterId" value="@reply.ChapterId" />
-						<input type="hidden" name="Input.MangaDexChapterId" value="@reply.Chapter?.MangaDexChapterId" />
-						<div class="mt-2">
-							<button type="submit" class="btn btn-sm btn-primary">Save</button>
-							<button type="button" class="btn btn-sm btn-secondary btn-cancel-edit">Cancel</button>
-						</div>
-					</form>
-					<div class="pad-ver">
-						<div class="btn-group comment-item">
-							<form class="like-form" data-comment-id="@reply.Id">
-								<button type="submit" class="btn btn-sm">
-									<i class="fa fa-thumbs-up"></i> @reply.Likes.Count(l => l.ReactionType == 1)
-								</button>
-							</form>
+    // Tránh null: nếu partial được gọi mà Model rỗng, không render gì cả
+    if (parentCommentId == null)
+    {
+        <div class="text-muted small">No replies yet.</div>
+        return;
+    }
+}
 
-							<form class="dislike-form" data-comment-id="@reply.Id">
-								<button type="submit" class="btn btn-sm">
-									<i class="fa fa-thumbs-down"></i> @reply.Likes.Count(l => l.ReactionType == -1)
-								</button>
-							</form>
+<div class="replies" style="margin-left: 40px;"
+     data-parent-id="@parentCommentId"
+     data-total="@Model.Count()">
+    @foreach (var reply in Model)
+    {
+        <div class="reply-block" data-reply-id="@reply.Id">
+            <div class="media-block">
+                <a class="media-left" href="#">
+                    <img class="img-circle img-sm" alt="Profile Picture"
+                         src="https://www.svgrepo.com/show/452030/avatar-default.svg">
+                </a>
+                <div class="media-body">
+                    <div class="mar-btm">
+                        <a href="#" class="btn-link text-semibold media-heading box-inline">@reply.User.UserName</a>
+                        <p class="text-muted text-sm">@reply.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
 
-						</div>
-						<button type="button" class="btn btn-sm btn-default btn-hover-primary btn-reply"
-								data-comment-id="@reply.Id">
-							Reply
-						</button>
-						</div>
-					</div>
-					@if (User?.FindFirst(ClaimTypes.NameIdentifier)?.Value == reply.UserId.ToString())
-					{
-						<div class="dropdown">
-							<button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="fa fa-ellipsis-v"></i>
-							</button>
-							<ul class="dropdown-menu dropdown-menu-end">
-								<li>
-									<a class="dropdown-item btn-edit" href="#" data-comment-id="@reply.Id">
-										<i class="fa fa-pencil"></i> Edit
-									</a>
-								</li>
-								<li>
-								<form method="post" asp-page="Chapter" asp-page-handler="DeleteComment" class="delete-comment-form">
-									<input type="hidden" name="Input.Id" value="@reply.Id" />
-									<input type="hidden" name="Input.ChapterId" value="@reply.ChapterId" />
-									<input type="hidden" name="Input.MangaDexChapterId" value="@reply.Chapter?.MangaDexChapterId" />
-									<button type="submit" class="dropdown-item text-danger">
-										<i class="fa fa-trash"></i> Delete
-									</button>
-								</form>
-								</li>
-							</ul>
-						</div>
-					}
-					<hr>
-					<div class="reply-container" style="display:none; margin-top:10px;">
-					<div class="media-block">
-						<a class="media-left" href="#"><img class="img-circle img-sm" alt="Profile Picture" src="https://www.svgrepo.com/show/452030/avatar-default.svg"></a>
-						<div class="media-body">
-							<div class="mar-btm">
-								<a href="#" class="btn-link text-semibold media-heading box-inline">@User?.Identity?.Name</a>
-							</div>
-							<div class="panel">
-								<div class="panel-body">
-									<form class="reply-form" data-comment-id="@reply.ParentCommentId" data-chapter-id="@reply.ChapterId"
-										  data-mangadexchapter-id="@reply.Chapter?.MangaDexChapterId">
+                    <p class="comment-content">@reply.Content</p>
 
-										<textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
-										<div class="mar-top clearfix">
-											<button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Reply</button>
-										</div>
-									</form>
-								</div>
-							</div>
-							<hr />
-						</div>
-					</div>
-				</div>
-				</div>
-			</div>
+                    <div class="pad-ver">
+                        <div class="btn-group comment-item">
+                            <form class="like-form" data-comment-id="@reply.Id">
+                                <button type="submit" class="btn btn-sm">
+                                    <i class="fa fa-thumbs-up"></i> @reply.Likes.Count(l => l.ReactionType == 1)
+                                </button>
+                            </form>
+                            <form class="dislike-form" data-comment-id="@reply.Id">
+                                <button type="submit" class="btn btn-sm">
+                                    <i class="fa fa-thumbs-down"></i> @reply.Likes.Count(l => l.ReactionType == -1)
+                                </button>
+                            </form>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-default btn-hover-primary btn-reply"
+                                data-comment-id="@reply.Id">Reply</button>
+                    </div>
 
+                    @if (User?.FindFirst(ClaimTypes.NameIdentifier)?.Value == reply.UserId.ToString())
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item btn-edit" href="#" data-comment-id="@reply.Id">
+                                        <i class="fa fa-pencil"></i> Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <form method="post" asp-page="Chapter" asp-page-handler="DeleteComment" class="delete-comment-form">
+                                        <input type="hidden" name="Input.Id" value="@reply.Id" />
+                                        <input type="hidden" name="Input.ChapterId" value="@reply.ChapterId" />
+                                        <input type="hidden" name="Input.MangaDexChapterId" value="@reply.Chapter?.MangaDexChapterId" />
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fa fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    <div class="reply-container" style="display:none; margin-top:10px;">
+                        <div class="media-block">
+                            <a class="media-left" href="#"><img class="img-circle img-sm" alt="Profile Picture" src="https://www.svgrepo.com/show/452030/avatar-default.svg"></a>
+                            <div class="media-body">
+                                <div class="mar-btm">
+                                    <a href="#" class="btn-link text-semibold media-heading box-inline">@User?.Identity?.Name</a>
+                                </div>
+                                <div class="panel">
+                                    <div class="panel-body">
+                                        <form class="reply-form" data-comment-id="@reply.Id" data-chapter-id="@reply.ChapterId">
 
-
-	}
+                                            <textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
+                                            <div class="mar-top clearfix">
+                                                <button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Reply</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <hr />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+@if (Model.Count() >= 2)
+{
+    <button type="button" class="btn btn-sm btn-link btn-show-more"
+            data-parent-id="@parentCommentId"
+            data-skip="2">
+        Show More
+    </button>
+}
 
 

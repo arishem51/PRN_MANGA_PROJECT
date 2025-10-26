@@ -106,7 +106,7 @@
 									</div>
 								</div>
 
-							<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies" />
+							<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies.OrderBy(r => r.CreatedAt).Take(2)" />
 						</div>
 					</div>
 				</div>

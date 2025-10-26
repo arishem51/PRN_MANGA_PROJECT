@@ -54,10 +54,10 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             .Where(c => c.ChapterId == Chapter.Id && c.ParentCommentId == null)
 
             .Include(c => c.Replies)
-                .ThenInclude(r => r.Chapter) 
+                .ThenInclude(r => r.Chapter)
 
             .Include(c => c.Replies)
-                .ThenInclude(r => r.User) 
+                .ThenInclude(r => r.User)
             .Include(c => c.Replies)
                 .ThenInclude(r => r.Likes)
                     .ThenInclude(l => l.User)
@@ -78,6 +78,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 : null;
 
             // call api mangadex chapter
+
             //try
             //{
             //    if (!string.IsNullOrEmpty(Chapter.MangaDexChapterId))
@@ -305,30 +306,49 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             public int ReactionType { get; set; }
         }
 
+        public async Task<IActionResult> OnGetMoreRepliesAsync(int parentCommentId, int skip, int take = 5)
+        {
+            var replies = _context.Comments
+                                  .Where(r => r.ParentCommentId == parentCommentId)
+                                  .OrderBy(r => r.CreatedAt)
+                                  .Skip(skip)
+                                  .Take(take)
+                                  .Select(r => new
+                                  {
+                                      r.Id,
+                                      r.Content,
+                                      r.User.UserName,
+                                      r.UserId,
+                                      r.CreatedAt,
+                                      Likes = r.Likes.Select(l => new { l.ReactionType })
+                                  })
+                                  .ToList();
 
+            return new JsonResult(replies);
+        }
+
+
+
+        public class MangaDexServerResponse
+        {
+            [JsonPropertyName("baseUrl")]
+            public string BaseUrl { get; set; }
+
+            [JsonPropertyName("chapter")]
+            public MangaDexServerChapter Chapter { get; set; }
+        }
+
+        public class MangaDexServerChapter
+        {
+            [JsonPropertyName("hash")]
+            public string Hash { get; set; }
+
+            [JsonPropertyName("data")]
+            public List<string> Data { get; set; }
+
+            [JsonPropertyName("dataSaver")]
+            public List<string> DataSaver { get; set; }
+        }
 
     }
-
-
-    public class MangaDexServerResponse
-    {
-        [JsonPropertyName("baseUrl")]
-        public string BaseUrl { get; set; }
-
-        [JsonPropertyName("chapter")]
-        public MangaDexServerChapter Chapter { get; set; }
-    }
-
-    public class MangaDexServerChapter
-    {
-        [JsonPropertyName("hash")]
-        public string Hash { get; set; }
-
-        [JsonPropertyName("data")]
-        public List<string> Data { get; set; }
-
-        [JsonPropertyName("dataSaver")]
-        public List<string> DataSaver { get; set; }
-    }
-
 }

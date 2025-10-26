@@ -528,13 +528,223 @@ document.addEventListener("submit", async (e) => {
     }
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. 🔥 LẤY USER ID CỦA NGƯỜI DÙNG ĐANG ĐĂNG NHẬP
+    // Giả định bạn đã thêm <input type="hidden" id="current-user-id" value="..."> vào HTML
+    const currentUserIdElement = document.getElementById("current-user-id");
+    const currentUserId = currentUserIdElement ? currentUserIdElement.value : null;
 
+    // ⚠️ CHÚ Ý: Đảm bảo các hàm attachLikeDislike, attachDelete, attachEdit, attachReply 
+    // đã được định nghĩa và có thể truy cập được trong phạm vi này.
 
+    document.querySelectorAll(".btn-show-more").forEach(button => {
+        button.addEventListener("click", async () => {
+            const isShowMore = button.textContent.trim() === "Show More";
+            const parentId = button.dataset.parentId;
+            let skip = parseInt(button.dataset.skip, 10);
 
+            if (isShowMore) {
+                // --- Xử lý SHOW MORE / LOAD MORE ---
+                try {
+                    // Gọi API để tải thêm phản hồi (handler=MoreReplies)
+                    const res = await fetch(`?handler=MoreReplies&parentCommentId=${parentId}&skip=${skip}`);
+                    const data = await res.json();
 
+                    const container = document.querySelector(`.replies[data-parent-id='${parentId}']`);
 
+                    // Thêm các phản hồi mới vào container
+                    data.forEach(reply => {
+                        // 2. 🔥 XÁC ĐỊNH isOwner TRÊN FRONT-END & Chuẩn bị dữ liệu
+                        const isOwner = currentUserId && (reply.userId === currentUserId);
+                        const createdAtFormatted = new Date(reply.createdAt).toLocaleString();
+                        const userAvatarUrl = reply.userAvatarUrl ?? 'https://www.svgrepo.com/show/452030/avatar-default.svg';
+                        const likesCount = reply.likesCount || 0;
+                        const dislikesCount = reply.dislikesCount || 0;
+                        const chapterId = reply.chapterId || '';
+                        const mangadexChapterId = reply.mangaDexChapterId || '';
 
+                        // Phần Dropdown Menu (Chỉ hiển thị nếu là Owner)
+                        const ownerMenu = isOwner
+                            ? `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item btn-edit" href="#" data-comment-id="${reply.id}">
+                                            <i class="fa fa-pencil"></i> Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form method="post" action="?handler=DeleteComment" class="delete-comment-form">
+                                            <input type="hidden" name="Input.Id" value="${reply.id}" />
+                                            <input type="hidden" name="Input.ChapterId" value="${chapterId}" />
+                                            <input type="hidden" name="Input.MangaDexChapterId" value="${mangadexChapterId}" />
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="fa fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>`
+                            : "";
 
+                        // Template HTML đầy đủ
+                        const html = `
+                        <div class="reply-block" data-reply-id="${reply.id}">
+                            <div class="media-block">
+                                <a class="media-left" href="#">
+                                    <img class="img-circle img-sm" src="${userAvatarUrl}" alt="Profile Picture">
+                                </a>
+                                <div class="media-body">
+                                    <div class="mar-btm d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <a href="#" class="btn-link text-semibold media-heading box-inline">${reply.userName}</a>
+                                            <span class="text-muted text-sm">${createdAtFormatted}</span>
+                                        </div>
+                                        ${ownerMenu}
+                                    </div>
+                                    <p class="comment-content">${reply.content}</p>
+                                    
+                                    ${isOwner ? `
+                                    <form method="post" class="edit-form" style="display:none;">
+                                        <textarea name="Input.Content" class="form-control" rows="2">${reply.content}</textarea>
+                                        <input type="hidden" name="Input.Id" value="${reply.id}" />
+                                        <input type="hidden" name="Input.ChapterId" value="${chapterId}" />
+                                        <input type="hidden" name="Input.MangaDexChapterId" value="${mangadexChapterId}" />
+                                        <div class="mt-2">
+                                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                            <button type="button" class="btn btn-sm btn-secondary btn-cancel-edit">Cancel</button>
+                                        </div>
+                                    </form>
+                                    ` : ''}
+
+                                    <div class="pad-ver">
+                                        <div class="btn-group comment-item">
+                                            <form class="like-form" data-comment-id="${reply.id}">
+                                                <button type="submit" class="btn btn-sm"><i class="fa fa-thumbs-up"></i> ${likesCount}</button>
+                                            </form>
+                                            <form class="dislike-form" data-comment-id="${reply.id}">
+                                                <button type="submit" class="btn btn-sm"><i class="fa fa-thumbs-down"></i> ${dislikesCount}</button>
+                                            </form>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-default btn-hover-primary btn-reply" data-comment-id="${reply.id}">Reply</button>
+                                    </div>
+
+                                    <div class="reply-container" style="display:none; margin-top:10px;">
+                                        <div class="media-block">
+                                            <a class="media-left" href="#">
+                                                <img class="img-circle img-sm" src="${userAvatarUrl}" alt="Profile Picture">
+                                            </a>
+                                            <div class="media-body">
+                                                <div class="panel">
+                                                    <div class="panel-body">
+                                                        <form class="reply-form" data-comment-id="${reply.id}" data-chapter-id="${chapterId}" data-mangadexchapter-id="${mangadexChapterId}">
+                                                            <textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
+                                                            <div class="mar-top clearfix">
+                                                                <button class="btn btn-sm btn-primary pull-right" type="submit">
+                                                                    <i class="fa fa-pencil fa-fw"></i> Reply
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                        // Chèn HTML vào container
+                        container.insertAdjacentHTML("beforeend", html);
+
+                        // 3. 🔥 GẮN SỰ KIỆN CHO COMMENT MỚI
+                        const newReplyBlock = container.lastElementChild;
+
+                        // Gắn sự kiện Like/Dislike/Reply Submit (Luôn gắn)
+                        newReplyBlock.querySelectorAll(".like-form, .dislike-form").forEach(f => {
+                            if (typeof attachLikeDislike === 'function') attachLikeDislike(f);
+                        });
+                        newReplyBlock.querySelectorAll(".reply-form").forEach(f => {
+                            if (typeof attachReply === 'function') attachReply(f);
+                        });
+
+                        // Gắn sự kiện Edit/Delete/Cancel (Chỉ gắn nếu là Owner)
+                        if (isOwner) {
+                            newReplyBlock.querySelectorAll(".delete-comment-form").forEach(f => {
+                                if (typeof attachDelete === 'function') attachDelete(f);
+                            });
+                            const contentEl = newReplyBlock.querySelector(".comment-content");
+                            const editForm = newReplyBlock.querySelector(".edit-form");
+
+                            if (editForm) {
+                                if (typeof attachEdit === 'function') attachEdit(editForm);
+                            }
+
+                            const editBtn = newReplyBlock.querySelector(".btn-edit");
+                            const cancelBtn = newReplyBlock.querySelector(".btn-cancel-edit");
+
+                            // Logic Edit/Cancel Click
+                            if (editBtn && editForm && contentEl) {
+                                editBtn.addEventListener("click", (e) => {
+                                    e.preventDefault();
+                                    contentEl.style.display = "none";
+                                    editForm.style.display = "block";
+                                });
+                            }
+                            if (cancelBtn && editForm && contentEl) {
+                                cancelBtn.addEventListener("click", () => {
+                                    editForm.style.display = "none";
+                                    contentEl.style.display = "block";
+                                });
+                            }
+                        }
+
+                        // Logic Reply Click (hiện/ẩn form)
+                        const replyBtn = newReplyBlock.querySelector(".btn-reply");
+                        const replyContainer = newReplyBlock.querySelector(".reply-container");
+
+                        if (replyBtn && replyContainer) {
+                            replyBtn.addEventListener("click", () => {
+                                replyContainer.style.display =
+                                    replyContainer.style.display === "none" || replyContainer.style.display === ""
+                                        ? "block"
+                                        : "none";
+                            });
+                        }
+                    }); // Kết thúc data.forEach
+
+                    // Cập nhật trạng thái nút Show More/Show Less
+                    skip += data.length;
+                    button.dataset.skip = skip;
+                    const totalReplies = parseInt(container.dataset.total, 10);
+                    if (skip >= totalReplies) {
+                        button.textContent = "Show Less";
+                        button.dataset.skip = totalReplies;
+                    }
+
+                } catch (err) {
+                    console.error("Error loading replies:", err);
+                }
+
+            } else {
+                // --- Xử lý SHOW LESS (Giữ nguyên) ---
+                const container = document.querySelector(`.replies[data-parent-id='${parentId}']`);
+                const allReplies = Array.from(container.querySelectorAll(".reply-block"));
+
+                // Giữ lại 2 replies đầu tiên
+                const repliesToShow = allReplies.slice(0, 2);
+                container.innerHTML = repliesToShow.map(el => el.outerHTML).join('');
+
+                // Chuyển nút lại thành "Show More" và reset skip về 2
+                button.textContent = "Show More";
+                button.dataset.skip = 2;
+            }
+        });
+    });
+});
 
 
 
