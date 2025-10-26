@@ -5,8 +5,131 @@
 
 @section Styles {
 	<link rel="stylesheet" href="~/css/Comment.css" />
+	<style>
+		.chapter-navigation {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border-radius: 10px;
+			padding: 20px;
+			margin: 20px 0;
+			box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+		}
+		
+		.navigation-instruction {
+			background: rgba(255,255,255,0.9);
+			border-radius: 8px;
+			padding: 15px;
+			margin-bottom: 20px;
+			text-align: center;
+			font-style: italic;
+			color: #333;
+			font-size: 16px;
+		}
+		
+		.nav-buttons {
+			display: flex;
+			justify-content: center;
+			gap: 20px;
+		}
+		
+		.nav-btn {
+			padding: 12px 24px;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 600;
+			text-decoration: none;
+			transition: all 0.3s ease;
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+		}
+		
+		.nav-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+		}
+		
+		.nav-btn.prev {
+			background: #6c757d;
+			color: white;
+		}
+		
+		.nav-btn.next {
+			background: #007bff;
+			color: white;
+		}
+		
+		.nav-btn:disabled {
+			background: #e9ecef;
+			color: #6c757d;
+			cursor: not-allowed;
+			transform: none;
+		}
+		
+		.nav-btn:disabled:hover {
+			transform: none;
+			box-shadow: none;
+		}
+		
+		.chapter-images {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		
+		.chapter-image-container {
+			text-align: center;
+			width: 100%;
+		}
+		
+		.chapter-image-container img {
+			max-width: 100%;
+			height: auto;
+			display: block;
+			margin: 0 auto;
+		}
+	</style>
 }
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
+<!-- Chapter Navigation -->
+<div class="chapter-navigation">
+	<div class="navigation-instruction">
+		Sử dụng mũi tên trái (←) hoặc phải (→) để chuyển chapter
+	</div>
+	
+	<div class="nav-buttons">
+		@if (Model.PreviousChapterId.HasValue)
+		{
+			<a href="/Public/Manga/Chapter/@Model.PreviousChapterId" class="nav-btn prev">
+				<i class="fa fa-arrow-left"></i>
+				Chap Trước
+			</a>
+		}
+		else
+		{
+			<button class="nav-btn prev" disabled>
+				<i class="fa fa-arrow-left"></i>
+				Chap Trước
+			</button>
+		}
+		
+		@if (Model.NextChapterId.HasValue)
+		{
+			<a href="/Public/Manga/Chapter/@Model.NextChapterId" class="nav-btn next">
+				Chap Sau
+				<i class="fa fa-arrow-right"></i>
+			</a>
+		}
+		else
+		{
+			<button class="nav-btn next" disabled>
+				Chap Sau
+				<i class="fa fa-arrow-right"></i>
+			</button>
+		}
+	</div>
+</div>
 
 <div>
 	<h1>@Model.Chapter.Title</h1>
@@ -17,7 +140,7 @@
 			@foreach (var image in Model.ChapterImages)
 			{
 				<div class="chapter-image-container mb-3">
-					<img src="@image.ImageUrl" alt="Chapter Image @image.PageNumber" class="img-fluid" style="max-width: 100%; height: auto;" />
+					<img src="@image.ImageUrl" alt="Chapter Image @image.PageNumber" class="img-fluid" />
 				</div>
 			}
 		</div>
@@ -53,3 +176,21 @@
 
 
 <partial name="~/Pages/Shared/Partial/_CommentPartial.cshtml" model="@Model.Comments"/>
+
+@section Scripts {
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Keyboard navigation
+			document.addEventListener('keydown', function(e) {
+				// Left arrow key - Previous chapter
+				if (e.key === 'ArrowLeft' && @(Model.PreviousChapterId?.ToString() ?? "null") !== null) {
+					window.location.href = '/Public/Manga/Chapter/@Model.PreviousChapterId';
+				}
+				// Right arrow key - Next chapter
+				else if (e.key === 'ArrowRight' && @(Model.NextChapterId?.ToString() ?? "null") !== null) {
+					window.location.href = '/Public/Manga/Chapter/@Model.NextChapterId';
+				}
+			});
+		});
+	</script>
+}

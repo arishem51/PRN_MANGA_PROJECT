@@ -25,6 +25,9 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
         public List<Comment> Comments { get; set; } = new List<Comment>();
         public List<Comment> ChildComments { get; set; } = new List<Comment>();
         public List<ChapterImage> ChapterImages { get; set; } = new List<ChapterImage>();
+        public int? PreviousChapterId { get; set; }
+        public int? NextChapterId { get; set; }
+        public int MangaId { get; set; }
         
         public async Task<IActionResult> OnGet(int chapterId)
         {
@@ -44,6 +47,26 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             }
             
             ChapterImages = Chapter.ChapterImages?.OrderBy(ci => ci.PageNumber).ToList() ?? new List<ChapterImage>();
+            
+            // Get manga ID for navigation
+            MangaId = Chapter.MangaId;
+            
+            // Get previous and next chapter IDs
+            var allChapters = _context.Chapters
+                .Where(c => c.MangaId == MangaId && c.IsActive)
+                .OrderBy(c => c.Id)
+                .Select(c => c.Id)
+                .ToList();
+                
+            var currentIndex = allChapters.IndexOf(chapterId);
+            if (currentIndex > 0)
+            {
+                PreviousChapterId = allChapters[currentIndex - 1];
+            }
+            if (currentIndex < allChapters.Count - 1)
+            {
+                NextChapterId = allChapters[currentIndex + 1];
+            }
             
             Comments = _context.Comments
                 .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null)
