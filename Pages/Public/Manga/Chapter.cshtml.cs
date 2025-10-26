@@ -24,6 +24,8 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
         public Models.Entities.Chapter Chapter { get; set; } = new Models.Entities.Chapter();
         public List<Comment> Comments { get; set; } = new List<Comment>();
         public List<Comment> ChildComments { get; set; } = new List<Comment>();
+        public List<ChapterImage> ChapterImages { get; set; } = new List<ChapterImage>();
+        
         public async Task<IActionResult> OnGet(int chapterId)
         {
             if (chapterId == null)
@@ -31,9 +33,22 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 return NotFound();
             }
 
-            Chapter = _context.Chapters.Include(c => c.Comments).FirstOrDefault(c => c.Id == chapterId);
+            Chapter = _context.Chapters
+                .Include(c => c.Comments)
+                .Include(c => c.ChapterImages)
+                .FirstOrDefault(c => c.Id == chapterId);
+                
+            if (Chapter == null)
+            {
+                return NotFound();
+            }
+            
+            ChapterImages = Chapter.ChapterImages?.OrderBy(ci => ci.PageNumber).ToList() ?? new List<ChapterImage>();
+            
             Comments = _context.Comments
-            .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null).Include(c => c.Replies).ToList();
+                .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null)
+                .Include(c => c.Replies)
+                .ToList();
             return Page();
         }
 

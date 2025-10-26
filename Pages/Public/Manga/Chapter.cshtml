@@ -10,7 +10,30 @@
 
 <div>
 	<h1>@Model.Chapter.Title</h1>
-	<p>@Model.Chapter.Content</p>
+	
+	@if (Model.ChapterImages != null && Model.ChapterImages.Any())
+	{
+		<div class="chapter-images">
+			@foreach (var image in Model.ChapterImages)
+			{
+				<div class="chapter-image-container mb-3">
+					<img src="@image.ImageUrl" alt="Chapter Image @image.PageNumber" class="img-fluid" style="max-width: 100%; height: auto;" />
+				</div>
+			}
+		</div>
+	}
+	else if (!string.IsNullOrEmpty(Model.Chapter.Content))
+	{
+		<div class="chapter-content">
+			@Html.Raw(Model.Chapter.Content)
+		</div>
+	}
+	else
+	{
+		<div class="alert alert-warning">
+			<p>Không có nội dung hoặc hình ảnh cho chapter này.</p>
+		</div>
+	}
 </div>
 
 <form method="post" asp-page-handler="Comment">
