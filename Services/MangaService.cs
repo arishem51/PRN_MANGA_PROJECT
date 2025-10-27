@@ -68,7 +68,6 @@ namespace PRN_MANGA_PROJECT.Services
             var manga = new Manga
             {
                 Title = mangaViewModel.Title,
-                MangaDexId = mangaViewModel.MangaDexId,
                 Author = mangaViewModel.Author,
                 Artist = mangaViewModel.Artist,
                 Description = mangaViewModel.Description,
@@ -155,7 +154,6 @@ namespace PRN_MANGA_PROJECT.Services
             {
                 Id = manga.Id,
                 Title = manga.Title,
-                MangaDexId = manga.MangaDexId,
                 Author = manga.Author,
                 Artist = manga.Artist,
                 Description = manga.Description,
