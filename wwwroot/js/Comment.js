@@ -2,21 +2,6 @@
 
     const currentUserIdElement = document.getElementById("current-user-id");
     const currentUserId = currentUserIdElement ? currentUserIdElement.value : null;
-
-    // =========================================================================
-    // HÀM "MASTER" ĐỂ GẮN SỰ KIỆN
-    // =========================================================================
-
-    /**
-     * Gắn tất cả các sự kiện (like, edit, reply, delete)
-     * cho bất kỳ khối comment/reply nào.
-     * 'block' có thể là .comment-block hoặc .reply-block
-     */
-    /**
-  * HÀM DÙNG CHUNG (MASTER FUNCTION) - ĐÃ SỬA LỖI LẶP
-  * Gắn tất cả các sự kiện (like, edit, reply, delete)
-  * cho bất kỳ khối comment/reply nào.
-  */
     function attachEventListenersToBlock(block) {
         if (!block) return;
 
@@ -28,7 +13,6 @@
 
         // 1. Gắn sự kiện SUBMIT cho form Like/Dislike
         block.querySelectorAll(".like-form, .dislike-form").forEach(form => {
-            // 🔥 KIỂM TRA: Chỉ gắn nếu form này thuộc block hiện tại
             if (form.closest(".comment-block, .reply-block") === block) {
                 if (typeof attachLikeDislike === 'function') attachLikeDislike(form);
             }
@@ -107,10 +91,7 @@
             }
         });
     }
-    // =========================================================================
-    // CÁC HÀM XỬ LÝ SUBMIT (Giữ nguyên logic của bạn)
-    // =========================================================================
-
+    
     function attachReply(form) {
         form.addEventListener("submit", async e => {
             e.preventDefault();
@@ -684,17 +665,11 @@
                 // (Giữ logic cũ của bạn)
                 const totalReplies = parseInt(container.dataset.total, 10);
                 const remaining = totalReplies - 2;
-                button.textContent = `Show ${remaining > 0 ? remaining + ' more' : ''} replies`; // Hoặc "Show More"
+                button.textContent = `Show ${remaining > 0 ? remaining + ' more' : ''} replies`;
                 button.dataset.skip = 2;
             }
         });
     });
-
-    // =========================================================================
-    // 🔥 QUAN TRỌNG: GẮN SỰ KIỆN CHO TẤT CẢ COMMENT/REPLY CÓ SẴN
-    // =========================================================================
-    // Xóa các lệnh .forEach(attach...) lẻ tẻ ở global scope
-    // và thay bằng vòng lặp "master" này.
 
     document.querySelectorAll(".comment-block, .reply-block").forEach(existingBlock => {
         attachEventListenersToBlock(existingBlock);
