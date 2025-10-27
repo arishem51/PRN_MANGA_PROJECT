@@ -38,7 +38,14 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
 
         public async Task<IdentityResult> Create(string username, string email, string password, string roleName)
         {
-            var user = new User { UserName = username, Email = email, IsActive = true };
+            var user = new User
+            {
+                UserName = username,
+                Email = email,
+                IsActive = true,
+                EmailConfirmed = true // ✅ Xác nhận email ngay khi tạo
+            };
+
             return await _repo.CreateAsync(user, password, roleName);
         }
 
