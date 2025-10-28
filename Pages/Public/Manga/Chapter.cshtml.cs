@@ -1,11 +1,16 @@
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.CodeAnalysis.Operations;
 using Microsoft.EntityFrameworkCore;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels;
+using System.Security.Claims;
+using System.Xml.Linq;
+using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
+using PRN_MANGA_PROJECT.Hubs;
+
 
 namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 {
@@ -16,9 +21,12 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
         public CommentViewModel Input { get; set; } = new CommentViewModel();
 
-        public ChapterModel(ApplicationDbContext context)
+        private readonly IHubContext<CommentHub> _hubContext;
+
+        public ChapterModel(ApplicationDbContext context , IHubContext<CommentHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public Models.Entities.Chapter Chapter { get; set; } = new Models.Entities.Chapter();
@@ -34,7 +42,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
         {
             if (chapterId == null)
             {
-                return NotFound();
+                return RedirectToPage("/Auth/Login");
             }
 
             Chapter = _context.Chapters
@@ -44,7 +52,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 
             if (Chapter == null)
             {
-                return NotFound();
+                return RedirectToPage("/Auth/Login");
             }
             
             ChapterImages = Chapter.ChapterImages?.OrderBy(ci => ci.PageNumber).ToList() ?? new List<ChapterImage>();
@@ -69,13 +77,45 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             {
                 NextChapterId = allChapterIds[currentIndex + 1];
             }
-            
+
             Comments = _context.Comments
-                .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null)
-                .Include(c => c.Replies)
-                .ToList();
+           .Include(c => c.Chapter)
+           .Include(c => c.User)
+           .Include(c => c.Likes)
+
+           .Where(c => c.ChapterId == Chapter.Id && c.ParentCommentId == null)
+
+           .Include(c => c.Replies)
+               .ThenInclude(r => r.Chapter)
+
+           .Include(c => c.Replies)
+               .ThenInclude(r => r.User)
+           .Include(c => c.Replies)
+               .ThenInclude(r => r.Likes)
+                   .ThenInclude(l => l.User)
+
+           .ToList();
+            ViewData["ChapterId"] = chapterId;
+            ViewData["CurrentUserId"] = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return Page();
         }
+
+
+        public IActionResult OnGetComments(int chapterId)
+        {
+            var comments = _context.Comments
+          .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null)
+          .OrderByDescending(c => c.CreatedAt)
+          .Include(c => c.User) // Tải thông tin người đăng
+          .Include(c => c.Replies) // <--- THÊM DÒNG NÀY
+              .ThenInclude(r => r.User) // <-- Thêm cả User cho reply
+          .ToList();
+
+            ViewData["ChapterId"] = chapterId;
+            ViewData["CurrentUserId"] = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Partial("Shared/Partial/_CommentPartial", comments);
+        }
+
 
         public async Task<IActionResult> OnPostComment()
         {
@@ -84,8 +124,12 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 return Page();
             }
 
-            var userId = "62b6f877-65d4-4ead-a967-90e24c697b71";
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+           if(userId == null)
+            {
+                return RedirectToPage("/Auth/Login");
 
+            }
             var comment = new Comment
             {
                 UserId = userId,
@@ -97,8 +141,8 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             };
             _context.Comments.Add(comment);
             _context.SaveChanges();
+            await _hubContext.Clients.All.SendAsync("LoadComments");
             return RedirectToPage(new { chapterId = Input.ChapterId });
-
         }
 
         public async Task<IActionResult> OnPostReply()
@@ -107,8 +151,12 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             {
                 return Page();
             }
-            var userId = "62b6f877-65d4-4ead-a967-90e24c697b71";
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(userId == null)
+            {
+                return RedirectToPage("/Auth/Login");
 
+            }
             var comment = new Comment
             {
                 UserId = userId,
@@ -121,6 +169,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             };
             _context.Comments.Add(comment);
             _context.SaveChanges();
+            await _hubContext.Clients.All.SendAsync("LoadComments");
             return RedirectToPage(new { chapterId = Input.ChapterId });
         }
 
@@ -129,7 +178,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             var comment = await _context.Comments.FindAsync(Input.Id);
             if (comment == null)
             {
-                return NotFound();
+                return RedirectToPage("/Auth/Login");
             }
 
             var replies = await _context.Comments
@@ -143,6 +192,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("LoadComments");
             return RedirectToPage(new { chapterId = Input.ChapterId });
         }
 
@@ -155,12 +205,12 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
             var comment = await _context.Comments.FindAsync(Input.Id);
             if (comment == null)
-                return NotFound();
+                return RedirectToPage("/Auth/Login");
 
             comment.Content = Input.Content;
             _context.Update(comment);
             await _context.SaveChangesAsync();
-
+            await _hubContext.Clients.All.SendAsync("LoadComments");
             return RedirectToPage(new { chapterId = Input.ChapterId });
         }
 
