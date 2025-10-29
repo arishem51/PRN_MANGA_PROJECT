@@ -19,6 +19,8 @@ namespace PRN_MANGA_PROJECT.Data
         public DbSet<Bookmark> Bookmarks { get; set; }
         public DbSet<ReadingHistory> ReadingHistories { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<CommentLike> CommentLikes { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -40,22 +42,22 @@ namespace PRN_MANGA_PROJECT.Data
 
             // Configure Comment self-referencing relationship
             builder.Entity<Comment>()
-                .HasOne(c => c.ParentComment)
-                .WithMany(c => c.Replies)
-                .HasForeignKey(c => c.ParentCommentId)
-                .OnDelete(DeleteBehavior.NoAction);
+               .HasOne(c => c.ParentComment)
+               .WithMany(c => c.Replies)
+               .HasForeignKey(c => c.ParentCommentId)
+               .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Comment>()
                 .HasOne(c => c.User)
                 .WithMany()
                 .HasForeignKey(c => c.UserId)
-                .OnDelete(DeleteBehavior.NoAction); 
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Comment>()
                 .HasOne(c => c.Chapter)
                 .WithMany(ch => ch.Comments)
                 .HasForeignKey(c => c.ChapterId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Configure indexes for better performance
             builder.Entity<Manga>()

@@ -12,7 +12,7 @@ using PRN_MANGA_PROJECT.Data;
 namespace PRN_MANGA_PROJECT.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251021162106_InitialCreate")]
+    [Migration("20251027082219_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -311,6 +311,33 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.HasIndex("UserId1");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.CommentLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReactionType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CommentLikes");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Manga", b =>
@@ -660,6 +687,25 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.CommentLike", b =>
+                {
+                    b.HasOne("PRN_MANGA_PROJECT.Models.Entities.Comment", "Comment")
+                        .WithMany("Likes")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PRN_MANGA_PROJECT.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.MangaTag", b =>
                 {
                     b.HasOne("PRN_MANGA_PROJECT.Models.Entities.Manga", "Manga")
@@ -715,6 +761,8 @@ namespace PRN_MANGA_PROJECT.Migrations
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Comment", b =>
                 {
+                    b.Navigation("Likes");
+
                     b.Navigation("Replies");
                 });
 

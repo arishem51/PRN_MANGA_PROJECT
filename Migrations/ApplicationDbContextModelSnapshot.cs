@@ -185,7 +185,7 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.HasIndex("UserId", "MangaId")
                         .IsUnique();
 
-                    b.ToTable("Bookmarks", (string)null);
+                    b.ToTable("Bookmarks");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Chapter", b =>
@@ -210,7 +210,6 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-
                     b.Property<int>("MangaId")
                         .HasColumnType("int");
 
@@ -231,7 +230,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("MangaId");
 
-                    b.ToTable("Chapters", (string)null);
+                    b.ToTable("Chapters");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.ChapterImage", b =>
@@ -260,7 +259,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("ChapterId");
 
-                    b.ToTable("ChapterImages", (string)null);
+                    b.ToTable("ChapterImages");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Comment", b =>
@@ -308,7 +307,34 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.CommentLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReactionType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CommentLikes");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Manga", b =>
@@ -341,7 +367,6 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -360,7 +385,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("Title");
 
-                    b.ToTable("Mangas", (string)null);
+                    b.ToTable("Mangas");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.MangaTag", b =>
@@ -378,7 +403,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("MangaTags", (string)null);
+                    b.ToTable("MangaTags");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.ReadingHistory", b =>
@@ -413,7 +438,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ReadingHistories", (string)null);
+                    b.ToTable("ReadingHistories");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Tag", b =>
@@ -445,7 +470,7 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.User", b =>
@@ -659,6 +684,25 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.CommentLike", b =>
+                {
+                    b.HasOne("PRN_MANGA_PROJECT.Models.Entities.Comment", "Comment")
+                        .WithMany("Likes")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PRN_MANGA_PROJECT.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.MangaTag", b =>
                 {
                     b.HasOne("PRN_MANGA_PROJECT.Models.Entities.Manga", "Manga")
@@ -714,6 +758,8 @@ namespace PRN_MANGA_PROJECT.Migrations
 
             modelBuilder.Entity("PRN_MANGA_PROJECT.Models.Entities.Comment", b =>
                 {
+                    b.Navigation("Likes");
+
                     b.Navigation("Replies");
                 });
 

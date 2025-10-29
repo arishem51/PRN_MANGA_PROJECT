@@ -12,6 +12,7 @@ using PRN_MANGA_PROJECT.Services.EmailService;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using PRN_MANGA_PROJECT.Repositories.CRUD;
 using PRN_MANGA_PROJECT.Services.CRUD;
+using PRN_MANGA_PROJECT.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,23 +22,11 @@ builder.Services.AddRazorComponents()
 
 // Add Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), 
-        sqlOptions => 
-        {
-            sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorNumbersToAdd: null);
-            sqlOptions.CommandTimeout(60);
-        });
-    options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
-    options.EnableServiceProviderCaching();
-    options.EnableDetailedErrors(builder.Environment.IsDevelopment());
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add MudBlazor
 builder.Services.AddMudServices();
+builder.Services.AddSignalR();
 
 // Add Repositories
 builder.Services.AddScoped<IBaseRepository<Manga>, BaseRepository<Manga>>();
@@ -55,7 +44,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 
 //Auth Logic
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService , UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
@@ -74,25 +63,13 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
-// Add Google Authentication (only if credentials are provided)
-var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
-var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-
-if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret) && 
-    googleClientId != "your-google-client-id-here" && googleClientSecret != "your-google-client-secret-here")
-{
-    builder.Services.AddAuthentication()
-        .AddGoogle("Google", options =>
-        {
-            options.ClientId = googleClientId;
-            options.ClientSecret = googleClientSecret;
-        });
-}
-else
-{
-    // Add authentication without Google provider if credentials are not configured
-    builder.Services.AddAuthentication();
-}
+// Add GG
+builder.Services.AddAuthentication()
+    .AddGoogle("Google", options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    });
 
 
 // Add API Controllers
@@ -174,5 +151,5 @@ app.MapStaticAssets();
 // Map API Controllers
 app.MapControllers();
 app.MapRazorPages();
-
+app.MapHub<CommentHub>("/commentHub");
 app.Run();
