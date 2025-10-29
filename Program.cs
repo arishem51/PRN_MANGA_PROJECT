@@ -23,7 +23,20 @@ builder.Services.AddRazorComponents()
 
 // ===== Database =====
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null);
+            sqlOptions.CommandTimeout(60);
+        });
+    options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+    options.EnableServiceProviderCaching();
+    options.EnableDetailedErrors(builder.Environment.IsDevelopment());
+});
 
 // ===== MudBlazor + SignalR =====
 builder.Services.AddMudServices();
@@ -65,13 +78,29 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// ===== Google Auth =====
-builder.Services.AddAuthentication()
-    .AddGoogle("Google", options =>
-    {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-    });
+// ===== Authentication (Google optional) =====
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+});
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+
+if (!string.IsNullOrEmpty(googleClientId) &&
+    !string.IsNullOrEmpty(googleClientSecret) &&
+    googleClientId != "your-google-client-id-here" &&
+    googleClientSecret != "your-google-client-secret-here")
+{
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+        });
+}
 
 // ===== HTTP Client for MangaDex API =====
 builder.Services.AddHttpClient("MangaDexClient", client =>
@@ -122,10 +151,10 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
 
-    // G?i SeedData (thêm Manga, Tag, MangaTag)
+    // Seed Manga, Tag, MangaTag
     SeedData.Initialize(context);
 
-    // G?i Role seeding
+    // Seed Roles
     var roleService = services.GetRequiredService<IRoleService>();
     await roleService.SeedRole();
 }
@@ -146,5 +175,5 @@ app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorPages();
 app.MapHub<AccountHub>("/accountHub");
-
+app.MapHub<TagHub>("/tagHub");
 app.Run();

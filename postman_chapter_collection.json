@@ -1,0 +1,531 @@
+{
+  "info": {
+    "_postman_id": "prn222-chapter-api-collection",
+    "name": "PRN222 Chapter API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for testing Chapter CRUD and pagination APIs for PRN222 Manga Project."
+  },
+  "item": [
+    {
+      "name": "GET Endpoints",
+      "item": [
+        {
+          "name": "1.1. Get All Chapters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter"
+              ]
+            },
+            "description": "Lấy tất cả các chapters. (Lưu ý: API này có thể không cần thiết trong thực tế, nhưng vẫn được giữ lại cho mục đích quản lý/admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "1.2. Get Chapter by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/{{chapterId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "{{chapterId}}"
+              ]
+            },
+            "description": "Lấy thông tin chi tiết của một chapter dựa trên ID. Sử dụng chapterId = 1 nếu đã có dữ liệu demo."
+          },
+          "response": []
+        },
+        {
+          "name": "1.3. Get Chapter with Images by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/{{chapterId}}/with-images",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "{{chapterId}}",
+                "with-images"
+              ]
+            },
+            "description": "Lấy thông tin chi tiết của một chapter kèm theo danh sách các ảnh của chapter đó. Sử dụng chapterId = 1 nếu đã có dữ liệu demo."
+          },
+          "response": []
+        },
+        {
+          "name": "1.4. Get Chapters by Manga ID (All)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/manga/{{mangaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "manga",
+                "{{mangaId}}"
+              ]
+            },
+            "description": "Lấy danh sách tất cả các chapters thuộc một manga cụ thể. Sử dụng mangaId = 1 nếu đã có dữ liệu demo."
+          },
+          "response": []
+        },
+        {
+          "name": "1.5. Get Chapters by Manga ID (Paged) - Basic",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/manga/{{mangaId}}/paged?page=1&pageSize=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "manga",
+                "{{mangaId}}",
+                "paged"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Số trang (mặc định là 1)"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "2",
+                  "description": "Số lượng item trên mỗi trang (mặc định là 10, tối đa 100)"
+                }
+              ]
+            },
+            "description": "Lấy danh sách các chapters thuộc một manga cụ thể với phân trang cơ bản. Sử dụng mangaId = 1 nếu đã có dữ liệu demo."
+          },
+          "response": []
+        },
+        {
+          "name": "1.6. Get Chapters by Manga ID (Paged) - Sort by Title",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/manga/{{mangaId}}/paged?page=1&pageSize=5&sortBy=title&sortDescending=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "manga",
+                "{{mangaId}}",
+                "paged"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "5"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "title",
+                  "description": "Sắp xếp theo title"
+                },
+                {
+                  "key": "sortDescending",
+                  "value": "false",
+                  "description": "Sắp xếp tăng dần"
+                }
+              ]
+            },
+            "description": "Lấy chapters với sắp xếp theo title tăng dần."
+          },
+          "response": []
+        },
+        {
+          "name": "1.7. Get Chapters by Manga ID (Paged) - Sort by Created Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/manga/{{mangaId}}/paged?page=1&pageSize=5&sortBy=createdat&sortDescending=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "manga",
+                "{{mangaId}}",
+                "paged"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "5"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdat",
+                  "description": "Sắp xếp theo ngày tạo"
+                },
+                {
+                  "key": "sortDescending",
+                  "value": "true",
+                  "description": "Sắp xếp giảm dần (mới nhất trước)"
+                }
+              ]
+            },
+            "description": "Lấy chapters với sắp xếp theo ngày tạo giảm dần (mới nhất trước)."
+          },
+          "response": []
+        },
+        {
+          "name": "1.8. Get Next Chapter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/{{chapterId}}/next?mangaId={{mangaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "{{chapterId}}",
+                "next"
+              ],
+              "query": [
+                {
+                  "key": "mangaId",
+                  "value": "{{mangaId}}"
+                }
+              ]
+            },
+            "description": "Lấy chapter tiếp theo của một manga. Sử dụng chapterId = 1 và mangaId = 1 nếu đã có dữ liệu demo."
+          },
+          "response": []
+        },
+        {
+          "name": "1.9. Get Previous Chapter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/{{chapterId}}/previous?mangaId={{mangaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "{{chapterId}}",
+                "previous"
+              ],
+              "query": [
+                {
+                  "key": "mangaId",
+                  "value": "{{mangaId}}"
+                }
+              ]
+            },
+            "description": "Lấy chapter trước đó của một manga. Sử dụng chapterId = 2 và mangaId = 1 nếu đã có dữ liệu demo."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "POST Endpoints",
+      "item": [
+        {
+          "name": "2.1. Create New Chapter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mangaId\": 1,\n  \"title\": \"Chapter 4: New Beginnings\",\n  \"chapterNumber\": \"4\",\n  \"content\": \"This is a newly created chapter for testing.\",\n  \"pageCount\": 15\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter"
+              ]
+            },
+            "description": "Tạo một chapter mới. Thay đổi mangaId nếu cần. Sau khi tạo, bạn có thể sử dụng ID của chapter mới để test các API PUT/DELETE."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PUT Endpoints",
+      "item": [
+        {
+          "name": "3.1. Update Chapter by ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Chapter 1: Beginning (Updated)\",\n  \"chapterNumber\": \"1.0\",\n  \"content\": \"This is the first chapter of our test manga, with updated content.\",\n  \"pageCount\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/{{chapterId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "{{chapterId}}"
+              ]
+            },
+            "description": "Cập nhật thông tin của một chapter. Sử dụng chapterId = 1 nếu đã có dữ liệu demo."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "DELETE Endpoints",
+      "item": [
+        {
+          "name": "4.1. Delete Chapter (Soft Delete) by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/chapter/{{chapterId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "chapter",
+                "{{chapterId}}"
+              ]
+            },
+            "description": "Xóa mềm một chapter (đặt IsActive = false). Sử dụng chapterId của một chapter bạn muốn xóa (ví dụ: chapter vừa tạo bằng POST)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Test Scenarios",
+      "item": [
+        {
+          "name": "Scenario 1: Empty Database Test",
+          "item": [
+            {
+              "name": "Get All Chapters (Empty)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chapter",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chapter"
+                  ]
+                },
+                "description": "Test khi database trống - should return empty array []"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Chapter by ID (Not Found)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chapter/999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chapter",
+                    "999"
+                  ]
+                },
+                "description": "Test với ID không tồn tại - should return 404 Not Found"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Scenario 2: Pagination Edge Cases",
+          "item": [
+            {
+              "name": "Pagination - Page 0 (Invalid)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chapter/manga/{{mangaId}}/paged?page=0&pageSize=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chapter",
+                    "manga",
+                    "{{mangaId}}",
+                    "paged"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Test với page = 0 - should be corrected to page = 1"
+              },
+              "response": []
+            },
+            {
+              "name": "Pagination - PageSize Too Large",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chapter/manga/{{mangaId}}/paged?page=1&pageSize=1000",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chapter",
+                    "manga",
+                    "{{mangaId}}",
+                    "paged"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "1000"
+                    }
+                  ]
+                },
+                "description": "Test với pageSize quá lớn - should be limited to 100"
+              },
+              "response": []
+            },
+            {
+              "name": "Pagination - Page Beyond Total",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/chapter/manga/{{mangaId}}/paged?page=999&pageSize=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "chapter",
+                    "manga",
+                    "{{mangaId}}",
+                    "paged"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "999"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Test với page vượt quá tổng số trang - should return empty data array"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5274",
+      "type": "string",
+      "description": "Base URL của API ứng dụng của bạn."
+    },
+    {
+      "key": "mangaId",
+      "value": "1",
+      "type": "string",
+      "description": "ID của một manga mẫu. Sử dụng 1 nếu đã có dữ liệu demo."
+    },
+    {
+      "key": "chapterId",
+      "value": "1",
+      "type": "string",
+      "description": "ID của một chapter mẫu. Sử dụng 1 nếu đã có dữ liệu demo."
+    }
+  ]
+}

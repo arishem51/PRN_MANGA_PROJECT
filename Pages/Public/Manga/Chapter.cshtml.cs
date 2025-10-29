@@ -21,9 +21,15 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             _context = context;
         }
 
-        public Chapter Chapter { get; set; } = new Chapter();
+        public Models.Entities.Chapter Chapter { get; set; } = new Models.Entities.Chapter();
         public List<Comment> Comments { get; set; } = new List<Comment>();
         public List<Comment> ChildComments { get; set; } = new List<Comment>();
+        public List<ChapterImage> ChapterImages { get; set; } = new List<ChapterImage>();
+        public int? PreviousChapterId { get; set; }
+        public int? NextChapterId { get; set; }
+        public int MangaId { get; set; }
+        public List<Models.Entities.Chapter> AllChapters { get; set; } = new List<Models.Entities.Chapter>();
+        
         public async Task<IActionResult> OnGet(int chapterId)
         {
             if (chapterId == null)
@@ -31,9 +37,43 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 return NotFound();
             }
 
-            Chapter = _context.Chapters.Include(c => c.Comments).FirstOrDefault(c => c.Id == chapterId);
+            Chapter = _context.Chapters
+                .Include(c => c.Comments)
+                .Include(c => c.ChapterImages)
+                .FirstOrDefault(c => c.Id == chapterId);
+                
+            if (Chapter == null)
+            {
+                return NotFound();
+            }
+            
+            ChapterImages = Chapter.ChapterImages?.OrderBy(ci => ci.PageNumber).ToList() ?? new List<ChapterImage>();
+            
+            // Get manga ID for navigation
+            MangaId = Chapter.MangaId;
+            
+            // Get all chapters for this manga
+            AllChapters = _context.Chapters
+                .Where(c => c.MangaId == MangaId && c.IsActive)
+                .OrderBy(c => c.Id)
+                .ToList();
+            
+            // Get previous and next chapter IDs
+            var allChapterIds = AllChapters.Select(c => c.Id).ToList();
+            var currentIndex = allChapterIds.IndexOf(chapterId);
+            if (currentIndex > 0)
+            {
+                PreviousChapterId = allChapterIds[currentIndex - 1];
+            }
+            if (currentIndex < allChapterIds.Count - 1)
+            {
+                NextChapterId = allChapterIds[currentIndex + 1];
+            }
+            
             Comments = _context.Comments
-            .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null).Include(c => c.Replies).ToList();
+                .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null)
+                .Include(c => c.Replies)
+                .ToList();
             return Page();
         }
 

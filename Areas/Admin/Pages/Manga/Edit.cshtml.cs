@@ -30,7 +30,6 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
             {
                 Id = manga.Id,
                 Title = manga.Title,
-                MangaDexId = manga.MangaDexId,
                 Author = manga.Author,
                 Artist = manga.Artist,
                 Description = manga.Description,
@@ -56,7 +55,6 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
             {
                 Id = Input.Id,
                 Title = Input.Title,
-                MangaDexId = Input.MangaDexId,
                 Author = Input.Author,
                 Artist = Input.Artist,
                 Description = Input.Description,
@@ -77,9 +75,6 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
         [StringLength(200)]
         public string Title { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(100)]
-        public string MangaDexId { get; set; } = string.Empty;
 
         [StringLength(100)]
         public string? Author { get; set; }

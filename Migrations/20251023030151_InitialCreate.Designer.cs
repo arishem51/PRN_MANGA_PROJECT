@@ -213,11 +213,6 @@ namespace PRN_MANGA_PROJECT.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MangaDexChapterId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int>("MangaId")
                         .HasColumnType("int");
 
@@ -347,10 +342,6 @@ namespace PRN_MANGA_PROJECT.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<string>("MangaDexId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)

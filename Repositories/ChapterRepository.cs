@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
+using PRN_MANGA_PROJECT.Models.ViewModels;
 
 namespace PRN_MANGA_PROJECT.Repositories
 {
@@ -17,6 +18,61 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .Where(c => c.MangaId == mangaId && c.IsActive)
                 .OrderBy(c => c.ChapterNumber)
                 .ToListAsync();
+        }
+
+        public async Task<PagedResult<Chapter>> GetChaptersByMangaIdPagedAsync(int mangaId, PaginationParams paginationParams)
+        {
+            var query = _dbSet
+                .Include(c => c.ChapterImages)
+                .Where(c => c.MangaId == mangaId && c.IsActive);
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(paginationParams.SortBy))
+            {
+                switch (paginationParams.SortBy.ToLower())
+                {
+                    case "title":
+                        query = paginationParams.SortDescending 
+                            ? query.OrderByDescending(c => c.Title)
+                            : query.OrderBy(c => c.Title);
+                        break;
+                    case "createdat":
+                        query = paginationParams.SortDescending 
+                            ? query.OrderByDescending(c => c.CreatedAt)
+                            : query.OrderBy(c => c.CreatedAt);
+                        break;
+                    case "pagenumber":
+                        query = paginationParams.SortDescending 
+                            ? query.OrderByDescending(c => c.PageCount)
+                            : query.OrderBy(c => c.PageCount);
+                        break;
+                    default:
+                        query = query.OrderBy(c => c.ChapterNumber);
+                        break;
+                }
+            }
+            else
+            {
+                // Default sorting by chapter number
+                query = query.OrderBy(c => c.ChapterNumber);
+            }
+
+            // Get total count
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination
+            var chapters = await query
+                .Skip((paginationParams.Page - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize)
+                .ToListAsync();
+
+            return new PagedResult<Chapter>
+            {
+                Data = chapters,
+                TotalCount = totalCount,
+                Page = paginationParams.Page,
+                PageSize = paginationParams.PageSize
+            };
         }
 
         public async Task<Chapter?> GetChapterWithImagesAsync(int id)

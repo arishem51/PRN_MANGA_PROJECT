@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
+
 namespace PRN_MANGA_PROJECT
 {
     public class SeedData
@@ -30,7 +31,6 @@ namespace PRN_MANGA_PROJECT
             {
                 new Manga {
                     Title = "Naruto",
-                    MangaDexId = "naruto-001",
                     Author = "Masashi Kishimoto",
                     Artist = "Masashi Kishimoto",
                     Status = "Completed",
@@ -40,7 +40,6 @@ namespace PRN_MANGA_PROJECT
                 },
                 new Manga {
                     Title = "One Piece",
-                    MangaDexId = "onepiece-001",
                     Author = "Eiichiro Oda",
                     Artist = "Eiichiro Oda",
                     Status = "Ongoing",
@@ -50,7 +49,6 @@ namespace PRN_MANGA_PROJECT
                 },
                 new Manga {
                     Title = "Attack on Titan",
-                    MangaDexId = "aot-001",
                     Author = "Hajime Isayama",
                     Artist = "Hajime Isayama",
                     Status = "Completed",
@@ -60,7 +58,6 @@ namespace PRN_MANGA_PROJECT
                 },
                 new Manga {
                     Title = "Komi-san wa Komyushou desu",
-                    MangaDexId = "komisan-001",
                     Author = "Tomohito Oda",
                     Artist = "Tomohito Oda",
                     Status = "Ongoing",

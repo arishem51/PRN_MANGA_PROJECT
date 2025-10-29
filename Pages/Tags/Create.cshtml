@@ -1,0 +1,79 @@
+﻿@page
+@model PRN_MANGA_PROJECT.Pages.Tags.CreateModel
+@{
+    ViewData["Title"] = "Thêm thể loại";
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+@if (Model.IsCreated)
+{
+    <div class="alert alert-success fade show">
+        ✅ Thể loại mới đã được thêm thành công!
+    </div>
+}
+
+<form method="post" class="p-3 border rounded shadow-sm bg-light">
+    <div class="form-group mb-3">
+        <label asp-for="Tag.Name" class="form-label">Tên thể loại</label>
+        <input asp-for="Tag.Name" class="form-control" placeholder="Nhập tên thể loại..." />
+        <span asp-validation-for="Tag.Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Tag.Description" class="form-label">Mô tả</label>
+        <textarea asp-for="Tag.Description" class="form-control" rows="3" placeholder="Nhập mô tả (tùy chọn)..."></textarea>
+        <span asp-validation-for="Tag.Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Tag.Color" class="form-label">Màu hiển thị</label>
+        <div class="input-group">
+            <input asp-for="Tag.Color" class="form-control" placeholder="#FFFFFF" />
+            <span class="input-group-text">
+                <input type="color" id="colorPicker" value="#ffffff" style="border:none; background:transparent; width:30px;" />
+            </span>
+        </div>
+        <span asp-validation-for="Tag.Color" class="text-danger"></span>
+    </div>
+
+    <div class="form-group form-check mb-3">
+        <input class="form-check-input" asp-for="Tag.IsActive" checked />
+        <label class="form-check-label" asp-for="Tag.IsActive">Kích hoạt</label>
+    </div>
+
+    <button type="submit" class="btn btn-success">💾 Tạo thể loại</button>
+    <a asp-page="Index" class="btn btn-secondary ms-2">⬅️ Quay lại danh sách</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Cập nhật đồng bộ giữa input và color picker
+        const colorInput = document.getElementById("Tag_Color");
+        const colorPicker = document.getElementById("colorPicker");
+        colorPicker.addEventListener("input", e => colorInput.value = e.target.value);
+
+        // Tự ẩn thông báo sau vài giây
+        const alert = document.querySelector(".alert-success");
+        if (alert) {
+            setTimeout(() => alert.classList.remove("show"), 2500);
+            setTimeout(() => alert.remove(), 3000);
+        }
+    </script>
+}

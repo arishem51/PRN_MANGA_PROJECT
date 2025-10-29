@@ -1,0 +1,111 @@
+﻿@page
+@model PRN_MANGA_PROJECT.Pages.Tags.IndexModel
+@{
+    ViewData["Title"] = "Danh sách thể loại";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a asp-page="/Tags/Create" class="btn btn-primary mb-3">+ Thêm thể loại</a>
+
+<form method="get" class="row mb-3">
+    <div class="col-md-4">
+        <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên thể loại..." />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-success w-100">Lọc</button>
+    </div>
+    <div class="col-md-2">
+        <a asp-page="/Tags/Index" class="btn btn-secondary w-100">Reset</a>
+    </div>
+</form>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Tên thể loại</th>
+            <th>Mô tả</th>
+            <th>Màu</th>
+            <th>Ngày tạo</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Tags != null && Model.Tags.Any())
+        {
+            @foreach (var tag in Model.Tags)
+            {
+                <tr>
+                    <td>@tag.Id</td>
+                    <td>@tag.Name</td>
+                    <td>@tag.Description</td>
+                    <td>
+                        <span class="badge text-dark" style="background-color:@tag.Color">@tag.Color</span>
+                    </td>
+                    <td>@tag.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        @if (tag.IsActive)
+                        {
+                            <span class="badge bg-success">Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Ẩn</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-page="/Tags/Edit" asp-route-id="@tag.Id" class="btn btn-warning btn-sm me-1">Sửa</a>
+
+                        @if (tag.IsActive)
+                        {
+                            <form method="post" asp-page-handler="Deactivate" asp-route-id="@tag.Id" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Bạn có chắc muốn ẩn thể loại này không?')">
+                                    Ẩn
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="Activate" asp-route-id="@tag.Id" style="display:inline;">
+                                <button type="submit" class="btn btn-success btn-sm"
+                                        onclick="return confirm('Bạn có chắc muốn kích hoạt thể loại này không?')">
+                                    Kích hoạt
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">Không có thể loại nào phù hợp.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/tagHub")
+            .build();
+
+        connection.on("ReloadTags", () => {
+            console.log("🔄 Tag list updated (real-time)");
+            location.reload(); // hoặc gọi Ajax refresh danh sách nếu muốn mượt hơn
+        });
+
+        connection.start()
+            .then(() => console.log("✅ Connected to TagHub"))
+            .catch(err => console.error("SignalR Error:", err));
+    </script>
+}
+
