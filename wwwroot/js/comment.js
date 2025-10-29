@@ -11,12 +11,14 @@
 
     function LoadCommentData() {
         var chapterId = $("#comment-list-container").data("chapter-id");
+        var userId = $("#comment-list-container").data("user-id");
+
         if (!chapterId) {
             console.error("Không tìm thấy chapterId từ data-chapter-id. Kiểm tra lại file .cshtml.");
             return;
         }
         $.ajax({
-            url: `/Public/Manga/Chapter/${chapterId}?handler=Comments&chapterId=${chapterId}`,
+            url: `/Public/Manga/Chapter/${chapterId}?handler=Comments&chapterId=${chapterId}&userId=${userId}`,
             method: "GET",
             success: (result) => {
                 $("#comment-list-container").html(result);
@@ -25,6 +27,50 @@
             error: (err) => console.log("Lỗi load comment:", err)
         });
     }
+
+    $(document).on("submit", ".comment-action-form", function (e) {
+        e.preventDefault();
+
+        var $form = $(this);
+        var url = $form.attr("action");
+        var data = $form.serialize();
+
+        // 2. Gửi dữ liệu form bằng AJAX
+        $.post(url, data)
+            .done(function () {
+                $form.find("textarea[name='Input.Content']").val("");
+                // Tùy chọn: Ẩn các form reply và edit sau khi gửi
+                if ($form.hasClass("reply-form")) { // (Bạn cần thêm class "reply-form" cho form reply)
+                    $form.closest(".reply-container").hide();
+                }
+                if ($form.hasClass("edit-form")) {
+                    $form.hide();
+                    $form.closest(".media-body").find(".comment-content").show();
+                }
+            })
+            .fail(function () {
+                console.error("Có lỗi khi gửi request.");
+                alert("Hành động của bạn thất bại, vui lòng thử lại.");
+            });
+    });
+
+    // Xử lý riêng cho form like/dislike
+    $(document).on("submit", "form[asp-page-handler='LikeComment']", function (e) {
+        e.preventDefault();
+        var $form = $(this);
+        var url = $form.attr("action");
+        var data = $form.serialize();
+
+        $.post(url, data)
+            .done(function (res) {
+                console.log("Liked successfully:", res);
+                // Không cần gọi LoadCommentData() vì SignalR sẽ tự reload
+            })
+            .fail(function (err) {
+                console.error("Error while liking:", err);
+            });
+    });
+
 
 
 });

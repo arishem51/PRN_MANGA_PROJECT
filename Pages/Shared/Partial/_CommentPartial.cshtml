@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<PRN_MANGA_PROJECT.Models.Entities.Comment>
 
-@section Styles {
+@* @section Styles {
 	<link rel="stylesheet" href="~/css/Comment.css" />
-}
+} *@
 @{
 	var currentUserId = ViewData["CurrentUserId"] as string;
 }
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-<div id="comment-list-container" data-chapter-id="@ViewData["ChapterId"]">
+<div id="comment-list-container" data-chapter-id="@ViewData["ChapterId"]" data-user-id="@ViewData["CurrentUserId"]">
 
 @foreach (var comment in Model)
 {
@@ -23,6 +23,7 @@
 							<div class="mar-btm">
 								<a href="#" class="btn-link text-semibold media-heading box-inline">@comment.User.UserName</a>
 								<p class="text-muted text-sm">@comment.CreatedAt</p>
+
 									@if (currentUserId != null && currentUserId == comment.UserId)
 									{
 									<div class="dropdown">
@@ -36,7 +37,7 @@
 												</a>
 											</li>
 											<li>
-												<form method="post" asp-page="Chapter" asp-page-handler="DeleteComment">
+													<form method="post" asp-page="Chapter" asp-page-handler="DeleteComment" class="comment-action-form">
 													<input type="hidden" name="Input.Id" value="@comment.Id" />
 													<input type="hidden" name="Input.ChapterId" value="@comment.ChapterId" />
 													<button type="submit" class="dropdown-item text-danger" onclick="return confirm('Do you want remove?') ;">
@@ -50,7 +51,7 @@
 							</div>
 
 							<p class="comment-content">@comment.Content</p>
-							<form method="post" asp-page="Chapter" asp-page-handler="EditComment" class="edit-form" style="display: none;">
+								<form method="post" asp-page="Chapter" asp-page-handler="EditComment" class="edit-form" class="comment-action-form" style="display: none;">
 								<textarea name="Input.Content" class="form-control" rows="2">@comment.Content</textarea>
 								<input type="hidden" name="Input.Id" value="@comment.Id" />
 								<input type="hidden" name="Input.ChapterId" value="@comment.ChapterId" />
@@ -61,8 +62,21 @@
 							</form>
 							<div class="pad-ver">
 								<div class="btn-group">
-									<a class="btn btn-sm btn-default btn-hover-success" href="#"><i class="fa fa-thumbs-up"></i></a>
-									<a class="btn btn-sm btn-default btn-hover-danger" href="#"><i class="fa fa-thumbs-down"></i></a>
+										<form method="post" asp-page-handler="LikeComment" class="comment-action-form like-form">
+											<input type="hidden" name="CommentId" value="@comment.Id" />
+											<input type="hidden" name="ReactionType" value="1" />
+											<button type="submit" class="btn btn-sm">
+												<i class="fa fa-thumbs-up"></i> @comment.Likes.Count(l => l.ReactionType == 1)
+											</button>
+										</form>
+
+										<form method="post" asp-page-handler="LikeComment" class="comment-action-form like-form">
+											<input type="hidden" name="CommentId" value="@comment.Id" />
+											<input type="hidden" name="ReactionType" value="-1" />
+											<button type="submit" class="btn btn-sm">
+												<i class="fa fa-thumbs-down"></i> @comment.Likes.Count(l => l.ReactionType == -1)
+											</button>
+										</form>
 								</div>
 								<button type="button" class="btn btn-sm btn-default btn-hover-primary btn-reply"
 										data-comment-id="@comment.Id">
@@ -74,7 +88,7 @@
 							<hr>
 							<!-- Comments -->
 							<form method="post" asp-page="/Public/Manga/Chapter"
-								  asp-page-handler="Reply">
+									  asp-page-handler="Reply" class="comment-action-form">
 								<div class="reply-container" style="display:none; margin-top:10px;">
 									<div class="media-block">
 										<a class="media-left" href="#"><img class="img-circle img-sm" alt="Profile Picture" src="https://bootdey.com/img/Content/avatar/avatar2.png"></a>
