@@ -69,8 +69,16 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 readingContinueId = readingHistory.ChapterId;
             }
 
-            firstChapterId = Manga.Chapters.OrderBy(c => c.ChapterNumber).FirstOrDefault().Id;
-            lastestChapterId = Manga.Chapters.OrderByDescending(c => c.ChapterNumber).FirstOrDefault().Id;
+            if (Manga.Chapters.Any())
+            {
+                firstChapterId = Manga.Chapters.OrderBy(c => c.ChapterNumber).FirstOrDefault().Id;
+                lastestChapterId = Manga.Chapters.OrderByDescending(c => c.ChapterNumber).FirstOrDefault().Id;
+            }
+            else
+            {
+                firstChapterId = null;
+                lastestChapterId = null;
+            }
             return Page();
         }
 

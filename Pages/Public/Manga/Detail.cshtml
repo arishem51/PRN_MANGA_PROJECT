@@ -63,14 +63,18 @@
                             <i class="fas fa-arrow-right"></i> Reading Continue
                         </a>
                     }
-
-                    <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.firstChapterId" class="btn btn-primary">
-                         Reading Chapter 1
-                    </a>
-                    <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.lastestChapterId" class="btn btn-primary">
-                        Reading Lastest Chapter
-                    </a>
-
+                    @if(Model.firstChapterId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.firstChapterId" class="btn btn-primary">
+                            Reading Chapter 1
+                        </a>
+                    }
+                    @if(Model.lastestChapterId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.lastestChapterId" class="btn btn-primary">
+                            Reading Lastest Chapter
+                        </a>
+                    }
                 </div>
             </div>
         </div>

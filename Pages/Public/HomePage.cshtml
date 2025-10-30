@@ -44,4 +44,32 @@
 	{
 		<p class="text-center text-muted mt-4">No manga found.</p>
 	}
+	@if (Model.TotalPages > 1)
+	{
+		<nav aria-label="Manga pagination" class="d-flex justify-content-center mt-4">
+			<ul class="pagination">
+				@if (Model.PageNumber > 1)
+				{
+					<li class="page-item">
+						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchTerm="@Model.SearchTerm">Previous</a>
+					</li>
+				}
+
+				@for (int i = 1; i <= Model.TotalPages; i++)
+				{
+					<li class="page-item @(i == Model.PageNumber ? "active" : "")">
+						<a class="page-link" asp-route-PageNumber="@i" asp-route-SearchTerm="@Model.SearchTerm">@i</a>
+					</li>
+				}
+
+				@if (Model.PageNumber < Model.TotalPages)
+				{
+					<li class="page-item">
+						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchTerm="@Model.SearchTerm">Next</a>
+					</li>
+				}
+			</ul>
+		</nav>
+	}
+
 </div>

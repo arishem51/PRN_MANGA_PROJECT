@@ -15,16 +15,16 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
     {
         private readonly IUserService _userService;
         private readonly SignInManager<User> _signInManager;
-
+        private readonly UserManager<User> _userManager;
 
         [BindProperty]
         public LoginDTO Input { get; set; } = new LoginDTO();
 
-        public LoginModel(IUserService userService , SignInManager<User> signInManager)
+        public LoginModel(IUserService userService , SignInManager<User> signInManager, UserManager<User> userManager)
         {
             _userService = userService;
             _signInManager = signInManager;
-
+            _userManager = userManager;
         }
 
 
@@ -70,7 +70,26 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             bool checkEmail = await _userService.CheckEmailConfirmation(Input.Username);
             if (check && checkEmail)
             {
-                return RedirectToPage("/Index");
+
+                var user = await _userManager.FindByNameAsync(Input.Username);
+
+                if (!user.EmailConfirmed)
+                {
+                    ModelState.AddModelError(string.Empty, "Please confirm your email first.");
+                    return Page();
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains("Admin"))
+                {
+                    return RedirectToPage("/Index", new { area = "Admin" });
+                }
+                else
+                {
+                    return RedirectToPage("/Index");
+                }
+
             }
 
             if (!check)
