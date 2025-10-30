@@ -78,6 +78,37 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .ToListAsync();
         }
 
+        public async Task<(IEnumerable<Manga>, int)> GetMangaPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Mangas
+                .OrderByDescending(m => m.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+
+            var data = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (data, totalCount);
+        }
+
+        public async Task<(IEnumerable<Manga>, int)> SearchMangaPagedAsync(string searchTerm, int pageNumber, int pageSize)
+        {
+            var query = _context.Mangas
+                .Where(m => m.Title.Contains(searchTerm) || m.Author.Contains(searchTerm) || m.Artist.Contains(searchTerm))
+                .OrderByDescending(m => m.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+
+            var data = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (data, totalCount);
+        }
+
         public async Task<IEnumerable<Manga>> GetRecentMangaAsync(int count)
         {
             return await _dbSet

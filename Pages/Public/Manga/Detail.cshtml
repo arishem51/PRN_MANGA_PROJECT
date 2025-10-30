@@ -57,6 +57,24 @@
                     <a asp-page="/Public/HomePage" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Quay lại
                     </a>
+                    @if (Model.readingContinueId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.readingContinueId" class="btn btn-success">
+                            <i class="fas fa-arrow-right"></i> Reading Continue
+                        </a>
+                    }
+                    @if(Model.firstChapterId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.firstChapterId" class="btn btn-primary">
+                            Reading Chapter 1
+                        </a>
+                    }
+                    @if(Model.lastestChapterId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.lastestChapterId" class="btn btn-primary">
+                            Reading Lastest Chapter
+                        </a>
+                    }
                 </div>
             </div>
         </div>

@@ -10,6 +10,11 @@ namespace PRN_MANGA_PROJECT.Pages.Public
     {
 
         private readonly IMangaRepository _mangaRepository;
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+
+        public int PageSize { get; set; } = 3; 
+        public int TotalPages { get; set; }
 
         public HomePageModel(IMangaRepository mangaRepository)
         {
@@ -23,14 +28,18 @@ namespace PRN_MANGA_PROJECT.Pages.Public
 
         public async Task OnGetAsync()
         {
+            int totalManga;
+
             if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
-                Mangas = await _mangaRepository.SearchMangaAsync(SearchTerm);
+                (Mangas, totalManga) = await _mangaRepository.SearchMangaPagedAsync(SearchTerm, PageNumber, PageSize);
             }
             else
             {
-                Mangas = await _mangaRepository.GetRecentMangaAsync(10);
+                (Mangas, totalManga) = await _mangaRepository.GetMangaPagedAsync(PageNumber, PageSize);
             }
+
+            TotalPages = (int)Math.Ceiling(totalManga / (double)PageSize);
         }
     }
 }
