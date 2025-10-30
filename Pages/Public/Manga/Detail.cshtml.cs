@@ -69,19 +69,19 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             }
 
 
-            if (userId == null) {
-                return RedirectToPage("/Auth/Login");
-            }
-            readingHistory = _context.ReadingHistories.FirstOrDefault(r => r.MangaId == mangaId && r.UserId == userId);
+            if (userId != null) {
+                readingHistory = _context.ReadingHistories.FirstOrDefault(r => r.MangaId == mangaId && r.UserId == userId);
 
-            if(readingHistory == null)
-            {
-                readingContinueId = null;
+                if (readingHistory == null)
+                {
+                    readingContinueId = null;
+                }
+                else
+                {
+                    readingContinueId = readingHistory.ChapterId;
+                }
             }
-            else
-            {
-                readingContinueId = readingHistory.ChapterId;
-            }
+            
 
             if (Manga.Chapters.Any())
             {

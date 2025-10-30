@@ -83,25 +83,29 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
             //add history
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var checkHistory = _context.ReadingHistories.FirstOrDefault(c => c.UserId == userId && c.MangaId == MangaId);
-            if (checkHistory != null)
+            if(userId != null)
             {
-                checkHistory.ChapterId = chapterId;
-                checkHistory.ReadAt = DateTime.Now;
-
-                _context.ReadingHistories.Update(checkHistory);
-            }
-            else
-            {
-                _context.ReadingHistories.Add(new ReadingHistory
+                var checkHistory = _context.ReadingHistories.FirstOrDefault(c => c.UserId == userId && c.MangaId == MangaId);
+                if (checkHistory != null)
                 {
-                    UserId = userId,
-                    MangaId = MangaId,
-                    ChapterId = chapterId,
-                    ReadAt = DateTime.Now,
-                });
+                    checkHistory.ChapterId = chapterId;
+                    checkHistory.ReadAt = DateTime.Now;
+
+                    _context.ReadingHistories.Update(checkHistory);
+                }
+                else
+                {
+                    _context.ReadingHistories.Add(new ReadingHistory
+                    {
+                        UserId = userId,
+                        MangaId = MangaId,
+                        ChapterId = chapterId,
+                        ReadAt = DateTime.Now,
+                    });
+                }
+                _context.SaveChanges();
             }
-            _context.SaveChanges();
+
 
             Comments = _context.Comments
            .Include(c => c.Chapter)

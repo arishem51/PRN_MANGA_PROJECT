@@ -51,7 +51,8 @@
 							</div>
 
 							<p class="comment-content">@comment.Content</p>
-								<form method="post" asp-page="Chapter" asp-page-handler="EditComment" class="edit-form" class="comment-action-form" style="display: none;">
+								<form method="post" asp-page="Chapter" asp-page-handler="EditComment" class="edit-form comment-action-form"
+									  style="display: none;">
 								<textarea name="Input.Content" class="form-control" rows="2">@comment.Content</textarea>
 								<input type="hidden" name="Input.Id" value="@comment.Id" />
 								<input type="hidden" name="Input.ChapterId" value="@comment.ChapterId" />
@@ -113,8 +114,8 @@
 								</div>
 							</form>
 
-							@* <partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies" /> *@
-								@if (comment.Replies != null && comment.Replies.Any())
+							<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies" />
+								@* @if (comment.Replies != null && comment.Replies.Any())
 								{
 									<button type="button"
 											class="btn btn-link btn-sm btn-show-replies"
@@ -125,7 +126,7 @@
 									<div id="reply-list-@comment.Id" class="reply-list" style="display:none;">
 										<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies" />
 									</div>
-								}
+								} *@
 
 						</div>
 					</div>

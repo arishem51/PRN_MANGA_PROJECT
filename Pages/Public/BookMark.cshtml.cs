@@ -34,7 +34,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public
             else
             {
                 // Nếu người dùng chưa đăng nhập, chuyển hướng đến trang đăng nhập
-                return RedirectToPage("/Account/Login");
+                return RedirectToPage("/Auth/Login");
             }
 
             return Page();
