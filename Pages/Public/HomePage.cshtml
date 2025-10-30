@@ -11,7 +11,7 @@
 
 	<!-- ======= Thanh chức năng ======= -->
 	<div class="d-flex justify-content-center gap-3 mb-4">
-		<a asp-page="/Public/User/ReadingHistory" class="btn btn-outline-secondary">
+		<a asp-page="/Public/Manga/ReadingHistory" class="btn btn-outline-secondary">
 			<i class="bi bi-clock-history"></i> Lịch sử đọc
 		</a>
 
@@ -61,6 +61,34 @@
 	{
 		<p class="text-center text-muted mt-4">Không tìm thấy truyện nào.</p>
 	}
+	@if (Model.TotalPages > 1)
+	{
+		<nav aria-label="Manga pagination" class="d-flex justify-content-center mt-4">
+			<ul class="pagination">
+				@if (Model.PageNumber > 1)
+				{
+					<li class="page-item">
+						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchTerm="@Model.SearchTerm">Previous</a>
+					</li>
+				}
+
+				@for (int i = 1; i <= Model.TotalPages; i++)
+				{
+					<li class="page-item @(i == Model.PageNumber ? "active" : "")">
+						<a class="page-link" asp-route-PageNumber="@i" asp-route-SearchTerm="@Model.SearchTerm">@i</a>
+					</li>
+				}
+
+				@if (Model.PageNumber < Model.TotalPages)
+				{
+					<li class="page-item">
+						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchTerm="@Model.SearchTerm">Next</a>
+					</li>
+				}
+			</ul>
+		</nav>
+	}
+
 </div>
 
 <!-- ======= POPUP CHỌN THỂ LOẠI ======= -->

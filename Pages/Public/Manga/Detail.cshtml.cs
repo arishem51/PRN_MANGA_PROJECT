@@ -6,6 +6,8 @@ using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels;
 using PRN_MANGA_PROJECT.Services;
+using System.Security.Claims;
+
 
 namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 {
@@ -31,8 +33,21 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
         [BindProperty]
         public List<Models.Entities.Tag> Tags { get; set; } = new List<Models.Entities.Tag>();
 
+
+        [BindProperty]
+        public ReadingHistory readingHistory { get; set; }
+        [BindProperty]
+        public int? readingContinueId { get; set; }
+        public int? firstChapterId { get; set; }
+        public int? lastestChapterId { get; set; }
+
         public async Task<IActionResult> OnGet(int mangaId)
         {
+            if(mangaId == null)
+            {
+                return RedirectToPage("/Public/Error");
+
+            }
             Manga = _context.Mangas
                             .Include(m => m.Chapters)
                             .Include(m => m.MangaTags)
@@ -41,7 +56,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
             if (Manga == null)
             {
-                return NotFound();
+                return RedirectToPage("/Public/Error");
             }
 
             chapters = Manga.Chapters.OrderByDescending(c => int.TryParse(c.ChapterNumber, out int num) ? num : 0).ToList();
@@ -53,6 +68,31 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 IsBookmarked = await _bookmarkService.IsMangaBookmarkedAsync(userId, mangaId);
             }
 
+
+            if (userId == null) {
+                return RedirectToPage("/Auth/Login");
+            }
+            readingHistory = _context.ReadingHistories.FirstOrDefault(r => r.MangaId == mangaId && r.UserId == userId);
+
+            if(readingHistory == null)
+            {
+                readingContinueId = null;
+            }
+            else
+            {
+                readingContinueId = readingHistory.ChapterId;
+            }
+
+            if (Manga.Chapters.Any())
+            {
+                firstChapterId = Manga.Chapters.OrderBy(c => c.ChapterNumber).FirstOrDefault().Id;
+                lastestChapterId = Manga.Chapters.OrderByDescending(c => c.ChapterNumber).FirstOrDefault().Id;
+            }
+            else
+            {
+                firstChapterId = null;
+                lastestChapterId = null;
+            }
             return Page();
         }
 

@@ -12,5 +12,9 @@ namespace PRN_MANGA_PROJECT.Repositories
         Task<IEnumerable<Manga>> GetMangaByStatusAsync(string status);
         Task<IEnumerable<Manga>> GetPopularMangaAsync(int count);
         Task<IEnumerable<Manga>> GetRecentMangaAsync(int count);
+        Task<(IEnumerable<Manga> Mangas, int TotalCount)> GetMangaPagedAsync(int pageNumber, int pageSize);
+        Task<(IEnumerable<Manga> Mangas, int TotalCount)> SearchMangaPagedAsync(string searchTerm, int pageNumber, int pageSize);
+
+
     }
 }

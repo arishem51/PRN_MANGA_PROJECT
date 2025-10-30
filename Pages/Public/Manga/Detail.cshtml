@@ -59,7 +59,6 @@
                         <i class="fas fa-arrow-left"></i> Quay lại
                     </a>
 
-
                     <!-- Nút Lưu Manga -->
                     <form method="post" asp-page-handler="SaveBookmark" class="mt-3" style="display: @(Model.IsBookmarked ? "none" : "block");">
                         <button type="submit" class="btn btn-success">
@@ -79,6 +78,24 @@
                         <div class="alert alert-info mt-4">
                             @TempData["Message"]
                         </div>
+                    }
+                    @if (Model.readingContinueId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.readingContinueId" class="btn btn-success">
+                            <i class="fas fa-arrow-right"></i> Reading Continue
+                        </a>
+                    }
+                    @if(Model.firstChapterId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.firstChapterId" class="btn btn-primary">
+                            Reading Chapter 1
+                        </a>
+                    }
+                    @if(Model.lastestChapterId != null)
+                    {
+                        <a asp-page="/Public/Manga/Chapter" asp-route-chapterId="@Model.lastestChapterId" class="btn btn-primary">
+                            Reading Lastest Chapter
+                        </a>
                     }
                 </div>
             </div>
@@ -132,13 +149,7 @@
     </div>
 </div>
 
-<!-- Hiển thị thông báo thành công hoặc lỗi -->
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-info mt-4">
-        @TempData["Message"]
-    </div>
-}
+
 
 <style>
     /* Chapter List Container với Scroll */
