@@ -63,6 +63,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IBookmarkService, BookmarkService>();
 
 // ===== Identity =====
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -79,28 +80,12 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // ===== Authentication (Google optional) =====
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-});
-
-var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
-var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-
-if (!string.IsNullOrEmpty(googleClientId) &&
-    !string.IsNullOrEmpty(googleClientSecret) &&
-    googleClientId != "your-google-client-id-here" &&
-    googleClientSecret != "your-google-client-secret-here")
-{
-    builder.Services.AddAuthentication()
-        .AddGoogle(options =>
-        {
-            options.ClientId = googleClientId;
-            options.ClientSecret = googleClientSecret;
-        });
-}
+builder.Services.AddAuthentication()
+    .AddGoogle("Google", options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    });
 
 // ===== HTTP Client for MangaDex API =====
 builder.Services.AddHttpClient("MangaDexClient", client =>
@@ -176,4 +161,5 @@ app.MapControllers();
 app.MapRazorPages();
 app.MapHub<AccountHub>("/accountHub");
 app.MapHub<TagHub>("/tagHub");
+app.MapHub<CommentHub>("/commentHub"); // Include CommentHub if required
 app.Run();

@@ -27,5 +27,7 @@ namespace PRN_MANGA_PROJECT.Models.Entities
         public virtual Chapter Chapter { get; set; } = null!;
         public virtual Comment? ParentComment { get; set; }
         public virtual ICollection<Comment> Replies { get; set; } = new List<Comment>();
+        public virtual ICollection<CommentLike> Likes { get; set; } = new List<CommentLike>();
+
     }
 }

@@ -6,5 +6,7 @@ namespace PRN_MANGA_PROJECT.Repositories
     {
         Task<IEnumerable<Bookmark>> GetBookmarksByUserIdAsync(string userId);
         Task<Bookmark?> GetBookmarkByUserAndMangaAsync(string userId, int mangaId);
+        Task AddBookmarkAsync(Bookmark bookmark);
+        Task RemoveBookmark(Bookmark bookmark);
     }
 }

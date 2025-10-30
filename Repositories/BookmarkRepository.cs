@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 
@@ -25,6 +25,16 @@ namespace PRN_MANGA_PROJECT.Repositories
         {
             return await _dbSet
                 .FirstOrDefaultAsync(b => b.UserId == userId && b.MangaId == mangaId);
+        }
+        public async Task AddBookmarkAsync(Bookmark bookmark)
+        {
+            await _context.Bookmarks.AddAsync(bookmark);
+            await _context.SaveChangesAsync();
+        }
+        public async Task RemoveBookmark(Bookmark bookmark)
+        {
+            _context.Bookmarks.Remove(bookmark);
+            await _context.SaveChangesAsync(); // Lưu thay đổi vào cơ sở dữ liệu
         }
     }
 }

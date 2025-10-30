@@ -638,16 +638,13 @@
 	}
 </div>
 
-<form method="post" asp-page-handler="Comment">
+<form method="post" asp-page-handler="Comment" class="comment-action-form">
 	<div class="panel">
 		<div class="panel-body">
 			<input type="hidden" asp-for="Input.ChapterId" value="@Model.Chapter.Id" />
 			<textarea class="form-control" rows="2" placeholder="What are you thinking?" asp-for="Input.Content"></textarea>
 			<div class="mar-top clearfix">
-				<button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Share</button>
-				<a class="btn btn-trans btn-icon fa fa-video-camera add-tooltip" href="#"></a>
-				<a class="btn btn-trans btn-icon fa fa-camera add-tooltip" href="#"></a>
-				<a class="btn btn-trans btn-icon fa fa-file add-tooltip" href="#"></a>
+				<button class="btn btn-sm btn-primary pull-right" type="submit"><i class="fa fa-pencil fa-fw"></i> Comment</button>
 			</div>
 		</div>
 	</div>
@@ -743,10 +740,10 @@
 			const followBtn = document.querySelector('.follow-btn');
 			if (followBtn.classList.contains('following')) {
 				followBtn.classList.remove('following');
-				followBtn.innerHTML = '<i class="fa fa-bookmark"></i><span>Theo Dõi</span>';
+				followBtn.innerHTML = '<i class="fa fa-bookmark"></i><span>Follow</span>';
 			} else {
 				followBtn.classList.add('following');
-				followBtn.innerHTML = '<i class="fa fa-check"></i><span>Đã Theo Dõi</span>';
+				followBtn.innerHTML = '<i class="fa fa-check"></i><span>Followed</span>';
 			}
 		}
 		

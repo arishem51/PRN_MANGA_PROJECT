@@ -1,0 +1,41 @@
+﻿@page
+@model PRN_MANGA_PROJECT.Pages.Public.BookMarkModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Truyện Đã Lưu";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Danh Sách Truyện Đã Lưu</h2>
+
+    <!-- Hiển thị các truyện đã lưu -->
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        @foreach (var manga in Model.BookmarkedMangas)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <a asp-page="/Public/Manga/Detail" asp-route-mangaId="@manga.Id">
+                        <img src="@manga.CoverImageUrl"
+                             class="card-img-top"
+                             alt="@manga.Title"
+                             style="height:300px; object-fit:cover; cursor:pointer;">
+                    </a>
+                    <div class="card-body">
+                        <h5 class="card-title">@manga.Title</h5>
+                        <p class="card-text text-muted">
+                            <strong>@manga.Author</strong><br />
+                            <small>@(manga.Description?.Length > 80 ? manga.Description.Substring(0, 80) + "..." : manga.Description)</small>
+                        </p>
+                        <span class="badge bg-info">@manga.Status</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.BookmarkedMangas.Any())
+    {
+        <p class="text-center text-muted mt-4">Bạn chưa lưu truyện nào.</p>
+    }
+</div>
