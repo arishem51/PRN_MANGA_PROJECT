@@ -101,7 +101,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                return RedirectToPage("/Account/Login");
+                return RedirectToPage("/Auth/Login");
             }
 
             var result = await _bookmarkService.SaveBookmarkAsync(userId, mangaId);

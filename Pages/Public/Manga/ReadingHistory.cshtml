@@ -1,4 +1,54 @@
 ﻿@page
 @model PRN_MANGA_PROJECT.Pages.Public.Manga.ReadingHistoryModel
 @{
+    ViewData["Title"] = "Lịch sử đọc truyện";
 }
+
+<div class="container mt-4" id="reading-history-container">
+    <h2 class="mb-3">@ViewData["Title"]</h2>
+
+    @if (Model.readingHistories == null || !Model.readingHistories.Any())
+    {
+        <div class="alert alert-info">
+            Bạn chưa đọc truyện nào gần đây.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var history in Model.readingHistories)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@history.Manga?.CoverImageUrl" class="card-img-top" alt="@history.Manga?.Title" />
+                        <div class="card-body">
+                            <h5 class="card-title">@history.Manga?.Title</h5>
+                            <p class="card-text">
+                                Chương cuối đọc: <strong>@history.Chapter.ChapterNumber</strong><br />
+                                Ngày đọc: @history.ReadAt.ToString("dd/MM/yyyy")
+                            </p>
+                            <a asp-page="/Public/Manga/Chapter"
+                               asp-route-mangaId="@history.MangaId"
+                               asp-route-chapterId="@history.ChapterId"
+                               class="btn btn-primary btn-sm">
+                                Tiếp tục đọc
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-page="/Public/Manga/ReadingHistory"
+                           asp-route-pageNumber="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
