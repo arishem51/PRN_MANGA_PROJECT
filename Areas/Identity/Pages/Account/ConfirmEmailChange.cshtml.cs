@@ -2,15 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.WebUtilities;
+using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account
 {
@@ -18,11 +20,14 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IHubContext<ChangeEmailHub> _hub;
 
-        public ConfirmEmailChangeModel(UserManager<User> userManager, SignInManager<User> signInManager)
+        public ConfirmEmailChangeModel(UserManager<User> userManager, SignInManager<User> signInManager ,
+            IHubContext<ChangeEmailHub> hub)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _hub = hub;
         }
 
         /// <summary>
@@ -66,6 +71,7 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Thank you for confirming your email change.";
+            await _hub.Clients.All.SendAsync("LoadChangePassword");
             return Page();
         }
     }

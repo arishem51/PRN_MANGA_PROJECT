@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
 
 namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
@@ -20,15 +22,17 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<ChangePasswordModel> _logger;
-
+        private readonly IHubContext<ChangeEmailHub> _hub;
         public ChangePasswordModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            ILogger<ChangePasswordModel> logger)
+            ILogger<ChangePasswordModel> logger,
+            IHubContext<ChangeEmailHub> hub)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _hub = hub;
         }
 
         [BindProperty]
@@ -99,7 +103,7 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
             await _signInManager.RefreshSignInAsync(user);
             _logger.LogInformation("User changed their password successfully.");
             StatusMessage = "Your password has been changed.";
-
+            await _hub.Clients.All.SendAsync("LoadChangePassword");
             return RedirectToPage();
         }
     }

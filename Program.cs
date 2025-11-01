@@ -171,4 +171,5 @@ app.MapHub<TagHub>("/tagHub");
 app.MapHub<CommentHub>("/commentHub");
 app.MapHub<ProfileHub>("/profileHub");
 app.MapHub<ReadingHistoryHub>("/historyHub");
+app.MapHub<ChangeEmailHub>("/changeEmailHub");
 app.Run();

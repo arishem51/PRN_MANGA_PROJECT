@@ -100,3 +100,36 @@
     }
 
 });
+
+$(() => {
+    // Kết nối tới ProfileHub
+    var profileConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/profileHub")
+        .build();
+
+    profileConnection.start()
+        .then(() => console.log("✅ SignalR connected to ProfileHub"))
+        .catch(err => console.error("❌ Không thể kết nối ProfileHub:", err.toString()));
+
+    // Khi server gửi tín hiệu LoadProfile
+    profileConnection.on("LoadProfile", function () {
+        console.log("🔁 Nhận tín hiệu cập nhật profile, đang reload trang...");
+        location.reload();
+    });
+});
+$(() => {
+    // Kết nối tới ProfileHub
+    var profileConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/changeEmailHub")
+        .build();
+
+    profileConnection.start()
+        .then(() => console.log("✅ SignalR connected to ProfileHub"))
+        .catch(err => console.error("❌ Không thể kết nối ProfileHub:", err.toString()));
+
+    // Khi server gửi tín hiệu LoadProfile
+    profileConnection.on("LoadChangePassword", function () {
+        console.log("🔁 Nhận tín hiệu cập nhật profile, đang reload trang...");
+        location.reload(); 
+    });
+});

@@ -178,3 +178,4 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
 
     }
 }
+
