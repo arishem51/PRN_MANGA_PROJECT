@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using PRN_MANGA_PROJECT.Models.Entities;
+using PRN_MANGA_PROJECT.Services.Auth;
 
 namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
 {
@@ -23,15 +24,18 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
-
+        private readonly IUserService _service;
         public EmailModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUserService service
+            )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _service = service;
         }
 
         /// <summary>
@@ -116,7 +120,8 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
             }
 
             var email = await _userManager.GetEmailAsync(user);
-            if (Input.NewEmail != email)
+            var checkEmailExist = await _service.IsExistEmail(Input.NewEmail);
+            if (Input.NewEmail != email && !checkEmailExist)
             {
                 var userId = await _userManager.GetUserIdAsync(user);
                 var code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
@@ -135,7 +140,7 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
                 return RedirectToPage();
             }
 
-            StatusMessage = "Your email is unchanged.";
+            StatusMessage = "Your email is invalid.";
             return RedirectToPage();
         }
 

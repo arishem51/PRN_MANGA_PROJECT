@@ -21,6 +21,55 @@
                 <label asp-for="Input.PhoneNumber" class="form-label"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
+
+            <!-- First Name -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.FirstName" class="form-control" placeholder="Enter your first name" />
+                <label asp-for="Input.FirstName"></label>
+                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+            </div>
+
+            <!-- Last Name -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.LastName" class="form-control" placeholder="Enter your last name" />
+                <label asp-for="Input.LastName"></label>
+                <span asp-validation-for="Input.LastName" class="text-danger"></span>
+            </div>
+
+            <!-- Gender -->
+            <div class="mb-3">
+                <label class="form-label d-block">Gender</label>
+                <div class="form-check form-check-inline">
+                    <input asp-for="Input.Gender" class="form-check-input" type="radio" value="true" checked="@Model.Input.Gender" />
+                    <label class="form-check-label">Male</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input asp-for="Input.Gender" class="form-check-input" type="radio" value="false" checked="@(Model.Input.Gender == false)" />
+                    <label class="form-check-label">Female</label>
+                </div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.BirthDate" class="form-control" type="date" />
+                <label asp-for="Input.BirthDate"></label>
+                <span asp-validation-for="Input.BirthDate" class="text-danger"></span>
+            </div>
+
+
+            <!-- Address -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Address" class="form-control" placeholder="Enter your address" />
+                <label asp-for="Input.Address"></label>
+                <span asp-validation-for="Input.Address" class="text-danger"></span>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Enter your phone number" />
+                <label asp-for="Input.PhoneNumber"></label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+
             <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </form>
     </div>
