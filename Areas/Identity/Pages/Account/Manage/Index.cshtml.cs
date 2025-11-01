@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
 
 namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
@@ -17,13 +19,15 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-
+        private readonly IHubContext<ProfileHub> _hub;
         public IndexModel(
             UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            IHubContext<ProfileHub> hub)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _hub = hub;
         }
 
        
@@ -158,6 +162,7 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
 
             // Gọi UpdateAsync để lưu thay đổi vào DB
             var updateResult = await _userManager.UpdateAsync(user);
+
             if (!updateResult.Succeeded)
             {
                 StatusMessage = "Unexpected error when trying to update profile.";
@@ -166,6 +171,7 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
+            await _hub.Clients.All.SendAsync("LoadProfile");
             return RedirectToPage();
         }
 

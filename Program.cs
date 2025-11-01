@@ -161,5 +161,6 @@ app.MapControllers();
 app.MapRazorPages();
 app.MapHub<AccountHub>("/accountHub");
 app.MapHub<TagHub>("/tagHub");
-app.MapHub<CommentHub>("/commentHub"); // Include CommentHub if required
+app.MapHub<CommentHub>("/commentHub");
+app.MapHub<ProfileHub>("/profileHub");
 app.Run();
