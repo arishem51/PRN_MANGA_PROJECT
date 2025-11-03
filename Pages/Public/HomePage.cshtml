@@ -121,3 +121,22 @@
 		</div>
 	</div>
 </div>
+
+@section Scripts {
+
+	<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+	<script>
+		const connection = new signalR.HubConnectionBuilder()
+			.withUrl("/tagHub")
+			.build();
+
+		connection.on("ReloadTags", () => {
+			console.log("🔄 Tag list updated (real-time)");
+			location.reload(); // hoặc gọi Ajax refresh danh sách nếu muốn mượt hơn
+		});
+
+		connection.start()
+			.then(() => console.log("✅ Connected to TagHub"))
+			.catch(err => console.error("SignalR Error:", err));
+	</script>
+}

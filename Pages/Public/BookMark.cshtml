@@ -39,3 +39,16 @@
         <p class="text-center text-muted mt-4">Bạn chưa lưu truyện nào.</p>
     }
 </div>
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/bookmarkHub")
+        .build();
+
+    connection.on("ReloadBookmarks", function () {
+        console.log("🔄 Reload triggered!");
+        location.reload(); // hoặc AJAX để cập nhật phần danh sách
+    });
+
+    connection.start().catch(err => console.error(err.toString()));
+</script>

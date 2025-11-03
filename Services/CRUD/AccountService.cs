@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels.CRUD;
 using PRN_MANGA_PROJECT.Repositories.CRUD;
@@ -9,32 +11,42 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
     {
         private readonly IAccountRepository _repo;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IHubContext<AccountHub> _hubContext;
 
-        public AccountService(IAccountRepository repo, UserManager<User> userManager)
+        public AccountService(
+            IAccountRepository repo,
+            UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IHubContext<AccountHub> hubContext)
         {
             _repo = repo;
             _userManager = userManager;
+            _roleManager = roleManager;
+            _hubContext = hubContext;
         }
 
         public async Task<IEnumerable<AccountViewModel>> GetAllWithRolesAsync()
         {
-            var users = _userManager.Users.ToList();
+            var users = await _repo.GetAllAsync();
             var list = new List<AccountViewModel>();
+
             foreach (var u in users)
             {
                 var roles = await _userManager.GetRolesAsync(u);
                 list.Add(new AccountViewModel
                 {
                     Id = u.Id,
-                    Username = u.UserName,
-                    Email = u.Email,
-                    Role = roles.FirstOrDefault() ?? "No Role"
+                    Username = u.UserName ?? "",
+                    Email = u.Email ?? "",
+                    Role = roles.FirstOrDefault() ?? "(Chưa gán)",
+                    IsActive = u.IsActive
                 });
             }
             return list;
         }
 
-        public Task<User> GetById(string id) => _repo.GetByIdAsync(id);
+        public async Task<User?> GetById(string id) => await _repo.GetByIdAsync(id);
 
         public async Task<IdentityResult> Create(string username, string email, string password, string roleName)
         {
@@ -43,18 +55,55 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
                 UserName = username,
                 Email = email,
                 IsActive = true,
-                EmailConfirmed = true // ✅ Xác nhận email ngay khi tạo
+                EmailConfirmed = true
             };
 
-            return await _repo.CreateAsync(user, password, roleName);
+            var result = await _userManager.CreateAsync(user, password);
+            if (!result.Succeeded) return result;
+
+            await AssignRoleAsync(user, roleName);
+            await _hubContext.Clients.All.SendAsync("ReloadUsers");
+
+            return IdentityResult.Success;
         }
 
-        public Task<IdentityResult> Update(User user) => _repo.UpdateAsync(user);
-        public Task<IdentityResult> Delete(string id) => _repo.DeleteAsync(id);
+        public async Task<IdentityResult> Update(User user)
+        {
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                await _hubContext.Clients.All.SendAsync("ReloadUsers");
+            return result;
+        }
+
+        public async Task<IdentityResult> Delete(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+            user.IsActive = false;
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                await _hubContext.Clients.All.SendAsync("ReloadUsers");
+
+            return result;
+        }
 
         public async Task<IdentityResult> AssignRoleAsync(User user, string roleName)
         {
-            return await _repo.AssignRoleAsync(user, roleName);
+            if (!await _roleManager.RoleExistsAsync(roleName))
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Any())
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+            var result = await _userManager.AddToRoleAsync(user, roleName);
+
+            if (result.Succeeded)
+                await _hubContext.Clients.All.SendAsync("ReloadUsers");
+
+            return result;
         }
     }
 }

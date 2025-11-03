@@ -159,6 +159,7 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorPages();
+app.MapHub<BookmarkHub>("/bookmarkHub");
 app.MapHub<AccountHub>("/accountHub");
 app.MapHub<TagHub>("/tagHub");
 app.MapHub<CommentHub>("/commentHub"); // Include CommentHub if required

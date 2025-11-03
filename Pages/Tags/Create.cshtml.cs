@@ -1,28 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.SignalR;
-using PRN_MANGA_PROJECT.Data;
-using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
+using PRN_MANGA_PROJECT.Services;
 using System.Threading.Tasks;
 
 namespace PRN_MANGA_PROJECT.Pages.Tags
 {
     public class CreateModel : PageModel
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IHubContext<TagHub> _hubContext;
+        private readonly ITagService _tagService;
 
-        public CreateModel(ApplicationDbContext context, IHubContext<TagHub> hubContext)
+        public CreateModel(ITagService tagService)
         {
-            _context = context;
-            _hubContext = hubContext;
+            _tagService = tagService;
         }
 
         [BindProperty]
         public Tag Tag { get; set; } = new Tag();
 
-        public bool IsCreated { get; set; } = false; // ✅ flag hiển thị thông báo
+        public bool IsCreated { get; set; } = false;
 
         public IActionResult OnGet() => Page();
 
@@ -31,17 +27,21 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
             if (!ModelState.IsValid)
                 return Page();
 
-            _context.Tags.Add(Tag);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _tagService.CreateTagAsync(Tag);
+                IsCreated = true;
+                ModelState.Clear();
+                Tag = new Tag(); // reset form
+            }
+            catch (InvalidOperationException ex)
+            {
+                // ✅ hiển thị thông báo lỗi trùng tên
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
 
-            // ✅ Gửi tín hiệu realtime sau khi tạo
-            await _hubContext.Clients.All.SendAsync("ReloadTags");
-
-            IsCreated = true; // ✅ hiển thị thông báo
-            ModelState.Clear(); // ✅ xóa dữ liệu cũ trong form
-            Tag = new Tag(); // reset form
-
-            return Page(); // ❌ không Redirect, giữ nguyên trang
+            return Page();
         }
+
     }
 }

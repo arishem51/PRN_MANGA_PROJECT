@@ -11,7 +11,7 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        private readonly IHubContext<TagHub> _hubContext; // ✅ thêm Hub để bắn tín hiệu realtime
+        private readonly IHubContext<TagHub> _hubContext;
 
         public IndexModel(ApplicationDbContext context, IHubContext<TagHub> hubContext)
         {
@@ -24,6 +24,12 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+
+        public int PageSize { get; set; } = 5; // ✅ mỗi trang 5 bản ghi
+        public int TotalPages { get; set; }
+
         public async Task OnGetAsync()
         {
             var query = _context.Tags.AsQueryable();
@@ -33,12 +39,16 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
                 query = query.Where(t => t.Name.Contains(SearchTerm));
             }
 
+            var totalCount = await query.CountAsync();
+            TotalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+
             Tags = await query
                 .OrderByDescending(t => t.CreatedAt)
+                .Skip((PageNumber - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
         }
 
-        // ===== POST: Ẩn Tag =====
         public async Task<IActionResult> OnPostDeactivateAsync(int id)
         {
             var tag = await _context.Tags.FindAsync(id);
@@ -48,14 +58,11 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
             tag.IsActive = false;
             await _context.SaveChangesAsync();
 
-            // ✅ Phát tín hiệu realtime
             await _hubContext.Clients.All.SendAsync("ReloadTags");
-
             TempData["SuccessMessage"] = $"Đã ẩn thể loại: {tag.Name}";
-            return RedirectToPage();
+            return RedirectToPage(new { PageNumber, SearchTerm });
         }
 
-        // ===== POST: Kích hoạt Tag =====
         public async Task<IActionResult> OnPostActivateAsync(int id)
         {
             var tag = await _context.Tags.FindAsync(id);
@@ -65,11 +72,9 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
             tag.IsActive = true;
             await _context.SaveChangesAsync();
 
-            // ✅ Phát tín hiệu realtime
             await _hubContext.Clients.All.SendAsync("ReloadTags");
-
             TempData["SuccessMessage"] = $"Đã kích hoạt thể loại: {tag.Name}";
-            return RedirectToPage();
+            return RedirectToPage(new { PageNumber, SearchTerm });
         }
     }
 }

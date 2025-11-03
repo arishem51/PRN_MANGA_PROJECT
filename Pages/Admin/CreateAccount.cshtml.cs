@@ -55,18 +55,7 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
             if (!ModelState.IsValid)
                 return Page();
 
-            // ✅ Kiểm tra username/email trùng
-            if (await _userManager.FindByNameAsync(Input.Username) != null)
-            {
-                ModelState.AddModelError("", "Tên đăng nhập đã tồn tại.");
-                return Page();
-            }
-
-            if (await _userManager.FindByEmailAsync(Input.Email) != null)
-            {
-                ModelState.AddModelError("", "Email đã được sử dụng.");
-                return Page();
-            }
+            
 
             // ✅ Sinh mật khẩu ngẫu nhiên
             string password = GenerateRandomPassword();

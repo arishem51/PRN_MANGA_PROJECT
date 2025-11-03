@@ -101,5 +101,6 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .Take(pageSize)
                 .ToListAsync();
         }
+        public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
     }
 }
