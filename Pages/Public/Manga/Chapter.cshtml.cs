@@ -9,6 +9,8 @@ using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels;
+using PRN_MANGA_PROJECT.Services.CommentService;
+using PRN_MANGA_PROJECT.Services.HistoryService;
 using System.Security.Claims;
 using System.Security.Claims;
 using System.Xml.Linq;
@@ -19,16 +21,24 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
     public class ChapterModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICommentService _commentService;
+        private readonly IReadingHistoryService _readingHistoryService;
+
         [BindProperty]
 
         public CommentViewModel Input { get; set; } = new CommentViewModel();
 
         private readonly IHubContext<CommentHub> _hubContext;
 
-        public ChapterModel(ApplicationDbContext context , IHubContext<CommentHub> hubContext)
+        public ChapterModel(ApplicationDbContext context,
+                    IHubContext<CommentHub> hubContext,
+                    ICommentService commentService,
+                    IReadingHistoryService readingHistoryService)
         {
             _context = context;
+            _commentService = commentService;
             _hubContext = hubContext;
+            _readingHistoryService = readingHistoryService;
         }
 
         public Models.Entities.Chapter Chapter { get; set; } = new Models.Entities.Chapter();
@@ -83,25 +93,11 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
             //add history
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var checkHistory = _context.ReadingHistories.FirstOrDefault(c => c.UserId == userId && c.MangaId == MangaId);
-            if (checkHistory != null)
+            if (userId != null)
             {
-                checkHistory.ChapterId = chapterId;
-                checkHistory.ReadAt = DateTime.Now;
+                await _readingHistoryService.AddOrUpdateHistoryAsync(userId, MangaId, chapterId);
+            }
 
-                _context.ReadingHistories.Update(checkHistory);
-            }
-            else
-            {
-                _context.ReadingHistories.Add(new ReadingHistory
-                {
-                    UserId = userId,
-                    MangaId = MangaId,
-                    ChapterId = chapterId,
-                    ReadAt = DateTime.Now,
-                });
-            }
-            _context.SaveChanges();
 
             Comments = _context.Comments
            .Include(c => c.Chapter)
@@ -161,141 +157,46 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
         public async Task<IActionResult> OnPostComment()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+            if (!ModelState.IsValid) return Page();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-           if(userId == null)
-            {
-                return RedirectToPage("/Auth/Login");
+            if (userId == null) return RedirectToPage("/Auth/Login");
 
-            }
-            var comment = new Comment
-            {
-                UserId = userId,
-                ChapterId = Input.ChapterId,
-                Content = Input.Content,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-            _context.Comments.Add(comment);
-            _context.SaveChanges();
-            await _hubContext.Clients.All.SendAsync("LoadComments");
+            await _commentService.AddCommentAsync(userId, Input.ChapterId, Input.Content);
             return RedirectToPage(new { chapterId = Input.ChapterId });
         }
 
         public async Task<IActionResult> OnPostReply()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if(userId == null)
-            {
-                return RedirectToPage("/Auth/Login");
+            if (!ModelState.IsValid) return Page();
 
-            }
-            var comment = new Comment
-            {
-                UserId = userId,
-                ChapterId = Input.ChapterId,
-                Content = Input.Content,
-                ParentCommentId = Input.ParentCommentId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-            _context.Comments.Add(comment);
-            _context.SaveChanges();
-            await _hubContext.Clients.All.SendAsync("LoadComments");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return RedirectToPage("/Auth/Login");
+
+            await _commentService.ReplyAsync(userId, Input.ChapterId, Input.Content, Input.ParentCommentId!.Value);
             return RedirectToPage(new { chapterId = Input.ChapterId });
         }
 
         public async Task<IActionResult> OnPostDeleteComment()
         {
-            var comment = await _context.Comments.FindAsync(Input.Id);
-            if (comment == null)
-            {
-                return RedirectToPage("/Auth/Login");
-            }
-
-            var replies = await _context.Comments
-       .Where(r => r.ParentCommentId == comment.Id)
-       .ToListAsync();
-
-            foreach (var reply in replies)
-            {
-                reply.ParentCommentId = null;
-            }
-
-            _context.Comments.Remove(comment);
-            await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("LoadComments");
+            await _commentService.DeleteCommentAsync(Input.Id);
             return RedirectToPage(new { chapterId = Input.ChapterId });
         }
 
-        public async Task<IActionResult> OnPostEditComment(int commentId)
+        public async Task<IActionResult> OnPostEditComment()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            var comment = await _context.Comments.FindAsync(Input.Id);
-            if (comment == null)
-                return RedirectToPage("/Auth/Login");
-
-            comment.Content = Input.Content;
-            _context.Update(comment);
-            await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("LoadComments");
+            if (!ModelState.IsValid) return Page();
+            await _commentService.EditCommentAsync(Input.Id, Input.Content);
             return RedirectToPage(new { chapterId = Input.ChapterId });
         }
 
         public async Task<IActionResult> OnPostLikeComment(LikeRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-                return RedirectToPage("/Auth/Login");
+            if (userId == null) return RedirectToPage("/Auth/Login");
 
-            var comment = await _context.Comments.FindAsync(request.CommentId);
-            if (comment == null)
-                return NotFound();
-
-            var existing = await _context.CommentLikes
-                .FirstOrDefaultAsync(l => l.CommentId == request.CommentId && l.UserId == userId);
-
-            if (existing != null)
-            {
-                if (existing.ReactionType == request.ReactionType)
-                {
-                    _context.CommentLikes.Remove(existing);
-                }
-                else
-                {
-                    existing.ReactionType = request.ReactionType;
-                }
-            }
-            else
-            {
-                _context.CommentLikes.Add(new CommentLike
-                {
-                    CommentId = request.CommentId,
-                    UserId = userId,
-                    ReactionType = request.ReactionType
-                });
-            }
-
-            await _context.SaveChangesAsync();
-            Console.WriteLine($"SignalR send LoadComments for CommentId={request.CommentId}");
-
-            await _hubContext.Clients.All.SendAsync("LoadComments");
+            await _commentService.LikeCommentAsync(userId, request.CommentId, request.ReactionType);
             return new JsonResult(new { success = true });
-
         }
 
 

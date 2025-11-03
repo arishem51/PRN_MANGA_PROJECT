@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using MudBlazor.Services;
 using PRN_MANGA_PROJECT;
 using PRN_MANGA_PROJECT.Data;
@@ -9,11 +10,15 @@ using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Repositories;
 using PRN_MANGA_PROJECT.Repositories.Auth;
+using PRN_MANGA_PROJECT.Repositories.CommentRepository;
 using PRN_MANGA_PROJECT.Repositories.CRUD;
+using PRN_MANGA_PROJECT.Repositories.ReadingHistoryRepository;
 using PRN_MANGA_PROJECT.Services;
 using PRN_MANGA_PROJECT.Services.Auth;
+using PRN_MANGA_PROJECT.Services.CommentService;
 using PRN_MANGA_PROJECT.Services.CRUD;
 using PRN_MANGA_PROJECT.Services.EmailService;
+using PRN_MANGA_PROJECT.Services.HistoryService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +56,8 @@ builder.Services.AddScoped<IBaseRepository<Tag>, BaseRepository<Tag>>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<IBaseRepository<Bookmark>, BaseRepository<Bookmark>>();
 builder.Services.AddScoped<IBookmarkRepository, BookmarkRepository>();
-
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<PRN_MANGA_PROJECT.Repositories.ReadingHistoryRepository.IHistoryRepository, ReadingHistoryRepository>();
 // ===== Services =====
 builder.Services.AddScoped<IMangaService, MangaService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -64,7 +70,8 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IBookmarkService, BookmarkService>();
-
+builder.Services.AddScoped<ICommentService, CommentService >();
+builder.Services.AddScoped<IReadingHistoryService, ReadingHistoryService >();
 // ===== Identity =====
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
@@ -162,5 +169,8 @@ app.MapRazorPages();
 app.MapHub<BookmarkHub>("/bookmarkHub");
 app.MapHub<AccountHub>("/accountHub");
 app.MapHub<TagHub>("/tagHub");
-app.MapHub<CommentHub>("/commentHub"); // Include CommentHub if required
+app.MapHub<CommentHub>("/commentHub");
+app.MapHub<ProfileHub>("/profileHub");
+app.MapHub<ReadingHistoryHub>("/historyHub");
+app.MapHub<ChangeEmailHub>("/changeEmailHub");
 app.Run();
