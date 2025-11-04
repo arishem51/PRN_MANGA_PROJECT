@@ -45,36 +45,61 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: rememberMe);
             if (result.Succeeded)
             {
-                return RedirectToPage("/Public/HomePage");
-            }
+                var checkRoleUser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
 
+                if (checkRoleUser != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(checkRoleUser);
+
+                    if (roles.Contains("Admin"))
+                    {
+                        return RedirectToPage("/Index", new { area = "Admin" });
+                    }
+                    else
+                    {
+                        return RedirectToPage("/Public/HomePage");
+                    }
+                }
+
+                TempData["GoogleLoginError"] = "Something Went Wrong";
+                return RedirectToPage("/Auth/Login");
+            }
             //get email from claim
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
-            // check email is exist
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                TempData["GoogleLoginError"] = "This Google account is not registered in the system.";
-                return RedirectToPage("/Auth/Login");
+                // check email is exist
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    TempData["GoogleLoginError"] = "This Google account is not registered in the system.";
+                    return RedirectToPage("/Auth/Login");
+                }
+
+                //if email exist create link between gg and account
+                //create new table in aspnetuserlogins
+                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+
+                //link successful => login
+                if (addLoginResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: rememberMe);
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains("Admin"))
+                {
+                    return RedirectToPage("/Index", new { area = "Admin" });
+                }
+                else
+                {
+                    return RedirectToPage("/Public/HomePage");
+                }
+            }
+                else
+                {
+                    return RedirectToPage("./Login");
+                }
             }
 
-            //if email exist create link between gg and account
-            //create new table in aspnetuserlogins
-            var addLoginResult = await _userManager.AddLoginAsync(user, info);
 
-            //link successful => login
-            if (addLoginResult.Succeeded)
-            {
-                await _signInManager.SignInAsync(user, isPersistent: rememberMe);
-                return RedirectToPage("/Public/HomePage");
-            }
-            else
-            {
-                return RedirectToPage("./Login");
-            }
         }
-
-
     }
-}
