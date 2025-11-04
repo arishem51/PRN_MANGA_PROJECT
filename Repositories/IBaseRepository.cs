@@ -18,5 +18,6 @@ namespace PRN_MANGA_PROJECT.Repositories
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
         Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize);
         Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>> predicate);
+        Task SaveChangesAsync();
     }
 }

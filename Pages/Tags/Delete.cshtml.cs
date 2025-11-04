@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
+using PRN_MANGA_PROJECT.Services;
 
 namespace PRN_MANGA_PROJECT.Pages.Tags
 {
     public class DeleteModel : PageModel
     {
-        private readonly PRN_MANGA_PROJECT.Data.ApplicationDbContext _context;
+        private readonly ITagService _tagService;
 
-        public DeleteModel(PRN_MANGA_PROJECT.Data.ApplicationDbContext context)
+        public DeleteModel(ITagService tagService)
         {
-            _context = context;
+            _tagService = tagService;
         }
 
         [BindProperty]
@@ -25,37 +20,39 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var tag = await _context.Tags.FirstOrDefaultAsync(m => m.Id == id);
+            var tagVM = await _tagService.GetTagWithMangaCountAsync(id.Value);
+            if (tagVM == null)
+                return NotFound();
 
-            if (tag is not null)
+            // ánh xạ tạm sang entity để hiển thị view
+            Tag = new Tag
             {
-                Tag = tag;
+                Id = tagVM.Id,
+                Name = tagVM.Name,
+                Description = tagVM.Description,
+                Color = tagVM.Color,
+                IsActive = tagVM.IsActive
+            };
 
-                return Page();
-            }
-
-            return NotFound();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var tag = await _context.Tags.FindAsync(id);
-            if (tag != null)
+            var success = await _tagService.DeleteTagAsync(id.Value);
+
+            if (!success)
             {
-                Tag = tag;
-                _context.Tags.Remove(Tag);
-                await _context.SaveChangesAsync();
+                ModelState.AddModelError(string.Empty, "Không tìm thấy thể loại cần xóa.");
+                return Page();
             }
 
+            // ✅ trở về trang danh sách
             return RedirectToPage("./Index");
         }
     }

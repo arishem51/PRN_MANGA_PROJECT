@@ -87,14 +87,17 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
                 return Page();
             }
 
-            // ✅ Cập nhật role qua service (có phát SignalR)
+            // ✅ Cập nhật role (qua service, có phát SignalR)
             if (Input.Role != "admin")
             {
                 await _accountService.AssignRoleAsync(user, Input.Role);
             }
 
             TempData["SuccessMessage"] = "✅ Cập nhật tài khoản thành công!";
-            return RedirectToPage("/ViewAccount");
+
+            // ✅ Redirect để gọi lại OnGetAsync → load lại dữ liệu mới và AllRoles
+            return RedirectToPage(new { id = Input.Id });
         }
+
     }
 }

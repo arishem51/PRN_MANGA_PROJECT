@@ -7,10 +7,8 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
     public interface IAccountService
     {
         Task<IEnumerable<AccountViewModel>> GetAllWithRolesAsync();
-
-        Task<User> GetById(string id);
+        Task<User?> GetById(string id);
         Task<IdentityResult> Create(string username, string email, string password, string roleName);
-
         Task<IdentityResult> Update(User user);
         Task<IdentityResult> Delete(string id);
         Task<IdentityResult> AssignRoleAsync(User user, string roleName);

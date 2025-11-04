@@ -243,3 +243,25 @@
 
 
 </style>
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        // Tạo kết nối tới BookmarkHub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/bookmarkHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        // Bắt đầu kết nối
+        connection.start()
+            .then(() => console.log("✅ SignalR connected (Detail page)"))
+            .catch(err => console.error("❌ SignalR connection failed:", err));
+
+        // Nhận thông báo reload khi có thay đổi bookmark
+        connection.on("ReloadBookmarks", () => {
+            console.log("🔄 Received ReloadBookmarks signal!");
+            // Có thể refresh lại giao diện hoặc báo người dùng
+            location.reload();
+        });
+    </script>
+}

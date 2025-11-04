@@ -1,4 +1,6 @@
-﻿using PRN_MANGA_PROJECT.Models.Entities;
+﻿using Microsoft.AspNetCore.SignalR;
+using PRN_MANGA_PROJECT.Hubs;
+using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Repositories;
 
 namespace PRN_MANGA_PROJECT.Services
@@ -6,10 +8,11 @@ namespace PRN_MANGA_PROJECT.Services
     public class BookmarkService : IBookmarkService
     {
         private readonly IBookmarkRepository _bookmarkRepository;
-
-        public BookmarkService(IBookmarkRepository bookmarkRepository)
+        private readonly IHubContext<BookmarkHub> _hubContext;
+        public BookmarkService(IBookmarkRepository bookmarkRepository, IHubContext<BookmarkHub> hubContext)
         {
             _bookmarkRepository = bookmarkRepository;
+            _hubContext = hubContext;
         }
 
         // Thêm bookmark vào cơ sở dữ liệu
@@ -31,6 +34,7 @@ namespace PRN_MANGA_PROJECT.Services
             };
 
             await _bookmarkRepository.AddBookmarkAsync(bookmark);
+            await _hubContext.Clients.All.SendAsync("ReloadBookmarks");
             return true; // Trả về true nếu thêm thành công
         }
 
@@ -55,6 +59,7 @@ namespace PRN_MANGA_PROJECT.Services
             }
 
             await _bookmarkRepository.RemoveBookmark(bookmark); // Đảm bảo gọi async
+            await _hubContext.Clients.All.SendAsync("ReloadBookmarks");
             return true;
         }
 

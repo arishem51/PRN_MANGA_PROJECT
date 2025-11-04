@@ -10,13 +10,13 @@ namespace PRN_MANGA_PROJECT.Pages.Public
     public class HomePageModel : PageModel
     {
         private readonly IMangaRepository _mangaRepository;
-
-        private readonly ITagService _tagService;
         [BindProperty(SupportsGet = true)]
         public int PageNumber { get; set; } = 1;
+        private readonly ITagService _tagService;
 
         public int PageSize { get; set; } = 3; 
         public int TotalPages { get; set; }
+        public int totalManga { get; set; }
 
         public HomePageModel(IMangaRepository mangaRepository, ITagService tagService)
         {
@@ -36,9 +36,10 @@ namespace PRN_MANGA_PROJECT.Pages.Public
 
         public async Task OnGetAsync()
         {
-           
+            // Load danh sách tag để hiện popup
             Tags = await _tagService.GetActiveTagsAsync();
 
+            // Lọc theo tag
             if (TagId.HasValue)
             {
                 var allManga = await _mangaRepository.GetMangaWithTagsAsync();
@@ -46,8 +47,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public
                 return;
             }
 
-            int totalManga;
-
+            // Tìm kiếm theo từ khóa
             if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
                 (Mangas, totalManga) = await _mangaRepository.SearchMangaPagedAsync(SearchTerm, PageNumber, PageSize);

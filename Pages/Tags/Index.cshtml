@@ -108,4 +108,33 @@
             .catch(err => console.error("SignalR Error:", err));
     </script>
 }
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Tag pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                <a class="page-link"
+                   asp-page="./Index"
+                   asp-route-PageNumber="@(Model.PageNumber - 1)"
+                   asp-route-SearchTerm="@Model.SearchTerm">Trang trước</a>
+            </li>
 
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link"
+                       asp-page="./Index"
+                       asp-route-PageNumber="@i"
+                       asp-route-SearchTerm="@Model.SearchTerm">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link"
+                   asp-page="./Index"
+                   asp-route-PageNumber="@(Model.PageNumber + 1)"
+                   asp-route-SearchTerm="@Model.SearchTerm">Trang sau</a>
+            </li>
+        </ul>
+    </nav>
+}

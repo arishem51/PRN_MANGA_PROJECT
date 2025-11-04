@@ -1,4 +1,5 @@
-﻿using PRN_MANGA_PROJECT.Models.ViewModels;
+﻿using PRN_MANGA_PROJECT.Models.Entities;
+using PRN_MANGA_PROJECT.Models.ViewModels;
 
 namespace PRN_MANGA_PROJECT.Services
 {
@@ -13,5 +14,8 @@ namespace PRN_MANGA_PROJECT.Services
         /// Lấy thông tin tag kèm danh sách manga (nếu có)
         /// </summary>
         Task<TagViewModel?> GetTagWithMangaCountAsync(int id);
+        Task<Tag> CreateTagAsync(Tag tag);
+        Task<Tag?> UpdateTagAsync(Tag tag);
+        Task<bool> DeleteTagAsync(int id);
     }
 }

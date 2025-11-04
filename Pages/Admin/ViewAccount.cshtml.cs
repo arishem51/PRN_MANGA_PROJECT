@@ -32,11 +32,16 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
         [BindProperty(SupportsGet = true)]
         public string? RoleFilter { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1; // ✅ Trang hiện tại
+
+        public int PageSize { get; set; } = 5;   // ✅ Số bản ghi mỗi trang
+        public int TotalPages { get; set; }       // ✅ Tổng số trang
+
         public List<string> AllRoles { get; set; } = new();
 
         public async Task OnGetAsync() => await LoadDataAsync();
 
-        // 🔹 Handler: Khóa tài khoản (IsActive = false)
         public async Task<IActionResult> OnPostDeleteAsync(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -44,13 +49,10 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
                 return NotFound();
 
             user.IsActive = false;
-            await _accountService.Update(user); // ✅ dùng service để phát SignalR
-
-            await LoadDataAsync();
-            return Page();
+            await _accountService.Update(user);
+            return RedirectToPage(); // Reload page
         }
 
-        // 🔹 Handler: Mở khóa tài khoản (IsActive = true)
         public async Task<IActionResult> OnPostUnlockAsync(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -58,20 +60,17 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
                 return NotFound();
 
             user.IsActive = true;
-            await _accountService.Update(user); // ✅ dùng service để phát SignalR
-
-            await LoadDataAsync();
-            return Page();
+            await _accountService.Update(user);
+            return RedirectToPage();
         }
 
-        // 🔹 Load danh sách tài khoản + lọc
         private async Task LoadDataAsync()
         {
-            Accounts.Clear();
             AllRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
 
             var users = await _userManager.Users.ToListAsync();
 
+            // ✅ Lọc theo SearchTerm
             if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
                 users = users
@@ -79,15 +78,19 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
                     .ToList();
             }
 
+            // ✅ Chuyển đổi sang ViewModel
+            var tempList = new List<AccountViewModel>();
+
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
                 var roleName = roles.Any() ? string.Join(", ", roles) : "(Chưa gán)";
 
+                // ✅ Lọc theo vai trò
                 if (!string.IsNullOrEmpty(RoleFilter) && !roles.Contains(RoleFilter))
                     continue;
 
-                Accounts.Add(new AccountViewModel
+                tempList.Add(new AccountViewModel
                 {
                     Id = user.Id,
                     Username = user.UserName,
@@ -96,6 +99,15 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
                     IsActive = user.IsActive
                 });
             }
+
+            // ✅ Phân trang
+            int totalRecords = tempList.Count;
+            TotalPages = (int)System.Math.Ceiling(totalRecords / (double)PageSize);
+
+            Accounts = tempList
+                .Skip((PageNumber - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
         }
     }
 }

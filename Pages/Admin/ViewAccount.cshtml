@@ -6,7 +6,7 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<a asp-page="/CreateAccount" class="btn btn-primary mb-2">+ Thêm tài khoản</a>
+<a asp-page="/Admin/CreateAccount" class="btn btn-primary mb-2">+ Thêm tài khoản</a>
 
 <form method="get" class="row mb-3">
     <div class="col-md-4">
@@ -53,7 +53,7 @@
                     <td>@acc.Role</td>
                     <td>@(acc.IsActive ? "Hoạt động" : "Khóa")</td>
                     <td>
-                        <a asp-page="/EditAccount" asp-route-id="@acc.Id" class="btn btn-warning btn-sm">Sửa</a>
+                        <a asp-page="/Admin/EditAccount" asp-route-id="@acc.Id" class="btn btn-warning btn-sm">Sửa</a>
 
                         @if (acc.IsActive)
                         {
@@ -104,4 +104,43 @@
             .catch(err => console.error("❌ Lỗi SignalR:", err));
     </script>
 }
+<!-- ✅ PHÂN TRANG -->
+@if (Model.TotalPages > 1)
+{
+    <nav>
+        <ul class="pagination justify-content-center mt-3">
+            <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                <a class="page-link"
+                   asp-page="/Admin/ViewAccount"
+                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                   asp-route-searchTerm="@Model.SearchTerm"
+                   asp-route-roleFilter="@Model.RoleFilter">
+                    « Trước
+                </a>
+            </li>
 
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                    <a class="page-link"
+                       asp-page="/Admin/ViewAccount"
+                       asp-route-pageNumber="@i"
+                       asp-route-searchTerm="@Model.SearchTerm"
+                       asp-route-roleFilter="@Model.RoleFilter">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link"
+                   asp-page="/Admin/ViewAccount"
+                   asp-route-pageNumber="@(Model.PageNumber + 1)"
+                   asp-route-searchTerm="@Model.SearchTerm"
+                   asp-route-roleFilter="@Model.RoleFilter">
+                    Sau »
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
