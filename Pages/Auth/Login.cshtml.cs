@@ -32,15 +32,14 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
         {
             if (User?.Identity?.IsAuthenticated == true)
             {
-                return RedirectToPage("/Index");
+                return RedirectToPage("/Index", null, null);
             }
-            // save binding loginDTO when remember Me 
             if (Request.Cookies.ContainsKey("Username"))
             {
                 Input.Username = Request.Cookies["Username"];
                 Input.RememberMe = true; 
             }
-            return Page();
+                return Page();
         }
 
         public async Task<IActionResult> OnPost()
@@ -60,7 +59,7 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             }
             else
             {
-                Response.Cookies.Delete("RememberedUsername");
+                Response.Cookies.Delete("Username");
             }
 
             // check signin 
@@ -76,6 +75,12 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                 if (!user.EmailConfirmed)
                 {
                     ModelState.AddModelError(string.Empty, "Please confirm your email first.");
+                    return Page();
+                }
+
+                if(!user.IsActive)
+                {
+                    ModelState.AddModelError(string.Empty, "Your Account is not active");
                     return Page();
                 }
 

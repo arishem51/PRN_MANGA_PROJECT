@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.WebUtilities;
+using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Hubs;
 using PRN_MANGA_PROJECT.Models.Entities;
 using System;
@@ -57,7 +58,7 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account
             if (!result.Succeeded)
             {
                 StatusMessage = "Error changing email.";
-                return Page();
+                return RedirectToPage("/Public/Error");
             }
 
             // In our UI email and user name are one and the same, so when we update the email
@@ -66,13 +67,32 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account
             if (!setUserNameResult.Succeeded)
             {
                 StatusMessage = "Error changing user name.";
-                return Page();
+                return RedirectToPage("/Public/Error");
+            }
+            user.UserName = user.Email;
+            user.NormalizedUserName = user.Email.ToUpper();
+            await _userManager.UpdateAsync(user);
+            var context = HttpContext.RequestServices.GetService<ApplicationDbContext>();
+            var userLogin = context.UserLogins.FirstOrDefault(l => l.UserId == user.Id);
+
+            if (userLogin != null)
+            {
+                userLogin.ProviderDisplayName = user.Email;
+                context.UserLogins.Update(userLogin);
+                await context.SaveChangesAsync();
+            }
+
+            var existingLogins = await _userManager.GetLoginsAsync(user);
+            var oldGoogleLogin = existingLogins.FirstOrDefault(l => l.LoginProvider == "Google");
+            if (oldGoogleLogin != null)
+            {
+                await _userManager.RemoveLoginAsync(user, oldGoogleLogin.LoginProvider, oldGoogleLogin.ProviderKey);
             }
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Thank you for confirming your email change.";
             await _hub.Clients.All.SendAsync("LoadChangePassword");
-            return Page();
+            return RedirectToPage("/Index");
         }
     }
 }

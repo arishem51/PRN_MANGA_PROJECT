@@ -157,13 +157,17 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
         public async Task<IActionResult> OnPostComment()
         {
-            if (!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid) return RedirectToPage("/Auth/Login");
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToPage("/Auth/Login");
-
-            await _commentService.AddCommentAsync(userId, Input.ChapterId, Input.Content);
-            return RedirectToPage(new { chapterId = Input.ChapterId });
+            if (userId == null) {
+                return RedirectToPage("/Auth/Login");
+            }
+            else
+            {
+                await _commentService.AddCommentAsync(userId, Input.ChapterId, Input.Content);
+                return RedirectToPage(new { chapterId = Input.ChapterId });
+            }
         }
 
         public async Task<IActionResult> OnPostReply()

@@ -67,22 +67,36 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             //get email from claim
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
 
-                // check email is exist
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
-                {
-                    TempData["GoogleLoginError"] = "This Google account is not registered in the system.";
-                    return RedirectToPage("/Auth/Login");
-                }
+            // check email is exist
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                TempData["GoogleLoginError"] = "This Google account is not registered in the system.";
+                return RedirectToPage("/Auth/Login");
+            }
 
-                //if email exist create link between gg and account
-                //create new table in aspnetuserlogins
-                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+            if (!user.IsActive)
+            {
 
-                //link successful => login
-                if (addLoginResult.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: rememberMe);
+                TempData["GoogleLoginError"] = "Your Account is not Active";
+                return RedirectToPage("/Auth/Login");
+            }
+
+            //if email exist create link between gg and account
+            //create new table in aspnetuserlogins
+            //var existingLogins = await _userManager.GetLoginsAsync(user);
+            //var oldGoogleLogin = existingLogins.FirstOrDefault(l => l.LoginProvider == info.LoginProvider);
+            //if (oldGoogleLogin != null)
+            //{
+            //    await _userManager.RemoveLoginAsync(user, oldGoogleLogin.LoginProvider, oldGoogleLogin.ProviderKey);
+            //}
+
+            var addLoginResult = await _userManager.AddLoginAsync(user, info);
+
+            //link successful => login
+            if (addLoginResult.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: rememberMe);
                 var roles = await _userManager.GetRolesAsync(user);
 
                 if (roles.Contains("Admin"))
@@ -94,12 +108,12 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                     return RedirectToPage("/Public/HomePage");
                 }
             }
-                else
-                {
-                    return RedirectToPage("./Login");
-                }
+            else
+            {
+                return RedirectToPage("./Login");
             }
-
-
         }
+
+
     }
+}

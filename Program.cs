@@ -165,6 +165,8 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapControllers();
+app.UseExceptionHandler("/Index");
+app.UseStatusCodePagesWithRedirects("/Index");
 app.MapRazorPages();
 app.MapHub<BookmarkHub>("/bookmarkHub");
 app.MapHub<AccountHub>("/accountHub");
