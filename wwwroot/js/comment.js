@@ -43,7 +43,15 @@
                     });
                 }
             },
-            error: (err) => console.log("Lỗi load comment:", err)
+            error: (xhr, status, error) => {
+                if (xhr.status == 401) {
+                    // Bị 401 (chưa đăng nhập / hết hạn)
+                    alert("Phiên đăng nhập của bạn đã hết hạn. Vui lòng tải lại trang.");
+                    window.location.reload(); // Tải lại trang để đưa về trang login
+                } else {
+                    console.log("Lỗi load comment:", error);
+                }
+            }   
         });
     }
 
@@ -93,10 +101,10 @@
 
 
 function setupCommentEvents() {
-    
+
     const $container = $("#comment-list-container");
 
- 
+    // 1. Xử lý nút SHOW REPLIES (Giữ nguyên)
     $container.off("click", ".btn-show-replies").on("click", ".btn-show-replies", function () {
         const commentId = $(this).data("comment-id");
         const $replyList = $("#reply-list-" + commentId);
@@ -112,15 +120,28 @@ function setupCommentEvents() {
         }
     });
 
+    // 2. SỬA LỖI NÚT REPLY TẠI ĐÂY
     $container.off("click", ".btn-reply").on("click", ".btn-reply", function () {
         const parentCommentId = $(this).data("comment-id");
-        const $replyContainer = $(this).closest(".media-body").find(".reply-container");
-        if (!$replyContainer.length) return;
+        const $mediaBody = $(this).closest(".media-body");
+
+        // Tìm form là con trực tiếp, CÓ class 'comment-action-form'
+        // NHƯNG KHÔNG CÓ class 'edit-form'
+        const $targetForm = $mediaBody.children("form.comment-action-form:not(.edit-form)");
+
+        // Tìm container bên trong form đó
+        const $replyContainer = $targetForm.find(".reply-container");
+
+        if (!$replyContainer.length) {
+            console.error("Selector vẫn lỗi! Không tìm thấy reply container.");
+            return;
+        }
 
         $replyContainer.find(".parent-id").val(parentCommentId);
-        $replyContainer.toggle(); 
+        $replyContainer.toggle();
     });
 
+    // 3. Xử lý EDIT/CANCEL (Giữ nguyên)
     $container.off("click", ".btn-edit").on("click", ".btn-edit", function (e) {
         e.preventDefault();
         const $commentBlock = $(this).closest(".media-body");
