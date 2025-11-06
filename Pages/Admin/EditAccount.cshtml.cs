@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels.CRUD;
 using PRN_MANGA_PROJECT.Services.CRUD;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace PRN_MANGA_PROJECT.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     public class EditAccountPageModel : PageModel
     {
         private readonly UserManager<User> _userManager;

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Services;
 
 namespace PRN_MANGA_PROJECT.Pages.Tags
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly ITagService _tagService;

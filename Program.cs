@@ -138,16 +138,16 @@ builder.Services.ConfigureApplicationCookie(options =>
 var app = builder.Build();
 
 // ===== SEED DATABASE & ROLES =====
-using (var scope = app.Services.CreateScope())
+using (var scope1 = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
+    var context = scope1.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var clientFactory = scope1.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+    await SeedData.InitializeAsync(context, clientFactory);
+}
 
-    // Seed Manga, Tag, MangaTag
-    SeedData.Initialize(context);
-
-    // Seed Roles
-    var roleService = services.GetRequiredService<IRoleService>();
+using (var scope2 = app.Services.CreateScope())
+{
+    var roleService = scope2.ServiceProvider.GetRequiredService<IRoleService>();
     await roleService.SeedRole();
 }
 

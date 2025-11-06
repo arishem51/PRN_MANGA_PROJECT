@@ -1,17 +1,19 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels.CRUD;
-using PRN_MANGA_PROJECT.Services.EmailService;
 using PRN_MANGA_PROJECT.Services.CRUD;
-using System.Security.Cryptography;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using PRN_MANGA_PROJECT.Services.EmailService;
 
 namespace PRN_MANGA_PROJECT.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     public class CreateAccountModel : PageModel
     {
         private readonly UserManager<User> _userManager;
@@ -87,7 +89,7 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
             await _emailService.SendEmailAsync(Input.Email, subject, body);
 
             TempData["SuccessMessage"] = "✅ Tạo tài khoản thành công!";
-            return RedirectToPage("/ViewAccount");
+            return Page();
         }
 
         // ✅ Hàm sinh mật khẩu hợp lệ cho ASP.NET Identity
