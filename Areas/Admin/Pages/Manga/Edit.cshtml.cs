@@ -20,9 +20,14 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
         [BindProperty]
         public EditInputModel Input { get; set; } = new();
 
-        public IList<ChapterViewModel> Chapters { get; set; } = new List<ChapterViewModel>();
+        public PagedResult<ChapterViewModel> ChaptersPaged { get; set; } = new();
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        [BindProperty(SupportsGet = true)]
+        public int ChapterPage { get; set; } = 1;
+
+        private const int ChapterPageSize = 10;
+
+        public async Task<IActionResult> OnGetAsync(int id, int chapterPage = 1)
         {
             var manga = await _mangaService.GetMangaByIdForAdminAsync(id);
             if (manga == null)
@@ -41,9 +46,14 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 CoverImageUrl = manga.CoverImageUrl
             };
 
-            // Load chapters for this manga
-            var chapters = await _chapterService.GetChaptersByMangaIdAsync(id);
-            Chapters = chapters.ToList();
+            // Load chapters for this manga with pagination
+            ChapterPage = chapterPage;
+            var paginationParams = new PaginationParams
+            {
+                Page = chapterPage,
+                PageSize = ChapterPageSize
+            };
+            ChaptersPaged = await _chapterService.GetChaptersByMangaIdPagedAsync(id, paginationParams);
 
             return Page();
         }
@@ -53,8 +63,12 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
             if (!ModelState.IsValid)
             {
                 // Reload chapters if validation fails
-                var chapters = await _chapterService.GetChaptersByMangaIdAsync(id);
-                Chapters = chapters.ToList();
+                var paginationParams = new PaginationParams
+                {
+                    Page = ChapterPage,
+                    PageSize = ChapterPageSize
+                };
+                ChaptersPaged = await _chapterService.GetChaptersByMangaIdPagedAsync(id, paginationParams);
                 return Page();
             }
 

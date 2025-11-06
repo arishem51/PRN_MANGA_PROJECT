@@ -73,13 +73,13 @@
         <!-- Chapters Section -->
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Chapters (@Model.Chapters.Count)</h5>
+                <h5 class="card-title mb-0">Chapters (@Model.ChaptersPaged.TotalCount)</h5>
                 <a href="/admin/chapter/create?mangaId=@Model.Input.Id" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus"></i> Add Chapter
                 </a>
             </div>
             <div class="card-body">
-                @if (Model.Chapters.Any())
+                @if (Model.ChaptersPaged.Data.Any())
                 {
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
@@ -95,7 +95,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var chapter in Model.Chapters)
+                                @foreach (var chapter in Model.ChaptersPaged.Data)
                                 {
                                     <tr>
                                         <td>@chapter.Id</td>
@@ -105,8 +105,8 @@
                                         <td>@(chapter.PageCount?.ToString() ?? "-")</td>
                                         <td>@chapter.CreatedAt.ToString("MM/dd/yyyy")</td>
                                         <td>
-                                            <a href="/admin/chapter/@chapter.Id" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i> Edit
+                                            <a href="/admin/chapter?mangaId=@Model.Input.Id" class="btn btn-sm btn-outline-info" title="View in Chapter Management">
+                                                <i class="fas fa-list"></i> View
                                             </a>
                                         </td>
                                     </tr>
@@ -114,6 +114,50 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination -->
+                    @if (Model.ChaptersPaged.TotalPages > 1)
+                    {
+                        <nav aria-label="Chapter pagination" class="mt-3">
+                            <ul class="pagination justify-content-center mb-0">
+                                @if (Model.ChaptersPaged.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="?id=@Model.Input.Id&chapterPage=@(Model.ChaptersPaged.Page - 1)">Previous</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Previous</span>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.ChaptersPaged.Page - 2); i <= Math.Min(Model.ChaptersPaged.TotalPages, Model.ChaptersPaged.Page + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.ChaptersPaged.Page ? "active" : "")">
+                                        <a class="page-link" href="?id=@Model.Input.Id&chapterPage=@i">@i</a>
+                                    </li>
+                                }
+
+                                @if (Model.ChaptersPaged.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="?id=@Model.Input.Id&chapterPage=@(Model.ChaptersPaged.Page + 1)">Next</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Next</span>
+                                    </li>
+                                }
+                            </ul>
+                            <div class="text-center text-muted small mt-2">
+                                Showing @((Model.ChaptersPaged.Page - 1) * Model.ChaptersPaged.PageSize + 1) to @(Math.Min(Model.ChaptersPaged.Page * Model.ChaptersPaged.PageSize, Model.ChaptersPaged.TotalCount)) of @Model.ChaptersPaged.TotalCount chapters
+                            </div>
+                        </nav>
+                    }
                 }
                 else
                 {
