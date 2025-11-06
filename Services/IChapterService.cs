@@ -10,6 +10,7 @@ namespace PRN_MANGA_PROJECT.Services
         Task<IEnumerable<ChapterViewModel>> GetChaptersByMangaIdAsync(int mangaId);
         Task<PagedResult<ChapterViewModel>> GetChaptersByMangaIdPagedAsync(int mangaId, PaginationParams paginationParams);
         Task<ChapterViewModel?> GetChapterWithImagesAsync(int id);
+        Task<ChapterViewModel?> GetChapterWithImagesForAdminAsync(int id);
         Task<ChapterViewModel?> GetNextChapterAsync(int mangaId, int currentChapterId);
         Task<ChapterViewModel?> GetPreviousChapterAsync(int mangaId, int currentChapterId);
         Task<ChapterViewModel> CreateChapterAsync(CreateChapterViewModel model);

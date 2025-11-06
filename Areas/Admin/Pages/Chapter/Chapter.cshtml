@@ -54,7 +54,9 @@
                         <td>@(chapter.PageCount?.ToString() ?? "-")</td>
                         <td>@chapter.CreatedAt.ToString("MM/dd/yyyy")</td>
                         <td>
-                            @* Edit page not implemented yet *@
+                            <a href="/admin/chapter/@chapter.Id/edit" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteChapter(@chapter.Id)">
                                 <i class="fas fa-trash"></i> Delete
                             </button>

@@ -1,0 +1,143 @@
+@page "/admin/chapter/{id:int}/edit"
+@model PRN_MANGA_PROJECT.Areas.Admin.Pages.Chapter.EditModel
+@{
+    ViewData["Title"] = "Edit Chapter";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Edit Chapter</h2>
+    <div class="d-flex gap-2">
+        @if (Model.Chapter != null)
+        {
+            <a href="/admin/chapter?mangaId=@Model.Chapter.MangaId" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Chapter List
+            </a>
+        }
+        else
+        {
+            <a href="/admin/chapter" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Chapter List
+            </a>
+        }
+    </div>
+</div>
+
+@if (Model.Manga != null)
+{
+    <div class="alert alert-info mb-4">
+        <strong>Manga:</strong> @Model.Manga.Title
+    </div>
+}
+
+<div class="row" style="padding-bottom: 100px;">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Chapter Details</h5>
+            </div>
+            <div class="card-body">
+                <!-- Success/Error Messages -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form method="post">
+                    <input type="hidden" asp-for="Input.Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Title" class="form-label">
+                            Title <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Input.Title" class="form-control" placeholder="Enter chapter title" required />
+                        <span asp-validation-for="Input.Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Input.ChapterNumber" class="form-label">Chapter Number</label>
+                                <input asp-for="Input.ChapterNumber" class="form-control" placeholder="e.g., 1, 2.5, 10" />
+                                <span asp-validation-for="Input.ChapterNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Input.PageCount" class="form-label">Page Count</label>
+                                <input asp-for="Input.PageCount" type="number" class="form-control" placeholder="Number of pages" min="0" />
+                                <span asp-validation-for="Input.PageCount" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.MangadexChapterId" class="form-label">
+                            MangaDex Chapter ID <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Input.MangadexChapterId" class="form-control" placeholder="Enter MangaDex Chapter UUID" required />
+                        <div class="form-text">The UUID from MangaDex chapter URL (e.g., from https://mangadex.org/chapter/...)</div>
+                        <span asp-validation-for="Input.MangadexChapterId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Content" class="form-label">Content</label>
+                        <textarea asp-for="Input.Content" class="form-control" rows="4" placeholder="Enter chapter content or summary"></textarea>
+                        <span asp-validation-for="Input.Content" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        @if (Model.Chapter != null)
+                        {
+                            <a href="/admin/chapter?mangaId=@Model.Chapter.MangaId" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/admin/chapter" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                        }
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Chapter Info</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.Chapter != null)
+                {
+                    <p><strong>Chapter ID:</strong> @Model.Chapter.Id</p>
+                    <p><strong>Manga ID:</strong> @Model.Chapter.MangaId</p>
+                    <p><strong>Created:</strong> @Model.Chapter.CreatedAt.ToString("MM/dd/yyyy HH:mm")</p>
+                    <p><strong>Updated:</strong> @Model.Chapter.UpdatedAt.ToString("MM/dd/yyyy HH:mm")</p>
+                    <p><strong>Image Count:</strong> @Model.Chapter.ImageCount</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

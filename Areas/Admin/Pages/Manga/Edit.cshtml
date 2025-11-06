@@ -105,8 +105,8 @@
                                         <td>@(chapter.PageCount?.ToString() ?? "-")</td>
                                         <td>@chapter.CreatedAt.ToString("MM/dd/yyyy")</td>
                                         <td>
-                                            <a href="/admin/chapter?mangaId=@Model.Input.Id" class="btn btn-sm btn-outline-info" title="View in Chapter Management">
-                                                <i class="fas fa-list"></i> View
+                                            <a href="/admin/chapter/@chapter.Id/edit" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i> Edit
                                             </a>
                                         </td>
                                     </tr>

@@ -25,7 +25,7 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Chapter
 
         public async Task OnGetAsync(int? mangaId = null)
         {
-            var mangas = await _mangaService.GetActiveMangaAsync();
+            var mangas = await _mangaService.GetAllMangaAsync();
             MangaList = new SelectList(mangas, "Id", "Title", mangaId);
             
             if (mangaId.HasValue)
@@ -38,7 +38,7 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Chapter
         {
             if (!ModelState.IsValid)
             {
-                var mangas = await _mangaService.GetActiveMangaAsync();
+                var mangas = await _mangaService.GetAllMangaAsync();
                 MangaList = new SelectList(mangas, "Id", "Title", Input.MangaId);
                 return Page();
             }
@@ -63,7 +63,7 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Chapter
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"An error occurred while creating the chapter: {ex.Message}";
-                var mangas = await _mangaService.GetActiveMangaAsync();
+                var mangas = await _mangaService.GetAllMangaAsync();
                 MangaList = new SelectList(mangas, "Id", "Title", Input.MangaId);
                 return Page();
             }

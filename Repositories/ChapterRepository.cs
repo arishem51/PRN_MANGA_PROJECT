@@ -86,6 +86,14 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .FirstOrDefaultAsync(c => c.Id == id && c.IsActive);
         }
 
+        public async Task<Chapter?> GetChapterWithImagesForAdminAsync(int id)
+        {
+            return await _dbSet
+                .Include(c => c.ChapterImages.OrderBy(ci => ci.PageNumber))
+                .Include(c => c.Manga)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
         public async Task<Chapter?> GetNextChapterAsync(int mangaId, int currentChapterId)
         {
             return await _dbSet
