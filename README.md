@@ -222,3 +222,13 @@ If you encounter any issues or have questions, please:
 3. Contact the maintainers
 
 ---
+
+https://api.mangadex.org/manga/{mangaId} - get manga detail
+
+https://api.mangadex.org/at-home/server/{chapterId} - Get chapter images
+
+https://api.mangadex.org/chapter/{chapterId} - detail chapter
+
+https://api.mangadex.org/chapter?manga={mangaId} - all chapter of a manga
+
+
