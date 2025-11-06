@@ -118,6 +118,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
            .ToList();
             ViewData["ChapterId"] = chapterId;
             ViewData["CurrentUserId"] = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewData["CurrentUser"] = User.FindFirstValue(ClaimTypes.Name) ;
             return Page();
         }
 
@@ -125,14 +126,18 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
         public IActionResult OnGetComments(int chapterId, string userId)
         {
             var comments = _context.Comments
-                .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null)
-                .Include(c => c.User)
-                           .Include(c => c.Likes)
-                .Include(c => c.Replies)
-                        .ThenInclude(r => r.Likes)
-                    .ThenInclude(r => r.User)
-                .OrderByDescending(c => c.CreatedAt)
-                .ToList();
+         .Where(c => c.ChapterId == chapterId && c.ParentCommentId == null)
+         .Include(c => c.User)                 
+         .Include(c => c.Likes)              
+         .Include(c => c.Replies)
+             .ThenInclude(r => r.Chapter) 
+         .Include(c => c.Replies)
+             .ThenInclude(r => r.User)    
+         .Include(c => c.Replies)
+             .ThenInclude(r => r.Likes)
+                 .ThenInclude(l => l.User) 
+         .OrderByDescending(c => c.CreatedAt)
+         .ToList();
 
             var viewData = new ViewDataDictionary<IEnumerable<PRN_MANGA_PROJECT.Models.Entities.Comment>>(
        metadataProvider: new EmptyModelMetadataProvider(),
@@ -157,13 +162,17 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
         public async Task<IActionResult> OnPostComment()
         {
-            if (!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid) return RedirectToPage("/Auth/Login");
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToPage("/Auth/Login");
-
-            await _commentService.AddCommentAsync(userId, Input.ChapterId, Input.Content);
-            return RedirectToPage(new { chapterId = Input.ChapterId });
+            if (userId == null) {
+                return RedirectToPage("/Auth/Login");
+            }
+            else
+            {
+                await _commentService.AddCommentAsync(userId, Input.ChapterId, Input.Content);
+                return RedirectToPage(new { chapterId = Input.ChapterId });
+            }
         }
 
         public async Task<IActionResult> OnPostReply()
@@ -199,7 +208,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             return new JsonResult(new { success = true });
         }
 
-
+                
         public class LikeRequest
         {
             public int CommentId { get; set; }

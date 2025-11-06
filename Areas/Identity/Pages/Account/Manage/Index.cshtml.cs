@@ -64,7 +64,9 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
-            [Phone]
+            [Phone(ErrorMessage = "Invalid phone number format")]
+            [RegularExpression(@"^0\d{9,10}$", ErrorMessage = "Phone number must start with 0 and contain 10-11 digits")]
+            [Required(ErrorMessage = "Phone is Required")]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
             [Display(Name = "First Name")]

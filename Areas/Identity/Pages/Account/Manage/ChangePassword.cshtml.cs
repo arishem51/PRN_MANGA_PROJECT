@@ -49,9 +49,10 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
             public string OldPassword { get; set; }
 
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters")]
+            [RegularExpression(@"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$",
+    ErrorMessage = "Password must contain at least one uppercase, one lowercase, and one number")]
             [DataType(DataType.Password)]
-            [Display(Name = "New password")]
             public string NewPassword { get; set; }
 
             [DataType(DataType.Password)]
@@ -103,7 +104,6 @@ namespace PRN_MANGA_PROJECT.Areas.Identity.Pages.Account.Manage
             await _signInManager.RefreshSignInAsync(user);
             _logger.LogInformation("User changed their password successfully.");
             StatusMessage = "Your password has been changed.";
-            await _hub.Clients.All.SendAsync("LoadChangePassword");
             return RedirectToPage();
         }
     }

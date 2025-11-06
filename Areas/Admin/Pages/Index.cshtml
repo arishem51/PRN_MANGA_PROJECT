@@ -1,6 +1,95 @@
-@page
+﻿@page
+@model PRN_MANGA_PROJECT.Areas.Admin.Pages.IndexModel
 @{
+    ViewData["Title"] = "Trang thống kê Admin";
 }
-admin home page
 
+<div class="container mt-4">
+    <h2 class="text-center mb-4 text-primary fw-bold">📊 Thống kê tổng quan</h2>
 
+    <div class="row text-center mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary">Tổng số truyện</h5>
+                    <h2 class="fw-bold text-dark">@Model.TotalStories</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary">Tổng số chương</h5>
+                    <h2 class="fw-bold text-dark">@Model.TotalChapters</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary">Tổng lượt đọc</h5>
+                    <h2 class="fw-bold text-success">@Model.TotalViews</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="text-center text-info mb-4">🔥 Top 5 truyện được đọc nhiều nhất</h3>
+
+    <div class="card shadow border-0 rounded-4">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Tên truyện</th>
+                        <th>Lượt đọc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Top5Manga != null && Model.Top5Manga.Any())
+                    {
+                        int index = 1;
+                        foreach (var manga in Model.Top5Manga)
+                        {
+                            <tr>
+                                <td>@index</td>
+                                <td>@manga.Title</td>
+                                <td class="text-success fw-semibold">@manga.ViewCount</td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">Chưa có dữ liệu truyện.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    h2, h3 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+    table th {
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+</style>

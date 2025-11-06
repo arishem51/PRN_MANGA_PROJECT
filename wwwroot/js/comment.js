@@ -17,14 +17,41 @@
             console.error("Không tìm thấy chapterId từ data-chapter-id. Kiểm tra lại file .cshtml.");
             return;
         }
+
+        let openReplyIds = [];
+        $("#comment-list-container .reply-list:visible").each(function () {
+            openReplyIds.push($(this).attr("id"));
+        });
+
         $.ajax({
             url: `/Public/Manga/Chapter/${chapterId}?handler=Comments&chapterId=${chapterId}&userId=${userId}`,
             method: "GET",
             success: (result) => {
                 $("#comment-list-container").html(result);
-                setupCommentEvents();
+
+                if (openReplyIds.length > 0) {
+                    openReplyIds.forEach(id => {
+                        let replyList = $("#" + id);
+                        if (replyList.length) {
+                            replyList.show();
+                            let commentId = id.replace("reply-list-", "");
+                            let button = $(`[data-comment-id='${commentId}'].btn-show-replies`);
+                            if (button.length) {
+                                button.text("Show less");
+                            }
+                        }
+                    });
+                }
             },
-            error: (err) => console.log("Lỗi load comment:", err)
+            error: (xhr, status, error) => {
+                if (xhr.status == 401) {
+                    // Bị 401 (chưa đăng nhập / hết hạn)
+                    alert("Phiên đăng nhập của bạn đã hết hạn. Vui lòng tải lại trang.");
+                    window.location.reload(); // Tải lại trang để đưa về trang login
+                } else {
+                    console.log("Lỗi load comment:", error);
+                }
+            }   
         });
     }
 
@@ -35,12 +62,10 @@
         var url = $form.attr("action");
         var data = $form.serialize();
 
-        // 2. Gửi dữ liệu form bằng AJAX
         $.post(url, data)
             .done(function () {
                 $form.find("textarea[name='Input.Content']").val("");
-                // Tùy chọn: Ẩn các form reply và edit sau khi gửi
-                if ($form.hasClass("reply-form")) { // (Bạn cần thêm class "reply-form" cho form reply)
+                if ($form.hasClass("reply-form")) {
                     $form.closest(".reply-container").hide();
                 }
                 if ($form.hasClass("edit-form")) {
@@ -64,51 +89,69 @@
         $.post(url, data)
             .done(function (res) {
                 console.log("Liked successfully:", res);
-                // Không cần gọi LoadCommentData() vì SignalR sẽ tự reload
             })
             .fail(function (err) {
                 console.error("Error while liking:", err);
             });
     });
 
-
+    setupCommentEvents();
 
 });
 
+
 function setupCommentEvents() {
-    document.querySelectorAll(".btn-reply").forEach(button => {
-        button.addEventListener("click", function () {
-            const parentCommentId = this.dataset.commentId;
-            const replyContainer = this.closest(".media-body").querySelector(".reply-container");
-            if (!replyContainer) return;
 
-            const hiddenInput = replyContainer.querySelector(".parent-id");
-            if (hiddenInput) hiddenInput.value = parentCommentId;
+    const $container = $("#comment-list-container");
 
-            replyContainer.style.display =
-                (replyContainer.style.display == "none" || replyContainer.style.display == "")
-                    ? "block"
-                    : "none";
-        });
+    // 1. Xử lý nút SHOW REPLIES (Giữ nguyên)
+    $container.off("click", ".btn-show-replies").on("click", ".btn-show-replies", function () {
+        const commentId = $(this).data("comment-id");
+        const $replyList = $("#reply-list-" + commentId);
+        if (!$replyList.length) return;
+
+        if ($replyList.is(":hidden")) {
+            $replyList.show();
+            $(this).text("Show less");
+        } else {
+            $replyList.hide();
+            const replyCount = $replyList.children("div").children(".media-block").length;
+            $(this).text(`Show more (${replyCount})`);
+        }
     });
 
-    document.querySelectorAll(".btn-edit").forEach(btn => {
-        btn.addEventListener("click", function (e) {
-            e.preventDefault();
-            const commentBlock = btn.closest(".media-body");
-            const content = commentBlock.querySelector(".comment-content");
-            const editForm = commentBlock.querySelector(".edit-form");
+    // 2. SỬA LỖI NÚT REPLY TẠI ĐÂY
+    $container.off("click", ".btn-reply").on("click", ".btn-reply", function () {
+        const parentCommentId = $(this).data("comment-id");
+        const $mediaBody = $(this).closest(".media-body");
 
-            content.style.display = "none";
-            editForm.style.display = "block";
+        // Tìm form là con trực tiếp, CÓ class 'comment-action-form'
+        // NHƯNG KHÔNG CÓ class 'edit-form'
+        const $targetForm = $mediaBody.children("form.comment-action-form:not(.edit-form)");
 
-            const cancelBtn = editForm.querySelector(".btn-cancel-edit");
-            cancelBtn.addEventListener("click", () => {
-                editForm.style.display = "none";
-                content.style.display = "block";
-            });
-        });
+        // Tìm container bên trong form đó
+        const $replyContainer = $targetForm.find(".reply-container");
+
+        if (!$replyContainer.length) {
+            console.error("Selector vẫn lỗi! Không tìm thấy reply container.");
+            return;
+        }
+
+        $replyContainer.find(".parent-id").val(parentCommentId);
+        $replyContainer.toggle();
+    });
+
+    // 3. Xử lý EDIT/CANCEL (Giữ nguyên)
+    $container.off("click", ".btn-edit").on("click", ".btn-edit", function (e) {
+        e.preventDefault();
+        const $commentBlock = $(this).closest(".media-body");
+        $commentBlock.find(".comment-content").hide();
+        $commentBlock.find(".edit-form").show();
+    });
+
+    $container.off("click", ".btn-cancel-edit").on("click", ".btn-cancel-edit", function () {
+        const $commentBlock = $(this).closest(".media-body");
+        $commentBlock.find(".edit-form").hide();
+        $commentBlock.find(".comment-content").show();
     });
 }
-
-setupCommentEvents();

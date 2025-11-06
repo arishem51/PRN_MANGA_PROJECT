@@ -5,6 +5,8 @@
 } *@
 @{
 	var currentUserId = ViewData["CurrentUserId"] as string;
+	var currentUser = ViewData["CurrentUser"] as string;
+
 }
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 <div id="comment-list-container" data-chapter-id="@ViewData["ChapterId"]" data-user-id="@ViewData["CurrentUserId"]">
@@ -88,14 +90,14 @@
 							
 							<hr>
 							<!-- Comments -->
-							<form method="post" asp-page="/Public/Manga/Chapter"
+								<form method="post" asp-page="Chapter"
 									  asp-page-handler="Reply" class="comment-action-form">
 								<div class="reply-container" style="display:none; margin-top:10px;">
 									<div class="media-block">
 										<a class="media-left" href="#"><img class="img-circle img-sm" alt="Profile Picture" src="https://bootdey.com/img/Content/avatar/avatar2.png"></a>
 										<div class="media-body">
 											<div class="mar-btm">
-												<a href="#" class="btn-link text-semibold media-heading box-inline">@comment.User.UserName</a>
+													<a href="#" class="btn-link text-semibold media-heading box-inline">@currentUser</a>
 											</div>
 											<div class="panel">
 												<div class="panel-body">
@@ -113,9 +115,7 @@
 									</div>
 								</div>
 							</form>
-
-							<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies" />
-								@* @if (comment.Replies != null && comment.Replies.Any())
+								@if (comment.Replies != null && comment.Replies.Any())
 								{
 									<button type="button"
 											class="btn btn-link btn-sm btn-show-replies"
@@ -126,7 +126,7 @@
 									<div id="reply-list-@comment.Id" class="reply-list" style="display:none;">
 										<partial name="~/Pages/Shared/Partial/_ReplyPartial.cshtml" model="@comment.Replies" />
 									</div>
-								} *@
+								}
 
 						</div>
 					</div>
@@ -136,22 +136,4 @@
 	</div>
 }
 </div>
-<script>
-	document.addEventListener('DOMContentLoaded', function() {
-		document.querySelectorAll('.btn-show-replies').forEach(button => {
-			button.addEventListener('click', function() {
-				const commentId = this.getAttribute('data-comment-id');
-				const replyList = document.getElementById('reply-list-' + commentId);
 
-				if (replyList.style.display === 'none') {
-					replyList.style.display = 'block';
-					this.textContent = 'Show less';
-				} else {
-					replyList.style.display = 'none';
-					const replyCount = replyList.querySelectorAll('.media-block').length;
-					this.textContent = `Show more (${replyCount})`;
-				}
-			});
-		});
-	});
-</script>

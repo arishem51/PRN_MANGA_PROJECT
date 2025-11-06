@@ -23,8 +23,8 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.Auth
 
         [Required(ErrorMessage = "Password is required")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters")]
-        [RegularExpression(@"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&#]).+$",
-            ErrorMessage = "Password must contain at least one uppercase, one lowercase, one number and one special character")]
+        [RegularExpression(@"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$",
+    ErrorMessage = "Password must contain at least one uppercase, one lowercase, and one number")]
         [DataType(DataType.Password)]
         public string? Password { get; set; }
 
@@ -38,7 +38,8 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.Auth
 
         [Required(ErrorMessage = "Phone number is required")]
         [Phone(ErrorMessage = "Invalid phone number format")]
-        [RegularExpression(@"^0\d{9,10}$", ErrorMessage = "Phone number must start with 0 and contain 10-11 digits")] public string? PhoneNumber { get; set; }
+        [RegularExpression(@"^0\d{9,10}$", ErrorMessage = "Phone number must start with 0 and contain 10-11 digits")] 
+        public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Address is required")]
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters")]
