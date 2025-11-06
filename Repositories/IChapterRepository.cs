@@ -8,6 +8,7 @@ namespace PRN_MANGA_PROJECT.Repositories
         Task<IEnumerable<Chapter>> GetChaptersByMangaIdAsync(int mangaId);
         Task<PagedResult<Chapter>> GetChaptersByMangaIdPagedAsync(int mangaId, PaginationParams paginationParams);
         Task<Chapter?> GetChapterWithImagesAsync(int id);
+        Task<Chapter?> GetChapterWithImagesForAdminAsync(int id);
         Task<Chapter?> GetNextChapterAsync(int mangaId, int currentChapterId);
         Task<Chapter?> GetPreviousChapterAsync(int mangaId, int currentChapterId);
     }

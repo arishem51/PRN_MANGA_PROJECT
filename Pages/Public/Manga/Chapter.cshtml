@@ -574,11 +574,24 @@
 					}
 					@foreach (var chapter in allChapters.OrderByDescending(c => c.ChapterNumber))
 					{
-						<a href="/Public/Manga/Chapter/@chapter.Id" 
-						   class="chapter-dropdown-item @(chapter.Id == Model.Chapter.Id ? "current" : "")" 
-						   data-chapter-number="@chapter.ChapterNumber">
-							Chương @chapter.ChapterNumber
-						</a>
+						@if (!string.IsNullOrEmpty(chapter.ExternalUrl))
+						{
+							<a href="@chapter.ExternalUrl" 
+							   target="_blank"
+							   rel="noopener noreferrer"
+							   class="chapter-dropdown-item @(chapter.Id == Model.Chapter.Id ? "current" : "")" 
+							   data-chapter-number="@chapter.ChapterNumber">
+								Chương @chapter.ChapterNumber <i class="fas fa-external-link-alt"></i>
+							</a>
+						}
+						else
+						{
+							<a href="/Public/Manga/Chapter/@chapter.Id" 
+							   class="chapter-dropdown-item @(chapter.Id == Model.Chapter.Id ? "current" : "")" 
+							   data-chapter-number="@chapter.ChapterNumber">
+								Chương @chapter.ChapterNumber
+							</a>
+						}
 					}
 				</div>
 			</div>

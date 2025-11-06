@@ -144,6 +144,7 @@ namespace PRN_MANGA_PROJECT
                     {
                         MangaId = manga.Id,
                         Title = $"{manga.Title} - Chapter {i}",
+                        MangadexChapterId = Guid.NewGuid().ToString(), // Generate a UUID for seed data
                         ChapterNumber = i.ToString(),
                         Content = $"Nội dung tóm tắt của {manga.Title} chương {i}.",
                         PageCount = 3,

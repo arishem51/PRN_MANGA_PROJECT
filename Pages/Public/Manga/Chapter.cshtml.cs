@@ -66,6 +66,13 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             {
                 return RedirectToPage("/Auth/Login");
             }
+
+            // If chapter has external URL, open it in a new window
+            if (!string.IsNullOrEmpty(Chapter.ExternalUrl))
+            {
+                // Return a page that opens the external URL in a new window
+                return Content($"<html><head><title>Redirecting...</title></head><body><script>window.open('{Chapter.ExternalUrl}', '_blank'); window.location.href = document.referrer || '/';</script><p>Opening chapter in new window...</p></body></html>", "text/html");
+            }
             
             ChapterImages = Chapter.ChapterImages?.OrderBy(ci => ci.PageNumber).ToList() ?? new List<ChapterImage>();
             

@@ -49,8 +49,9 @@ namespace PRN_MANGA_PROJECT.Data
 
             builder.Entity<Comment>()
                 .HasOne(c => c.User)
-                .WithMany()
+                .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.UserId)
+                .HasPrincipalKey(u => u.Id)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Comment>()

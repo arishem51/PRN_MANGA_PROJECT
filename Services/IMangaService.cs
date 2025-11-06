@@ -7,6 +7,7 @@ namespace PRN_MANGA_PROJECT.Services
         Task<IEnumerable<MangaViewModel>> GetAllMangaAsync();
         Task<IEnumerable<MangaViewModel>> GetActiveMangaAsync();
         Task<MangaViewModel?> GetMangaByIdAsync(int id);
+        Task<MangaViewModel?> GetMangaByIdForAdminAsync(int id);
         Task<IEnumerable<MangaViewModel>> SearchMangaAsync(string searchTerm);
         Task<IEnumerable<MangaViewModel>> GetMangaByTagAsync(int tagId);
         Task<IEnumerable<MangaViewModel>> GetMangaByStatusAsync(string status);

@@ -60,6 +60,7 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<PRN_MANGA_PROJECT.Repositories.ReadingHistoryRepository.IHistoryRepository, ReadingHistoryRepository>();
 // ===== Services =====
 builder.Services.AddScoped<IMangaService, MangaService>();
+builder.Services.AddScoped<IChapterService, ChapterService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ITagService, TagService>();
@@ -142,7 +143,7 @@ using (var scope1 = app.Services.CreateScope())
 {
     var context = scope1.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var clientFactory = scope1.ServiceProvider.GetRequiredService<IHttpClientFactory>();
-    await SeedData.InitializeAsync(context, clientFactory);
+    // await SeedData.InitializeAsync(context, clientFactory);
 }
 
 using (var scope2 = app.Services.CreateScope())
@@ -165,8 +166,8 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapControllers();
-app.UseExceptionHandler("/Index");
-app.UseStatusCodePagesWithRedirects("/Index");
+app.UseExceptionHandler("/Error");
+app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 app.MapRazorPages();
 app.MapHub<BookmarkHub>("/bookmarkHub");
 app.MapHub<AccountHub>("/accountHub");
