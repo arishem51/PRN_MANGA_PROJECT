@@ -1,7 +1,7 @@
 @using Microsoft.AspNetCore.Mvc.RazorPages
 @{
     var path = Context?.Request?.Path.Value?.ToLowerInvariant() ?? string.Empty;
-    bool isAccount = path.Contains("/admin") && path.Contains("account");
+    bool isAccount = path.Contains("viewaccount");
     bool isManga = path.Contains("/admin") && path.Contains("manga");
 }
 <!DOCTYPE html>
@@ -30,7 +30,8 @@
         <div class="row">
             <aside class="col-12 col-md-3 col-lg-2 bg-light border-end min-vh-100 p-0">
                 <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-action @(isAccount ? "active" : "")" href="/admin/account">Account</a>
+                    <a class="list-group-item list-group-item-action @(isAccount ? "active" : "")"
+                       asp-page="/viewaccount">Account</a>
                     <a class="list-group-item list-group-item-action @(isManga ? "active" : "")" href="/admin/manga">Manga</a>
                 </div>
             </aside>
