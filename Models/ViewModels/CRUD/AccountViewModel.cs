@@ -12,6 +12,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.CRUD
 
         [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
         [StringLength(50, ErrorMessage = "Tên đăng nhập không được vượt quá 50 ký tự")]
+        [UniqueUsername(ErrorMessage = "Tên đăng nhập này đã được sử dụng, vui lòng chọn tên khác")]
         public string Username { get; set; }
 
         [Required(ErrorMessage = "Email không được để trống")]
@@ -49,6 +50,36 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.CRUD
             if (existingUser != null)
             {
                 return new ValidationResult(ErrorMessage ?? "Email đã tồn tại trong hệ thống");
+            }
+
+            return ValidationResult.Success;
+        }
+    }
+
+    /// <summary>
+    /// ✅ Custom ValidationAttribute kiểm tra username trùng trong hệ thống.
+    /// </summary>
+    public class UniqueUsernameAttribute : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            if (value == null)
+                return ValidationResult.Success;
+
+            var username = value.ToString()?.Trim();
+            if (string.IsNullOrEmpty(username))
+                return ValidationResult.Success;
+
+            // ✅ Lấy UserManager từ DI container
+            var userManager = validationContext.GetService(typeof(UserManager<User>)) as UserManager<User>;
+            if (userManager == null)
+                return ValidationResult.Success;
+
+            // ✅ Kiểm tra trùng username
+            var existingUser = userManager.Users.FirstOrDefault(u => u.UserName == username);
+            if (existingUser != null)
+            {
+                return new ValidationResult(ErrorMessage ?? "Tên đăng nhập đã tồn tại trong hệ thống");
             }
 
             return ValidationResult.Success;

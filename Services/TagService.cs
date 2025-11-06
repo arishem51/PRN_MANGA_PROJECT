@@ -83,7 +83,7 @@ namespace PRN_MANGA_PROJECT.Services
             existingTag.Color = tag.Color;
             existingTag.IsActive = tag.IsActive;
 
-            _tagRepository.UpdateAsync(existingTag);
+            await _tagRepository.UpdateAsync(existingTag);
             await _tagRepository.SaveChangesAsync();
 
             // ✅ Gửi tín hiệu realtime sau khi update
@@ -97,7 +97,7 @@ namespace PRN_MANGA_PROJECT.Services
             if (tag == null)
                 return false;
 
-            _tagRepository.DeleteAsync(tag);
+            await _tagRepository.DeleteAsync(tag);
             await _tagRepository.SaveChangesAsync();
 
             // ✅ gửi tín hiệu realtime cho client cập nhật danh sách
