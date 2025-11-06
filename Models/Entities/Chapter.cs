@@ -23,6 +23,10 @@ namespace PRN_MANGA_PROJECT.Models.Entities
         [StringLength(1000)]
         public string? Content { get; set; } // For text-based chapters
         
+        [StringLength(500)]
+        [Url]
+        public string? ExternalUrl { get; set; } // External URL for chapters hosted elsewhere
+        
         public int? PageCount { get; set; }
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

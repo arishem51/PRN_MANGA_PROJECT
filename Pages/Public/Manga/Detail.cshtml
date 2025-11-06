@@ -116,24 +116,46 @@
                 <div class="chapter-list-container">
                     @foreach (var chapter in Model.chapters)
                     {
-                        <a asp-page="/Public/Manga/Chapter"
-                           asp-route-chapterId="@chapter.Id"
-                           class="chapter-item">
-                            <div class="chapter-info">
-                                <h6 class="mb-1">Chương @(chapter.ChapterNumber ?? chapter.Id.ToString()) - @chapter.Title</h6>
-                                @if (!string.IsNullOrEmpty(chapter.Content))
-                                {
-                                    <small class="text-muted">@(chapter.Content.Length > 100 ? chapter.Content.Substring(0, 100) + "..." : chapter.Content)</small>
-                                }
-                            </div>
-                            <div class="chapter-meta">
-                                @if (chapter.PageCount.HasValue)
-                                {
-                                    <small class="text-muted me-2">@chapter.PageCount trang</small>
-                                }
-                                <i class="fas fa-chevron-right"></i>
-                            </div>
-                        </a>
+                        @if (!string.IsNullOrEmpty(chapter.ExternalUrl))
+                        {
+                            <a href="@chapter.ExternalUrl"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="chapter-item">
+                                <div class="chapter-info">
+                                    <h6 class="mb-1">Chương @(chapter.ChapterNumber ?? chapter.Id.ToString()) - @chapter.Title</h6>
+                                    @if (!string.IsNullOrEmpty(chapter.Content))
+                                    {
+                                        <small class="text-muted">@(chapter.Content.Length > 100 ? chapter.Content.Substring(0, 100) + "..." : chapter.Content)</small>
+                                    }
+                                </div>
+                                <div class="chapter-meta">
+                                    <small class="text-muted me-2"><i class="fas fa-external-link-alt"></i> External</small>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-page="/Public/Manga/Chapter"
+                               asp-route-chapterId="@chapter.Id"
+                               class="chapter-item">
+                                <div class="chapter-info">
+                                    <h6 class="mb-1">Chương @(chapter.ChapterNumber ?? chapter.Id.ToString()) - @chapter.Title</h6>
+                                    @if (!string.IsNullOrEmpty(chapter.Content))
+                                    {
+                                        <small class="text-muted">@(chapter.Content.Length > 100 ? chapter.Content.Substring(0, 100) + "..." : chapter.Content)</small>
+                                    }
+                                </div>
+                                <div class="chapter-meta">
+                                    @if (chapter.PageCount.HasValue)
+                                    {
+                                        <small class="text-muted me-2">@chapter.PageCount trang</small>
+                                    }
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                        }
                     }
                 </div>
             }

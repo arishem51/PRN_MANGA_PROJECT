@@ -133,7 +133,54 @@ namespace PRN_MANGA_PROJECT.Services
                 return;
             }
 
+            // First, fetch chapter details to check for externalUrl
+            _logger.LogInformation("Fetching chapter details for chapter {ChapterId} from MangaDex API", chapterId);
             var httpClient = _httpClientFactory.CreateClient("MangaDexClient");
+            var chapterDetailResponse = await httpClient.GetAsync($"chapter/{mangadexChapterId}");
+
+            if (!chapterDetailResponse.IsSuccessStatusCode)
+            {
+                _logger.LogError("Failed to fetch chapter details from MangaDex API for chapter {ChapterId}. Status Code: {StatusCode}", chapterId, chapterDetailResponse.StatusCode);
+                throw new HttpRequestException($"Failed to fetch chapter details from MangaDex: {chapterDetailResponse.StatusCode}");
+            }
+
+            var chapterDetailJson = await chapterDetailResponse.Content.ReadAsStringAsync();
+            _logger.LogInformation("Raw chapter detail JSON response for chapter {ChapterId} (first 500 chars): {JsonPreview}", 
+                chapterId, chapterDetailJson.Length > 500 ? chapterDetailJson.Substring(0, 500) + "..." : chapterDetailJson);
+
+            var chapterDetail = JsonSerializer.Deserialize<MangaDexChapterDetailResponse>(chapterDetailJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (chapterDetail?.Data?.Attributes == null)
+            {
+                _logger.LogError("Invalid chapter detail response from MangaDex API for chapter {ChapterId}. Full JSON: {JsonContent}", chapterId, chapterDetailJson);
+                throw new InvalidOperationException("Invalid chapter detail response from MangaDex API");
+            }
+
+            var externalUrl = chapterDetail.Data.Attributes.ExternalUrl;
+            _logger.LogInformation("Chapter detail for chapter {ChapterId}: ExternalUrl='{ExternalUrl}', Pages={Pages}", 
+                chapterId, externalUrl ?? "NULL", chapterDetail.Data.Attributes.Pages);
+
+            // Update chapter with externalUrl if it exists
+            var chapterEntity = await _chapterRepository.GetByIdAsync(chapterId);
+            if (chapterEntity != null)
+            {
+                chapterEntity.ExternalUrl = externalUrl;
+                await _chapterRepository.UpdateAsync(chapterEntity);
+                _logger.LogInformation("Updated chapter {ChapterId} with ExternalUrl: {ExternalUrl}", chapterId, externalUrl ?? "NULL");
+            }
+
+            // If externalUrl exists, don't fetch images - user will be redirected to external URL
+            if (!string.IsNullOrWhiteSpace(externalUrl))
+            {
+                _logger.LogInformation("Chapter {ChapterId} has external URL: {ExternalUrl}. Skipping image fetch. Users will be redirected to external URL when reading.", chapterId, externalUrl);
+                return;
+            }
+
+            // If no externalUrl, fetch images from at-home API as before
+            _logger.LogInformation("Chapter {ChapterId} has no external URL. Fetching images from at-home API...", chapterId);
             var response = await httpClient.GetAsync($"at-home/server/{mangadexChapterId}");
 
             if (!response.IsSuccessStatusCode)
@@ -265,6 +312,39 @@ namespace PRN_MANGA_PROJECT.Services
             public List<string>? DataSaver { get; set; }
         }
 
+        private class MangaDexChapterDetailResponse
+        {
+            [System.Text.Json.Serialization.JsonPropertyName("result")]
+            public string Result { get; set; } = string.Empty;
+            
+            [System.Text.Json.Serialization.JsonPropertyName("data")]
+            public MangaDexChapterDetailData? Data { get; set; }
+        }
+
+        private class MangaDexChapterDetailData
+        {
+            [System.Text.Json.Serialization.JsonPropertyName("id")]
+            public string Id { get; set; } = string.Empty;
+            
+            [System.Text.Json.Serialization.JsonPropertyName("attributes")]
+            public MangaDexChapterAttributes? Attributes { get; set; }
+        }
+
+        private class MangaDexChapterAttributes
+        {
+            [System.Text.Json.Serialization.JsonPropertyName("externalUrl")]
+            public string? ExternalUrl { get; set; }
+            
+            [System.Text.Json.Serialization.JsonPropertyName("pages")]
+            public int? Pages { get; set; }
+            
+            [System.Text.Json.Serialization.JsonPropertyName("chapter")]
+            public string? Chapter { get; set; }
+            
+            [System.Text.Json.Serialization.JsonPropertyName("title")]
+            public string? Title { get; set; }
+        }
+
         public async Task<ChapterViewModel> UpdateChapterAsync(int id, UpdateChapterViewModel model)
         {
             var chapter = await _chapterRepository.GetByIdAsync(id);
@@ -381,6 +461,7 @@ namespace PRN_MANGA_PROJECT.Services
                 MangadexChapterId = chapter.MangadexChapterId,
                 ChapterNumber = chapter.ChapterNumber,
                 Content = chapter.Content,
+                ExternalUrl = chapter.ExternalUrl,
                 PageCount = chapter.PageCount,
                 CreatedAt = chapter.CreatedAt,
                 UpdatedAt = chapter.UpdatedAt,
