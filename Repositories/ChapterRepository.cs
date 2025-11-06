@@ -16,7 +16,8 @@ namespace PRN_MANGA_PROJECT.Repositories
             return await _dbSet
                 .Include(c => c.ChapterImages)
                 .Where(c => c.MangaId == mangaId && c.IsActive)
-                .OrderBy(c => c.ChapterNumber)
+                .OrderBy(c => c.ChapterNumber ?? "")
+                .ThenBy(c => c.Id)
                 .ToListAsync();
         }
 
@@ -47,14 +48,16 @@ namespace PRN_MANGA_PROJECT.Repositories
                             : query.OrderBy(c => c.PageCount);
                         break;
                     default:
-                        query = query.OrderBy(c => c.ChapterNumber);
+                        query = query.OrderBy(c => c.ChapterNumber ?? "")
+                            .ThenBy(c => c.Id);
                         break;
                 }
             }
             else
             {
                 // Default sorting by chapter number
-                query = query.OrderBy(c => c.ChapterNumber);
+                query = query.OrderBy(c => c.ChapterNumber ?? "")
+                    .ThenBy(c => c.Id);
             }
 
             // Get total count

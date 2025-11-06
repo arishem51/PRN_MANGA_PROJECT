@@ -60,6 +60,7 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<PRN_MANGA_PROJECT.Repositories.ReadingHistoryRepository.IHistoryRepository, ReadingHistoryRepository>();
 // ===== Services =====
 builder.Services.AddScoped<IMangaService, MangaService>();
+builder.Services.AddScoped<IChapterService, ChapterService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ITagService, TagService>();

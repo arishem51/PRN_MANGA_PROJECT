@@ -6,9 +6,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Edit Manga</h2>
+    <div class="d-flex gap-2">
+        <a href="/admin/chapter/create?mangaId=@Model.Input.Id" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Chapter
+        </a>
     <a href="/admin/manga" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Back to Manga List
     </a>
+    </div>
     </div>
 
 <div class="row" style="padding-bottom: 100px;">
@@ -62,6 +67,58 @@
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Chapters Section -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Chapters (@Model.Chapters.Count)</h5>
+                <a href="/admin/chapter/create?mangaId=@Model.Input.Id" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Add Chapter
+                </a>
+            </div>
+            <div class="card-body">
+                @if (Model.Chapters.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Chapter Number</th>
+                                    <th>MangaDex ID</th>
+                                    <th>Page Count</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var chapter in Model.Chapters)
+                                {
+                                    <tr>
+                                        <td>@chapter.Id</td>
+                                        <td><strong>@chapter.Title</strong></td>
+                                        <td>@(chapter.ChapterNumber ?? "-")</td>
+                                        <td><code class="small">@(string.IsNullOrEmpty(chapter.MangadexChapterId) ? "-" : (chapter.MangadexChapterId.Length > 20 ? chapter.MangadexChapterId.Substring(0, 20) + "..." : chapter.MangadexChapterId))</code></td>
+                                        <td>@(chapter.PageCount?.ToString() ?? "-")</td>
+                                        <td>@chapter.CreatedAt.ToString("MM/dd/yyyy")</td>
+                                        <td>
+                                            <a href="/admin/chapter/@chapter.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center mb-0">No chapters found. <a href="/admin/chapter/create?mangaId=@Model.Input.Id">Create the first chapter</a></p>
+                }
             </div>
         </div>
     </div>

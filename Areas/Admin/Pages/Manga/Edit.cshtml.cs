@@ -9,14 +9,18 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
     public class EditModel : PageModel
     {
         private readonly IMangaService _mangaService;
+        private readonly IChapterService _chapterService;
 
-        public EditModel(IMangaService mangaService)
+        public EditModel(IMangaService mangaService, IChapterService chapterService)
         {
             _mangaService = mangaService;
+            _chapterService = chapterService;
         }
 
         [BindProperty]
         public EditInputModel Input { get; set; } = new();
+
+        public IList<ChapterViewModel> Chapters { get; set; } = new List<ChapterViewModel>();
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -36,6 +40,11 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 Status = manga.Status,
                 CoverImageUrl = manga.CoverImageUrl
             };
+
+            // Load chapters for this manga
+            var chapters = await _chapterService.GetChaptersByMangaIdAsync(id);
+            Chapters = chapters.ToList();
+
             return Page();
         }
 
@@ -43,6 +52,9 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
         {
             if (!ModelState.IsValid)
             {
+                // Reload chapters if validation fails
+                var chapters = await _chapterService.GetChaptersByMangaIdAsync(id);
+                Chapters = chapters.ToList();
                 return Page();
             }
 
