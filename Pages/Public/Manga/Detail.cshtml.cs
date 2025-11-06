@@ -6,7 +6,6 @@ using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels;
 using PRN_MANGA_PROJECT.Services;
-using System.Security.Claims;
 
 
 namespace PRN_MANGA_PROJECT.Pages.Public.Manga
@@ -43,11 +42,11 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
         public async Task<IActionResult> OnGet(int mangaId)
         {
-            if(mangaId == null)
+            if(mangaId <= 0)
             {
                 return RedirectToPage("/Public/Error");
-
             }
+            
             Manga = _context.Mangas
                             .Include(m => m.Chapters)
                             .Include(m => m.MangaTags)

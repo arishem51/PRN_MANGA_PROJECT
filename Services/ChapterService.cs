@@ -68,6 +68,7 @@ namespace PRN_MANGA_PROJECT.Services
             {
                 MangaId = model.MangaId,
                 Title = model.Title,
+                MangadexChapterId = model.MangadexChapterId,
                 ChapterNumber = model.ChapterNumber,
                 Content = model.Content,
                 PageCount = model.PageCount,
@@ -89,6 +90,7 @@ namespace PRN_MANGA_PROJECT.Services
             }
 
             chapter.Title = model.Title;
+            chapter.MangadexChapterId = model.MangadexChapterId;
             chapter.ChapterNumber = model.ChapterNumber;
             chapter.Content = model.Content;
             chapter.PageCount = model.PageCount;
@@ -126,6 +128,7 @@ namespace PRN_MANGA_PROJECT.Services
                 Id = chapter.Id,
                 MangaId = chapter.MangaId,
                 Title = chapter.Title,
+                MangadexChapterId = chapter.MangadexChapterId,
                 ChapterNumber = chapter.ChapterNumber,
                 Content = chapter.Content,
                 PageCount = chapter.PageCount,
