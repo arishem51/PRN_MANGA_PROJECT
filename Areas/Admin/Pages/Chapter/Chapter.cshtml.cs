@@ -26,7 +26,7 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Chapter
             
             if (mangaId.HasValue)
             {
-                SelectedManga = await _mangaService.GetMangaByIdAsync(mangaId.Value);
+                SelectedManga = await _mangaService.GetMangaByIdForAdminAsync(mangaId.Value);
                 var chapters = await _chapterService.GetChaptersByMangaIdAsync(mangaId.Value);
                 Chapters = chapters.ToList();
             }

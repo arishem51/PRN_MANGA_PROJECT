@@ -37,6 +37,15 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id && m.IsActive);
         }
 
+        public async Task<Manga?> GetMangaWithTagsByIdForAdminAsync(int id)
+        {
+            return await _dbSet
+                .Include(m => m.MangaTags)
+                .ThenInclude(mt => mt.Tag)
+                .Include(m => m.Chapters)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
         public async Task<IEnumerable<Manga>> SearchMangaAsync(string searchTerm)
         {
             return await _dbSet
@@ -44,8 +53,8 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .ThenInclude(mt => mt.Tag)
                 .Where(m => m.IsActive && 
                     (m.Title.Contains(searchTerm) || 
-                     m.Author!.Contains(searchTerm) || 
-                     m.Artist!.Contains(searchTerm)))
+                     (m.Author != null && m.Author.Contains(searchTerm)) || 
+                     (m.Artist != null && m.Artist.Contains(searchTerm))))
                 .ToListAsync();
         }
 
@@ -98,7 +107,9 @@ namespace PRN_MANGA_PROJECT.Repositories
         {
             var query = _context.Mangas
                 .Where(m => m.IsActive && 
-                    (m.Title.Contains(searchTerm) || m.Author.Contains(searchTerm) || m.Artist.Contains(searchTerm)))
+                    (m.Title.Contains(searchTerm) || 
+                     (m.Author != null && m.Author.Contains(searchTerm)) || 
+                     (m.Artist != null && m.Artist.Contains(searchTerm))))
                 .OrderByDescending(m => m.CreatedAt);
 
             var totalCount = await query.CountAsync();

@@ -33,6 +33,12 @@ namespace PRN_MANGA_PROJECT.Services
             return manga != null ? MapToViewModel(manga) : null;
         }
 
+        public async Task<MangaViewModel?> GetMangaByIdForAdminAsync(int id)
+        {
+            var manga = await _mangaRepository.GetMangaWithTagsByIdForAdminAsync(id);
+            return manga != null ? MapToViewModel(manga) : null;
+        }
+
         public async Task<IEnumerable<MangaViewModel>> SearchMangaAsync(string searchTerm)
         {
             var mangas = await _mangaRepository.SearchMangaAsync(searchTerm);

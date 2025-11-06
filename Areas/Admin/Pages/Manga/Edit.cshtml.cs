@@ -20,7 +20,7 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            var manga = await _mangaService.GetMangaByIdAsync(id);
+            var manga = await _mangaService.GetMangaByIdForAdminAsync(id);
             if (manga == null)
             {
                 return NotFound();
