@@ -143,7 +143,7 @@ using (var scope1 = app.Services.CreateScope())
 {
     var context = scope1.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var clientFactory = scope1.ServiceProvider.GetRequiredService<IHttpClientFactory>();
-    await SeedData.InitializeAsync(context, clientFactory);
+    // await SeedData.InitializeAsync(context, clientFactory);
 }
 
 using (var scope2 = app.Services.CreateScope())

@@ -17,5 +17,6 @@ namespace PRN_MANGA_PROJECT.Services
         Task<ChapterViewModel> UpdateChapterAsync(int id, UpdateChapterViewModel model);
         Task<bool> DeleteChapterAsync(int id);
         Task<bool> ChapterExistsAsync(int id);
+        Task<bool> RefreshChapterImagesAsync(int chapterId);
     }
 }

@@ -90,6 +90,28 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Chapter
                 return Page();
             }
         }
+
+        public async Task<IActionResult> OnPostRefreshImagesAsync(int id)
+        {
+            try
+            {
+                var success = await _chapterService.RefreshChapterImagesAsync(id);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Chapter images have been refreshed successfully from MangaDex!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to refresh images. Please check if the chapter has a valid MangaDex Chapter ID.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred while refreshing images: {ex.Message}";
+            }
+
+            return RedirectToPage(new { id = id });
+        }
     }
 
     public class EditChapterInputModel
