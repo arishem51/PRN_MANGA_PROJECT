@@ -128,8 +128,7 @@ namespace PRN_MANGA_PROJECT.Repositories
                 .Include(m => m.MangaTags)
                 .ThenInclude(mt => mt.Tag)
                 .Where(m => m.IsActive && m.MangaTags.Any(mt => mt.TagId == tagId))
-                .OrderByDescending(m => m.CreatedAt)
-                .Take(3); 
+                .OrderByDescending(m => m.CreatedAt);
 
             var totalCount = await query.CountAsync();
 
