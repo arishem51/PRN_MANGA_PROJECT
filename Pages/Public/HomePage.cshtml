@@ -68,21 +68,30 @@
 				@if (Model.PageNumber > 1)
 				{
 					<li class="page-item">
-						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchTerm="@Model.SearchTerm">Previous</a>
+						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchTerm="@Model.SearchTerm"
+						   asp-route-tagId="@Model.TagId">
+							Previous
+						</a>
 					</li>
 				}
 
 				@for (int i = 1; i <= Model.TotalPages; i++)
 				{
 					<li class="page-item @(i == Model.PageNumber ? "active" : "")">
-						<a class="page-link" asp-route-PageNumber="@i" asp-route-SearchTerm="@Model.SearchTerm">@i</a>
+						<a class="page-link" asp-route-PageNumber="@i" asp-route-SearchTerm="@Model.SearchTerm"
+						   asp-route-tagId="@Model.TagId">
+							@i
+						</a>
 					</li>
 				}
 
 				@if (Model.PageNumber < Model.TotalPages)
 				{
 					<li class="page-item">
-						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchTerm="@Model.SearchTerm">Next</a>
+						<a class="page-link" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchTerm="@Model.SearchTerm"
+						   asp-route-tagId="@Model.TagId">
+							Next
+						</a>
 					</li>
 				}
 			</ul>

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -35,9 +35,8 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             var user = await _userService.FindByEmail(Input.Email);
             if (user == null)
             {
-                ModelState.AddModelError("Input.Email", "Your email is not existed");
-                return Page();
-
+                TempData["ErrorMessage"] = "Your email does not exist.";
+                return RedirectToPage("/Auth/ForgotPassword"); 
             }
             await _userService.UpdateToken(user);
 
@@ -47,7 +46,8 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
 
             if (newToken == null)
             {
-                return RedirectToPage("Public/HomePage");
+                TempData["ErrorMessage"] = "Unable to generate reset token.";
+                return RedirectToPage("/Auth/ForgotPassword");
             }
             var resetLink = Url.Page("/Auth/ResetPassword", pageHandler: null
                 , values: new { email = Input.Email, token = encodedToken }
@@ -56,10 +56,9 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             await _emailSender.SendEmailAsync(Input.Email, "Reset Your Password",
      $"Click this link to reset your password: <a href='{resetLink}'>Reset Password</a>");
 
+            TempData["SuccessMessage"] = "A password reset link has been sent to your email.";
 
-            ModelState.AddModelError("Input.Email", "Request is sended in your email");
-
-            return Page();
+            return RedirectToPage("/Auth/ForgotPassword");
         }
     }
 }

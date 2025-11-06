@@ -22,11 +22,10 @@
                 <span asp-validation-for="Input.Password" class="text-danger small"></span>
             </div>
 
-            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
 
-            @if (TempData["GoogleLoginError"] != null)
+            @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger py-1">@TempData["GoogleLoginError"]</div>
+                <div class="text-danger small">@TempData["ErrorMessage"]</div>
             }
 
             <div class="form-check mb-3">

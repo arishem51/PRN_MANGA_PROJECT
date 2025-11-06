@@ -51,6 +51,13 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                 {
                     var roles = await _userManager.GetRolesAsync(checkRoleUser);
 
+                    if (!checkRoleUser.IsActive)
+                    {
+                        TempData["ErrorMessage"] = "Your Account is not Active";
+                        await _signInManager.SignOutAsync(); 
+                        return RedirectToPage("/Auth/Login");
+                    }
+
                     if (roles.Contains("Admin"))
                     {
                         return RedirectToPage("/Index", new { area = "Admin" });
@@ -61,7 +68,7 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                     }
                 }
 
-                TempData["GoogleLoginError"] = "Something Went Wrong";
+                TempData["ErrorMessage"] = "Something Went Wrong";
                 return RedirectToPage("/Auth/Login");
             }
             //get email from claim
@@ -71,16 +78,10 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                TempData["GoogleLoginError"] = "This Google account is not registered in the system.";
+                TempData["ErrorMessage"] = "This Google account is not registered in the system.";
                 return RedirectToPage("/Auth/Login");
             }
 
-            if (!user.IsActive)
-            {
-
-                TempData["GoogleLoginError"] = "Your Account is not Active";
-                return RedirectToPage("/Auth/Login");
-            }
 
             //if email exist create link between gg and account
             //create new table in aspnetuserlogins

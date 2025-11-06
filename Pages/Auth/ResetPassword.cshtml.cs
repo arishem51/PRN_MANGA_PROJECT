@@ -32,19 +32,10 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
 
         public async Task<IActionResult> OnPostAsync()  
         {
-            if (!ModelState.IsValid)
-            {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine(error.ErrorMessage);
-                }
-                return Page();
-            }
-
             var user = await _userService.FindByEmail(Input.Email);
             if (user == null) {
-                ModelState.AddModelError("Input.Email", "Your Email not existed");
-                return Page();
+                TempData["ErrorMessage"] = "Your Email not existed";
+                return RedirectToPage("/Auth/ResetPassword");
             }
 
             var response = await _userService.ResetPassword(user , Input.Token , Input.NewPassword);
@@ -53,13 +44,12 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
                 await _userService.UpdateToken(user);
                 return RedirectToPage("/Auth/Login");
             }
-            if (!response.Succeeded)
-            {
-                ModelState.AddModelError(string.Empty, "Reset Password Failed!");
-                return Page();
-            }
-            return Page();
-
+            //if (!response.Succeeded)
+            //{
+            //    TempData["ErrorMessage"] = "Reset Password Failed!";
+            //    return RedirectToPage("/Auth/ResetPassword");
+            //}
+            return RedirectToPage("/Auth/ResetPassword");
         }
 
     }

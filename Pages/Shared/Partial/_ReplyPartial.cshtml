@@ -13,7 +13,28 @@
 			<div class="media-body">
 				<div class="mar-btm">
 					<a href="#" class="btn-link text-semibold media-heading box-inline">@reply.User?.UserName</a>
-					<p class="text-muted text-sm">@reply.CreatedAt</p>
+					@{
+						var timeSpan = DateTime.Now - reply.CreatedAt;
+						string timeAgo;
+
+						if (timeSpan.TotalMinutes < 1)
+							timeAgo = "just now";
+						else if (timeSpan.TotalMinutes < 60)
+							timeAgo = $"{(int)timeSpan.TotalMinutes} minute{(timeSpan.TotalMinutes >= 2 ? "s" : "")} ago";
+						else if (timeSpan.TotalHours < 24)
+							timeAgo = $"{(int)timeSpan.TotalHours} hour{(timeSpan.TotalHours >= 2 ? "s" : "")} ago";
+						else if (timeSpan.TotalDays < 7)
+							timeAgo = $"{(int)timeSpan.TotalDays} day{(timeSpan.TotalDays >= 2 ? "s" : "")} ago";
+						else if (timeSpan.TotalDays < 30)
+							timeAgo = $"{(int)(timeSpan.TotalDays / 7)} week{(timeSpan.TotalDays / 7 >= 2 ? "s" : "")} ago";
+						else if (timeSpan.TotalDays < 365)
+							timeAgo = $"{(int)(timeSpan.TotalDays / 30)} month{(timeSpan.TotalDays / 30 >= 2 ? "s" : "")} ago";
+						else
+							timeAgo = $"{(int)(timeSpan.TotalDays / 365)} year{(timeSpan.TotalDays / 365 >= 2 ? "s" : "")} ago";
+					}
+
+					<p class="text-muted text-sm">@timeAgo</p>
+
 					@if (currentUserId != null && currentUserId == reply.UserId)
 					{
 						<div class="dropdown">
@@ -51,10 +72,17 @@
 				</form>
 				<div class="pad-ver">
 					<div class="btn-group">
+						@{
+							// Kiểm tra xem người dùng hiện tại đã "Like" (ReactionType = 1) comment này chưa
+							bool isLikedByCurrentUser = reply.Likes.Any(l => l.UserId == currentUserId && l.ReactionType == 1);
+
+							// (Tùy chọn) Kiểm tra luôn cho Dislike để đổi màu nút kia nếu cần
+							bool isDislikedByCurrentUser = reply.Likes.Any(l => l.UserId == currentUserId && l.ReactionType == -1);
+						}
 						<form method="post" asp-page-handler="LikeComment" class="comment-action-form like-form">
 							<input type="hidden" name="CommentId" value="@reply.Id" />
 							<input type="hidden" name="ReactionType" value="1" />
-							<button type="submit" class="btn btn-sm">
+							<button type="submit" class="btn btn-sm @(isLikedByCurrentUser ? "text-primary" : "")">
 								<i class="fa fa-thumbs-up"></i> @reply.Likes.Count(l => l.ReactionType == 1)
 							</button>
 						</form>
@@ -62,7 +90,7 @@
 						<form method="post" asp-page-handler="LikeComment" class="comment-action-form like-form">
 							<input type="hidden" name="CommentId" value="@reply.Id" />
 							<input type="hidden" name="ReactionType" value="-1" />
-							<button type="submit" class="btn btn-sm">
+							<button type="submit" class="btn btn-sm @(isDislikedByCurrentUser ? "text-danger" : "")">
 								<i class="fa fa-thumbs-down"></i> @reply.Likes.Count(l => l.ReactionType == -1)
 							</button>
 						</form>
@@ -77,11 +105,7 @@
 					  asp-page-handler="Reply" class="comment-action-form">
 					<div class="reply-container" style="display:none; margin-top:10px;">
 						<div class="media-block">
-							<a class="media-left" href="#"><img class="img-circle img-sm" alt="Profile Picture" src="https://bootdey.com/img/Content/avatar/avatar2.png"></a>
 							<div class="media-body">
-								<div class="mar-btm">
-									<a href="#" class="btn-link text-semibold media-heading box-inline">@currentUser</a>
-								</div>
 								<div class="panel">
 									<div class="panel-body">
 										<textarea class="form-control" rows="2" placeholder="What are you thinking?" name="Input.Content"></textarea>
