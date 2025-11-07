@@ -13,7 +13,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public
       
         private readonly ITagService _tagService;
 
-        public int PageSize { get; set; } = 10; 
+        public int PageSize { get; set; } = 8; 
         public int TotalPages { get; set; }
         public int totalManga { get; set; }
 
@@ -40,18 +40,34 @@ namespace PRN_MANGA_PROJECT.Pages.Public
         {
             // Load danh sách tag để hiện popup
             Tags = await _tagService.GetActiveTagsAsync();
-
-            // Lọc theo tag
-            if (TagId.HasValue)
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
             {
+                // Chỉ Trim() ở đây để giữ nguyên
+                // cách gõ hoa/thường của người dùng hiển thị lại trên ô search
+                SearchTerm = SearchTerm.Trim();
+            }
+            bool hasTag = TagId.HasValue;
+            bool hasSearch = !string.IsNullOrWhiteSpace(SearchTerm);
+
+            // ---- LOGIC ĐÃ SỬA ----
+            if (hasTag && hasSearch)
+            {
+                // Ưu tiên 1: Lọc theo cả Tag VÀ Search
+                (Mangas, totalManga) = await _mangaRepository.SearchMangaByTagPagedAsync(TagId.Value, SearchTerm, PageNumber, PageSize);
+            }
+            else if (hasTag)
+            {
+                // Ưu tiên 2: Chỉ lọc theo Tag
                 (Mangas, totalManga) = await _mangaRepository.GetMangaByTagPagedAsync(TagId.Value, PageNumber, PageSize);
             }
-            else if (!string.IsNullOrWhiteSpace(SearchTerm))
+            else if (hasSearch)
             {
+                // Ưu tiên 3: Chỉ lọc theo Search
                 (Mangas, totalManga) = await _mangaRepository.SearchMangaPagedAsync(SearchTerm, PageNumber, PageSize);
             }
             else
             {
+                // Mặc định: Lấy tất cả
                 (Mangas, totalManga) = await _mangaRepository.GetMangaPagedAsync(PageNumber, PageSize);
             }
 

@@ -16,11 +16,6 @@ namespace PRN_MANGA_PROJECT
         {
             await context.Database.MigrateAsync();
 
-            if (context.Mangas.Any())
-            {
-                Console.WriteLine("⚠️ Dữ liệu đã tồn tại, bỏ qua seeding.");
-                return;
-            }
 
             var random = new Random();
 
@@ -45,7 +40,15 @@ namespace PRN_MANGA_PROJECT
             var sampleTitles = new[]
             {
                 "Naruto", "Bleach", "One Piece", "Attack on Titan", "My Hero Academia",
-                "Demon Slayer", "Jujutsu Kaisen", "Tokyo Ghoul", "Death Note", "Fairy Tail"
+                "Demon Slayer", "Jujutsu Kaisen", "Tokyo Ghoul", "Death Note", "Fairy Tail",
+                "Dragon Ball", "Fullmetal Alchemist", "Hunter x Hunter", "Berserk", "Vinland Saga",
+                "Vagabond", "Slam Dunk", "One-Punch Man", "Mob Psycho 100", "Chainsaw Man",
+                "Spy x Family", "Blue Lock", "Haikyu!!", "The Promised Neverland", "Dr. Stone",
+                "Fire Force", "Black Clover", "Kingdom", "Goodnight Punpun", "Monster",
+                "20th Century Boys", "Gintama", "JoJo's Bizarre Adventure", "Kaguya-sama: Love is War", "Your Lie in April",
+                "Steins;Gate", "Code Geass", "Neon Genesis Evangelion", "Sailor Moon", "Cardcaptor Sakura",
+                "Fruits Basket", "Horimiya", "Komi Can't Communicate", "Oshi no Ko", "Solo Leveling",
+                "Tower of God", "The God of High School", "Re:Zero", "Mushoku Tensei: Jobless Reincarnation", "That Time I Got Reincarnated as a Slime"
             };
 
             foreach (var title in sampleTitles)
