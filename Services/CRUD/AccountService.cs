@@ -34,12 +34,16 @@ namespace PRN_MANGA_PROJECT.Services.CRUD
             foreach (var u in users)
             {
                 var roles = await _userManager.GetRolesAsync(u);
+                var role = roles.FirstOrDefault() ?? "(Chưa gán)";
+
+                if (role.Equals("admin", StringComparison.OrdinalIgnoreCase))
+                    continue;
                 list.Add(new AccountViewModel
                 {
                     Id = u.Id,
                     Username = u.UserName ?? "",
                     Email = u.Email ?? "",
-                    Role = roles.FirstOrDefault() ?? "(Chưa gán)",
+                    Role = role,
                     IsActive = u.IsActive
                 });
             }

@@ -13,7 +13,9 @@ namespace PRN_MANGA_PROJECT.Pages.Public
       
         private readonly ITagService _tagService;
 
+
         public int PageSize { get; set; } = 8; 
+
         public int TotalPages { get; set; }
         public int totalManga { get; set; }
 

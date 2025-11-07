@@ -25,6 +25,8 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
 
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public string? SortOrder { get; set; } = "asc";
 
         [BindProperty(SupportsGet = true)]
         public int PageNumber { get; set; } = 1;
@@ -36,16 +38,28 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
         {
             var query = _context.Tags.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            // ✅ Chuẩn hóa search (bỏ khoảng trắng, không phân biệt hoa thường)
+            var keyword = SearchTerm?.Trim().ToLower();
+            if (!string.IsNullOrWhiteSpace(keyword))
             {
-                query = query.Where(t => t.Name.Contains(SearchTerm));
+                query = query.Where(t => t.Name.ToLower().Contains(keyword));
             }
 
+            // ✅ Sắp xếp theo Id
+            if (SortOrder?.ToLower() == "asc")
+            {
+                query = query.OrderBy(t => t.Id);
+            }
+            else
+            {
+                query = query.OrderByDescending(t => t.Id);
+            }
+
+            // ✅ Phân trang
             var totalCount = await query.CountAsync();
             TotalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
 
             Tags = await query
-                .OrderByDescending(t => t.CreatedAt)
                 .Skip((PageNumber - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();

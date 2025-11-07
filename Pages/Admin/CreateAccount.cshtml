@@ -1,7 +1,7 @@
 ﻿@page "/createaccount"
 @model PRN_MANGA_PROJECT.Pages.Admin.CreateAccountModel
 @{
-    ViewData["Title"] = "Thêm tài khoản";
+    ViewData["Title"] = "Add new Account";
 }
 
 <h2 class="mb-4">@ViewData["Title"]</h2>
@@ -18,7 +18,7 @@
 
 <form method="post">
     <div class="form-group mb-3">
-        <label asp-for="Input.Username" class="form-label">Tên đăng nhập</label>
+        <label asp-for="Input.Username" class="form-label">Username</label>
         <input asp-for="Input.Username" class="form-control" placeholder="Nhập tên đăng nhập..." />
         <span asp-validation-for="Input.Username" class="text-danger"></span>
     </div>
@@ -30,7 +30,7 @@
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Input.Role" class="form-label">Vai trò</label>
+        <label asp-for="Input.Role" class="form-label">Role</label>
         <select asp-for="Input.Role" class="form-select">
             <option value="">-- Chọn vai trò --</option>
             @foreach (var role in Model.AllRoles)
@@ -41,8 +41,8 @@
         <span asp-validation-for="Input.Role" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">Tạo tài khoản</button>
-    <a asp-page="/Admin/ViewAccount" class="btn btn-secondary ms-2">Trở lại trang danh sách tài khoản</a>
+    <button type="submit" class="btn btn-success">Create Account</button>
+    <a asp-page="/Admin/ViewAccount" class="btn btn-secondary ms-2">Back to list Account</a>
 </form>
 
 @section Scripts {

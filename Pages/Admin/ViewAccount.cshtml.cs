@@ -68,45 +68,30 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
 
         private async Task LoadDataAsync()
         {
-            AllRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+            AllRoles = await _roleManager.Roles
+                .Where(r => r.Name != "admin") // Không cho chọn admin trong dropdown
+                .Select(r => r.Name!)
+                .ToListAsync();
 
-            var users = await _userManager.Users.ToListAsync();
+            // ✅ Lấy danh sách user qua service (đã có filter sẵn nếu bạn thêm vào service)
+            var allAccounts = await _accountService.GetAllWithRolesAsync();
+            var keyword = SearchTerm?.Trim().ToLower();
+            // ✅ Áp dụng tìm kiếm và lọc vai trò
+            if (!string.IsNullOrWhiteSpace(keyword))
+                allAccounts = allAccounts
+                    .Where(u => !string.IsNullOrEmpty(u.Username) &&
+                                u.Username.ToLower().Contains(keyword));
 
-            // ✅ Lọc theo SearchTerm
-            if (!string.IsNullOrWhiteSpace(SearchTerm))
-            {
-                users = users
-                    .Where(u => u.UserName != null && u.UserName.ToLower().Contains(SearchTerm.ToLower()))
-                    .ToList();
-            }
 
-            // ✅ Chuyển đổi sang ViewModel
-            var tempList = new List<AccountViewModel>();
-
-            foreach (var user in users)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                var roleName = roles.Any() ? string.Join(", ", roles) : "(Chưa gán)";
-
-                // ✅ Lọc theo vai trò
-                if (!string.IsNullOrEmpty(RoleFilter) && !roles.Contains(RoleFilter))
-                    continue;
-
-                tempList.Add(new AccountViewModel
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    Email = user.Email,
-                    Role = roleName,
-                    IsActive = user.IsActive
-                });
-            }
+            if (!string.IsNullOrEmpty(RoleFilter))
+                allAccounts = allAccounts
+                    .Where(u => u.Role.Equals(RoleFilter, StringComparison.OrdinalIgnoreCase));
 
             // ✅ Phân trang
-            int totalRecords = tempList.Count;
-            TotalPages = (int)System.Math.Ceiling(totalRecords / (double)PageSize);
+            int totalRecords = allAccounts.Count();
+            TotalPages = (int)Math.Ceiling(totalRecords / (double)PageSize);
 
-            Accounts = tempList
+            Accounts = allAccounts
                 .Skip((PageNumber - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();

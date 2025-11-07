@@ -9,18 +9,27 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
     public class EditModel : PageModel
     {
         private readonly IMangaService _mangaService;
+        private readonly IChapterService _chapterService;
 
-        public EditModel(IMangaService mangaService)
+        public EditModel(IMangaService mangaService, IChapterService chapterService)
         {
             _mangaService = mangaService;
+            _chapterService = chapterService;
         }
 
         [BindProperty]
         public EditInputModel Input { get; set; } = new();
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public PagedResult<ChapterViewModel> ChaptersPaged { get; set; } = new();
+
+        [BindProperty(SupportsGet = true)]
+        public int ChapterPage { get; set; } = 1;
+
+        private const int ChapterPageSize = 10;
+
+        public async Task<IActionResult> OnGetAsync(int id, int chapterPage = 1)
         {
-            var manga = await _mangaService.GetMangaByIdAsync(id);
+            var manga = await _mangaService.GetMangaByIdForAdminAsync(id);
             if (manga == null)
             {
                 return NotFound();
@@ -36,6 +45,16 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 Status = manga.Status,
                 CoverImageUrl = manga.CoverImageUrl
             };
+
+            // Load chapters for this manga with pagination
+            ChapterPage = chapterPage;
+            var paginationParams = new PaginationParams
+            {
+                Page = chapterPage,
+                PageSize = ChapterPageSize
+            };
+            ChaptersPaged = await _chapterService.GetChaptersByMangaIdPagedAsync(id, paginationParams);
+
             return Page();
         }
 
@@ -43,6 +62,13 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
         {
             if (!ModelState.IsValid)
             {
+                // Reload chapters if validation fails
+                var paginationParams = new PaginationParams
+                {
+                    Page = ChapterPage,
+                    PageSize = ChapterPageSize
+                };
+                ChaptersPaged = await _chapterService.GetChaptersByMangaIdPagedAsync(id, paginationParams);
                 return Page();
             }
 

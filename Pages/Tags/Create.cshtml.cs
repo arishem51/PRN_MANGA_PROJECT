@@ -26,6 +26,17 @@ namespace PRN_MANGA_PROJECT.Pages.Tags
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // ✅ Step 1: Validate required fields manually
+            if (string.IsNullOrWhiteSpace(Tag.Name))
+                ModelState.AddModelError("Tag.Name", "Name is required.");
+
+            if (string.IsNullOrWhiteSpace(Tag.Description))
+                ModelState.AddModelError("Tag.Description", "Description is required.");
+
+            if (string.IsNullOrWhiteSpace(Tag.Color))
+                ModelState.AddModelError("Tag.Color", "Color is required.");
+
+         
             if (!ModelState.IsValid)
                 return Page();
 

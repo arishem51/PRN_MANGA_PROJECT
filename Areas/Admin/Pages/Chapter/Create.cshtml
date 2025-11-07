@@ -1,0 +1,140 @@
+@page
+@model PRN_MANGA_PROJECT.Areas.Admin.Pages.Chapter.CreateModel
+@{
+    ViewData["Title"] = "Create Chapter";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Create Chapter</h2>
+    <a href="/admin/chapter" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Chapter List
+    </a>
+</div>
+
+<div class="row" style="padding-bottom: 100px;">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Create New Chapter</h5>
+            </div>
+            <div class="card-body">
+                <!-- Success/Error Messages -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Input.MangaId" class="form-label">
+                            Manga <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="Input.MangaId" asp-items="Model.MangaList" class="form-select" required>
+                            <option value="">-- Select Manga --</option>
+                        </select>
+                        <span asp-validation-for="Input.MangaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Input.Title" class="form-label">
+                                    Title <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="Input.Title" class="form-control" placeholder="Enter chapter title" required />
+                                <span asp-validation-for="Input.Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Input.ChapterNumber" class="form-label">Chapter Number</label>
+                                <input asp-for="Input.ChapterNumber" class="form-control" placeholder="e.g., 1, 2.5, 10" />
+                                <span asp-validation-for="Input.ChapterNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.MangadexChapterId" class="form-label">
+                            MangaDex Chapter ID <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Input.MangadexChapterId" class="form-control" placeholder="Enter MangaDex Chapter UUID" required />
+                        <div class="form-text">The UUID from MangaDex chapter URL (e.g., from https://mangadex.org/chapter/...)</div>
+                        <span asp-validation-for="Input.MangadexChapterId" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Input.PageCount" class="form-label">Page Count</label>
+                                <input asp-for="Input.PageCount" type="number" class="form-control" placeholder="Number of pages" min="0" />
+                                <span asp-validation-for="Input.PageCount" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Content" class="form-label">Content</label>
+                        <textarea asp-for="Input.Content" class="form-control" rows="4" placeholder="Enter chapter content or summary"></textarea>
+                        <span asp-validation-for="Input.Content" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/admin/chapter" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Chapter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Help</h6>
+            </div>
+            <div class="card-body">
+                <h6>MangaDex Chapter ID</h6>
+                <p class="small text-muted">
+                    Find the MangaDex Chapter ID in the URL when viewing a chapter on MangaDex. 
+                    It's the UUID in the URL path (e.g., https://mangadex.org/chapter/{uuid}).
+                </p>
+                
+                <h6>Required Fields</h6>
+                <ul class="small text-muted">
+                    <li>Manga</li>
+                    <li>Title</li>
+                    <li>MangaDex Chapter ID</li>
+                </ul>
+                
+                <h6>Optional Fields</h6>
+                <ul class="small text-muted">
+                    <li>Chapter Number</li>
+                    <li>Page Count</li>
+                    <li>Content</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

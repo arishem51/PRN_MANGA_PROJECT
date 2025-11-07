@@ -6,7 +6,6 @@ using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels;
 using PRN_MANGA_PROJECT.Services;
-using System.Security.Claims;
 
 
 namespace PRN_MANGA_PROJECT.Pages.Public.Manga
@@ -43,13 +42,13 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
 
         public async Task<IActionResult> OnGet(int mangaId)
         {
-            if(mangaId == null)
+            if(mangaId <= 0)
             {
                 return RedirectToPage("/Public/Error");
-
             }
+            
             Manga = _context.Mangas
-                            .Include(m => m.Chapters)
+                            .Include(m => m.Chapters.Where(c => c.IsActive))
                             .Include(m => m.MangaTags)
                                 .ThenInclude(mt => mt.Tag)
                             .FirstOrDefault(m => m.Id == mangaId);
@@ -59,7 +58,7 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
                 return RedirectToPage("/Public/Error");
             }
 
-            chapters = Manga.Chapters.OrderByDescending(c => int.TryParse(c.ChapterNumber, out int num) ? num : 0).ToList();
+            chapters = Manga.Chapters.Where(c => c.IsActive).OrderByDescending(c => int.TryParse(c.ChapterNumber, out int num) ? num : 0).ToList();
             Tags = Manga.MangaTags.Select(mt => mt.Tag).ToList();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -83,10 +82,11 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             }
             
 
-            if (Manga.Chapters.Any())
+            var activeChapters = Manga.Chapters.Where(c => c.IsActive).ToList();
+            if (activeChapters.Any())
             {
-                firstChapterId = Manga.Chapters.OrderBy(c => c.ChapterNumber).FirstOrDefault().Id;
-                lastestChapterId = Manga.Chapters.OrderByDescending(c => c.ChapterNumber).FirstOrDefault().Id;
+                firstChapterId = activeChapters.OrderBy(c => c.ChapterNumber).FirstOrDefault()?.Id;
+                lastestChapterId = activeChapters.OrderByDescending(c => c.ChapterNumber).FirstOrDefault()?.Id;
             }
             else
             {

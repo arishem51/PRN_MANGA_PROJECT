@@ -10,17 +10,17 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.CRUD
     {
         public string? Id { get; set; }
 
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
+        [Required(ErrorMessage = "UserName can't empty")]
         [StringLength(50, ErrorMessage = "Tên đăng nhập không được vượt quá 50 ký tự")]
-        [UniqueUsername(ErrorMessage = "Tên đăng nhập này đã được sử dụng, vui lòng chọn tên khác")]
+        [UniqueUsername(ErrorMessage = "UserName is existed")]
         public string Username { get; set; }
 
-        [Required(ErrorMessage = "Email không được để trống")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        [UniqueEmail(ErrorMessage = "Email này đã được sử dụng, vui lòng chọn email khác")]
+        [Required(ErrorMessage = "Email can't empty")]
+        [EmailAddress(ErrorMessage = "Email format wrong")]
+        [UniqueEmail(ErrorMessage = "Email is existed")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn vai trò")]
+        [Required(ErrorMessage = "please choose role")]
         public string Role { get; set; }
 
         public bool IsActive { get; set; } = true;
@@ -49,7 +49,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.CRUD
             var existingUser = userManager.Users.FirstOrDefault(u => u.Email == email);
             if (existingUser != null)
             {
-                return new ValidationResult(ErrorMessage ?? "Email đã tồn tại trong hệ thống");
+                return new ValidationResult(ErrorMessage ?? "Email is existed in system");
             }
 
             return ValidationResult.Success;
@@ -79,7 +79,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels.CRUD
             var existingUser = userManager.Users.FirstOrDefault(u => u.UserName == username);
             if (existingUser != null)
             {
-                return new ValidationResult(ErrorMessage ?? "Tên đăng nhập đã tồn tại trong hệ thống");
+                return new ValidationResult(ErrorMessage ?? "UserName is existed in system");
             }
 
             return ValidationResult.Success;

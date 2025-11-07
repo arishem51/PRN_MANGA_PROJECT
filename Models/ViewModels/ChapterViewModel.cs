@@ -5,8 +5,10 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
         public int Id { get; set; }
         public int MangaId { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string MangadexChapterId { get; set; } = string.Empty;
         public string? ChapterNumber { get; set; }
         public string? Content { get; set; }
+        public string? ExternalUrl { get; set; }
         public int? PageCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -22,6 +24,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
     {
         public int MangaId { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string MangadexChapterId { get; set; } = string.Empty;
         public string? ChapterNumber { get; set; }
         public string? Content { get; set; }
         public int? PageCount { get; set; }
@@ -30,6 +33,7 @@ namespace PRN_MANGA_PROJECT.Models.ViewModels
     public class UpdateChapterViewModel
     {
         public string Title { get; set; } = string.Empty;
+        public string MangadexChapterId { get; set; } = string.Empty;
         public string? ChapterNumber { get; set; }
         public string? Content { get; set; }
         public int? PageCount { get; set; }

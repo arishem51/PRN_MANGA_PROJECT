@@ -24,25 +24,25 @@
 @if (Model.IsCreated)
 {
     <div class="alert alert-success fade show">
-        ✅ Thể loại mới đã được thêm thành công!
+        ✅ create successfully!
     </div>
 }
 
 <form method="post" class="p-3 border rounded shadow-sm bg-light">
     <div class="form-group mb-3">
-        <label asp-for="Tag.Name" class="form-label">Tên thể loại</label>
+        <label asp-for="Tag.Name" class="form-label">Tag Name</label>
         <input asp-for="Tag.Name" class="form-control" placeholder="Nhập tên thể loại..." />
         <span asp-validation-for="Tag.Name" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Tag.Description" class="form-label">Mô tả</label>
+        <label asp-for="Tag.Description" class="form-label">Description</label>
         <textarea asp-for="Tag.Description" class="form-control" rows="3" placeholder="Nhập mô tả (tùy chọn)..."></textarea>
         <span asp-validation-for="Tag.Description" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Tag.Color" class="form-label">Màu hiển thị</label>
+        <label asp-for="Tag.Color" class="form-label">Color</label>
         <div class="input-group">
             <input asp-for="Tag.Color" class="form-control" placeholder="#FFFFFF" />
             <span class="input-group-text">
@@ -54,11 +54,11 @@
 
     <div class="form-group form-check mb-3">
         <input class="form-check-input" asp-for="Tag.IsActive" checked />
-        <label class="form-check-label" asp-for="Tag.IsActive">Kích hoạt</label>
+        <label class="form-check-label" asp-for="Tag.IsActive">Active</label>
     </div>
 
-    <button type="submit" class="btn btn-success">💾 Tạo thể loại</button>
-    <a asp-page="Index" class="btn btn-secondary ms-2">⬅️ Quay lại danh sách</a>
+    <button type="submit" class="btn btn-success">💾 Create tag</button>
+    <a asp-page="Index" class="btn btn-secondary ms-2">⬅️ Back to List </a>
 </form>
 
 @section Scripts {
