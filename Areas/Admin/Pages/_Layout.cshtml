@@ -2,7 +2,7 @@
 @{
     var path = Context?.Request?.Path.Value?.ToLowerInvariant() ?? string.Empty;
 
-    bool isAccount = path.Contains("/admin") && path.Contains("viewaccount");
+    bool isAccount = path.StartsWith("/viewaccount");
     bool isManga = path.Contains("/admin") && path.Contains("manga");
 }
 <!DOCTYPE html>

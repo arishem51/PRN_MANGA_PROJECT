@@ -57,7 +57,12 @@
 
     $(document).on("submit", ".comment-action-form", function (e) {
         e.preventDefault();
+        var currentUserId = $("#comment-list-container").data("user-id");
 
+        if (!currentUserId || currentUserId === "") {
+            window.location.href = "/login"; 
+            return;
+        }
         var $form = $(this);
         var url = $form.attr("action");
         var data = $form.serialize();

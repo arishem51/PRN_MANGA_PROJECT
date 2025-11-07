@@ -18,6 +18,15 @@
                     </a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li>
+                        <a class="dropdown-item" asp-area="Admin" asp-page="/Index">
+                            Admin Panel
+                        </a>
+                    </li>
+                }
+                <li><hr class="dropdown-divider" /></li>
                 <li>
                     <form asp-area="" asp-page="/Auth/Logout"
                           asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post">

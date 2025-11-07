@@ -24,8 +24,8 @@ namespace PRN_MANGA_PROJECT.Services.CommentService
                 UserId = userId,
                 ChapterId = chapterId,
                 Content = content,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
                 IsActive = true
             };
 
@@ -43,8 +43,8 @@ namespace PRN_MANGA_PROJECT.Services.CommentService
                 ChapterId = chapterId,
                 Content = content,
                 ParentCommentId = parentId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
                 IsActive = true
             };
 
@@ -68,6 +68,10 @@ namespace PRN_MANGA_PROJECT.Services.CommentService
             var context = (ApplicationDbContext)typeof(CommentRepository)
                 .GetField("_context", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
                 .GetValue(_repo)!;
+            if (replies.Any())
+            {
+                context.Comments.RemoveRange(replies);
+            }
 
             context.Comments.Remove(comment);
             await _repo.SaveChangesAsync();
