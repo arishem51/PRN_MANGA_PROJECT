@@ -88,7 +88,7 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
 
             await _emailService.SendEmailAsync(Input.Email, subject, body);
 
-            TempData["SuccessMessage"] = "✅ Tạo tài khoản thành công!";
+            TempData["SuccessMessage"] = "✅ Create successfully!";
             return Page();
         }
 

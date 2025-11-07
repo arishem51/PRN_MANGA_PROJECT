@@ -95,7 +95,7 @@ namespace PRN_MANGA_PROJECT.Pages.Admin
                 await _accountService.AssignRoleAsync(user, Input.Role);
             }
 
-            TempData["SuccessMessage"] = "✅ Cập nhật tài khoản thành công!";
+            TempData["SuccessMessage"] = "Update successfully!";
 
             // ✅ Redirect để gọi lại OnGetAsync → load lại dữ liệu mới và AllRoles
             return RedirectToPage(new { id = Input.Id });

@@ -9,14 +9,20 @@
 <a asp-page="/Tags/Create" class="btn btn-primary mb-3">+ Thêm thể loại</a>
 
 <form method="get" class="row mb-3">
+    <div class="col-md-2">
+        <select name="sortOrder" class="form-select">
+            <option value="desc" selected="@(Model.SortOrder == "desc")">Des</option>
+            <option value="asc" selected="@(Model.SortOrder == "asc")">Asc</option>
+        </select>
+    </div>
     <div class="col-md-4">
         <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Tìm theo tên thể loại..." />
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-success w-100">Lọc</button>
+        <button type="submit" class="btn btn-success w-100">Search</button>
     </div>
     <div class="col-md-2">
-        <a asp-page="/Tags/Index" class="btn btn-secondary w-100">Reset</a>
+        <a href="/Tags/Index" class="btn btn-secondary w-100">Reset</a>
     </div>
 </form>
 

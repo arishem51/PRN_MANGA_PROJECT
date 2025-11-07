@@ -18,20 +18,20 @@
     }
     <div class="form-group mb-3">
         <label asp-for="Input.Username" class="form-label"></label>
-        <input asp-for="Input.Username" class="form-control" disabled />
+        <input asp-for="Input.Username" class="form-control" readonly />
         <span asp-validation-for="Input.Username" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <div class="form-group mb-3" "> 
         <label asp-for="Input.Email" class="form-label"></label>
-        <input asp-for="Input.Email" class="form-control"  disabled/>
+        <input asp-for="Input.Email" class="form-control" readonly />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="Input.Role" class="form-label"></label>
         <select asp-for="Input.Role" class="form-select">
-            <option value="">-- Chọn vai trò --</option>
+            <option value="">-- Role --</option>
             @foreach (var role in Model.AllRoles)
             {
                 <option value="@role" selected="@(role == Model.Input.Role)">
@@ -42,8 +42,8 @@
         <span asp-validation-for="Input.Role" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-    <a asp-page="/Admin/ViewAccount" class="btn btn-secondary ms-2">Trở lại trang danh sách tài khoản</a>
+    <button type="submit" class="btn btn-primary">Save change</button>
+    <a asp-page="/Admin/ViewAccount" class="btn btn-secondary ms-2">Back to list</a>
 </form>
 
 @section Scripts {

@@ -1,12 +1,12 @@
 ﻿@page "/viewaccount"
 @model PRN_MANGA_PROJECT.Pages.Admin.ViewAccountModel
 @{
-    ViewData["Title"] = "Danh sách tài khoản";
+    ViewData["Title"] = "List Account";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<a asp-page="/Admin/CreateAccount" class="btn btn-primary mb-2">+ Thêm tài khoản</a>
+<a asp-page="/Admin/CreateAccount" class="btn btn-primary mb-2">Add new Account</a>
 
 <form method="get" class="row mb-3">
     <div class="col-md-4">
@@ -14,7 +14,7 @@
     </div>
     <div class="col-md-3">
         <select name="roleFilter" class="form-select">
-            <option value="">-- Tất cả vai trò --</option>
+            <option value="">-- All roles --</option>
             @foreach (var role in Model.AllRoles)
             {
                 <option value="@role" selected="@(Model.RoleFilter == role)">@role</option>
@@ -22,11 +22,13 @@
         </select>
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-success w-100">Lọc</button>
+        <button type="submit" class="btn btn-success w-100">Search</button>
     </div>
     <div class="col-md-2">
-        <!-- ✅ Nút reset để xóa search và lọc -->
-        <a asp-page="/viewaccount" class="btn btn-secondary w-100">Reset</a>
+        <a href="/viewaccount"
+           class="btn btn-secondary w-100">
+            Reset
+        </a>
     </div>
 </form>
 
@@ -34,11 +36,11 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Tên đăng nhập</th>
+            <th>Username</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
+            <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -51,16 +53,16 @@
                     <td>@acc.Username</td>
                     <td>@acc.Email</td>
                     <td>@acc.Role</td>
-                    <td>@(acc.IsActive ? "Hoạt động" : "Khóa")</td>
+                    <td>@(acc.IsActive ? "Active" : "Ban")</td>
                     <td>
-                        <a asp-page="/Admin/EditAccount" asp-route-id="@acc.Id" class="btn btn-warning btn-sm">Sửa</a>
+                        <a asp-page="/Admin/EditAccount" asp-route-id="@acc.Id" class="btn btn-warning btn-sm">Edit</a>
 
                         @if (acc.IsActive)
                         {
                             <form method="post" asp-page-handler="Delete" asp-route-id="@acc.Id" style="display:inline">
                                 <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Bạn có chắc muốn khóa tài khoản này không?')">
-                                    Khóa
+                                        onclick="return confirm('Do you want ban this account?')">
+                                    Ban
                                 </button>
                             </form>
                         }
@@ -68,8 +70,8 @@
                         {
                             <form method="post" asp-page-handler="Unlock" asp-route-id="@acc.Id" style="display:inline">
                                 <button type="submit" class="btn btn-success btn-sm"
-                                        onclick="return confirm('Bạn có chắc muốn mở khóa tài khoản này không?')">
-                                    Mở khóa
+                                        onclick="return confirm('Do you want to Unlock this account?')">
+                                    Unlock
                                 </button>
                             </form>
                         }
@@ -80,7 +82,7 @@
         else
         {
             <tr>
-                <td colspan="6" class="text-center text-muted">Không có tài khoản nào phù hợp.</td>
+                <td colspan="6" class="text-center text-muted">No any account.</td>
             </tr>
         }
     </tbody>
