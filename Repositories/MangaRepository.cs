@@ -155,5 +155,30 @@ namespace PRN_MANGA_PROJECT.Repositories
             return (data, totalCount);
         }
 
+        public async Task<(IEnumerable<Manga>, int)> SearchMangaByTagPagedAsync(int tagId, string searchTerm, int pageNumber, int pageSize)
+        {
+            var lower = searchTerm.ToLower();
+            var query = _context.Mangas
+
+                // Lọc theo Tag
+                .Where(m => m.IsActive && m.MangaTags.Any(mt => mt.TagId == tagId) &&
+
+                      // Lọc theo SearchTerm
+                      (m.Title.Contains(searchTerm) ||
+                      (m.Author != null && m.Author.Contains(lower)) ||
+                      (m.Artist != null && m.Artist.Contains(lower))))
+
+                .OrderByDescending(m => m.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+
+            var data = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (data, totalCount);
+        }
+
     }
 }

@@ -4,7 +4,12 @@
     ViewData["Title"] = "Login";
 }
 
-
+<style>
+    .validation-summary-errors ul {
+        list-style-type: none;
+        padding-left: 0; /* Xóa luôn cả phần đệm bên trái do thẻ <ul> tạo ra */
+    }
+</style>
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="card shadow-lg p-4" style="width: 400px; border-radius: 1rem;">
         <h3 class="text-center mb-4 text-primary fw-bold">Sign In</h3>
@@ -27,6 +32,8 @@
             {
                 <div class="text-danger small">@TempData["ErrorMessage"]</div>
             }
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
 
             <div class="form-check mb-3">
                 <input asp-for="Input.RememberMe" class="form-check-input" />

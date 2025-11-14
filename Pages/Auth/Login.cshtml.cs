@@ -74,14 +74,14 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
 
                 if (!user.EmailConfirmed)
                 {
-                    TempData["ErrorMessage"] = "Please confirm your email first.";
-                    return RedirectToPage("/Auth/Login"); 
+                    ModelState.AddModelError(string.Empty, "Please confirm your email first.");
+                    return Page();
                 }
 
                 if (!user.IsActive)
                 {
-                    TempData["ErrorMessage"] = "Your Account is not active";
-                    return RedirectToPage("/Auth/Login");
+                    ModelState.AddModelError(string.Empty, "Your Account is not active");
+                    return Page();
                 }
 
                 var roles = await _userManager.GetRolesAsync(user);
@@ -99,16 +99,14 @@ namespace PRN_MANGA_PROJECT.Pages.Auth
 
             if (!check)
             {
-                TempData["ErrorMessage"] = "Username or password is incorrect.";
-                return RedirectToPage("/Auth/Login");
-            }
+                ModelState.AddModelError(string.Empty, "Username or password is incorrect.");
 
-            if (!checkEmail)
+            }
+            if (check && !checkEmail)
             {
-                TempData["ErrorMessage"] = "Please confirm email to sign in";
-                return RedirectToPage("/Auth/Login");
-            }
+                ModelState.AddModelError(string.Empty, "Please confirm email to sign in");
 
+            }
 
 
             return Page();
