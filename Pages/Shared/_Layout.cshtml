@@ -16,6 +16,7 @@
         var isTag = path.StartsWith("/Tags/index");
         var isAccount = path.StartsWith("/viewaccount");
         var isManga = path.StartsWith("/admin/manga");
+        var isChapter = path.StartsWith("/admin/chapter");
 
 
         // Sidebar layout values for admin pages
@@ -59,6 +60,7 @@
                    href="/Tags/index">Tag</a>
                 <a class="list-group-item list-group-item-action @(isAccount ? "active" : "")" href="/viewaccount">Account</a>
                 <a class="list-group-item list-group-item-action @(isManga ? "active" : "")" href="/admin/manga">Manga</a>
+                <a class="list-group-item list-group-item-action @(isChapter ? "active" : "")" href="/admin/chapter">Chapter</a>
             </div>
         </aside>
         <div class="container-fluid flex-grow-1">

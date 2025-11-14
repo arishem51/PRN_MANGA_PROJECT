@@ -3,6 +3,7 @@
     var path = Context?.Request?.Path.Value?.ToLowerInvariant() ?? string.Empty;
     bool isTag = path.StartsWith("/Tags/index");
     bool isAccount = path.StartsWith("/viewaccount");
+    bool isChapter = path.StartsWith("/admin/chapter");
     bool isManga = path.Contains("/admin") && path.Contains("manga");
 }
 <!DOCTYPE html>
@@ -37,6 +38,7 @@
                     <a class="list-group-item list-group-item-action @(isTag ? "active" : "")"
                        href="/Tags/index">Tag</a>
                     <a class="list-group-item list-group-item-action @(isManga ? "active" : "")" href="/admin/manga">Manga</a>
+                    <a class="list-group-item list-group-item-action @(isChapter ? "active" : "")" href="/admin/chapter">Chapter</a>
                 </div>
             </aside>
             <main role="main" class="col-12 col-md-9 col-lg-10 p-4">
