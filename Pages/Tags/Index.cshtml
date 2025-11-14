@@ -30,12 +30,12 @@
     <thead class="table-light">
         <tr>
             <th>ID</th>
-            <th>Tên thể loại</th>
-            <th>Mô tả</th>
-            <th>Màu</th>
-            <th>Ngày tạo</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
+            <th>TagName</th>
+            <th>Description</th>
+            <th>Color</th>
+            <th>Create Date</th>
+            <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -54,22 +54,22 @@
                     <td>
                         @if (tag.IsActive)
                         {
-                            <span class="badge bg-success">Hoạt động</span>
+                            <span class="badge bg-success">Active</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">Ẩn</span>
+                            <span class="badge bg-secondary">InActive</span>
                         }
                     </td>
                     <td>
-                        <a asp-page="/Tags/Edit" asp-route-id="@tag.Id" class="btn btn-warning btn-sm me-1">Sửa</a>
+                        <a asp-page="/Tags/Edit" asp-route-id="@tag.Id" class="btn btn-warning btn-sm me-1">Edit</a>
 
                         @if (tag.IsActive)
                         {
                             <form method="post" asp-page-handler="Deactivate" asp-route-id="@tag.Id" style="display:inline;">
                                 <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Bạn có chắc muốn ẩn thể loại này không?')">
-                                    Ẩn
+                                        onclick="return confirm('Do you want to deactive this tag?')">
+                                    Deactive
                                 </button>
                             </form>
                         }
@@ -77,8 +77,8 @@
                         {
                             <form method="post" asp-page-handler="Activate" asp-route-id="@tag.Id" style="display:inline;">
                                 <button type="submit" class="btn btn-success btn-sm"
-                                        onclick="return confirm('Bạn có chắc muốn kích hoạt thể loại này không?')">
-                                    Kích hoạt
+                                        onclick="return confirm('Do you want to active this tag?')">
+                                    Active
                                 </button>
                             </form>
                         }
@@ -89,7 +89,7 @@
         else
         {
             <tr>
-                <td colspan="7" class="text-center text-muted">Không có thể loại nào phù hợp.</td>
+                <td colspan="7" class="text-center text-muted">No have tag.</td>
             </tr>
         }
     </tbody>

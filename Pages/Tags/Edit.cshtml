@@ -24,7 +24,7 @@
 @if (Model.IsUpdated)
 {
     <div class="alert alert-success">
-        ✅ Thể loại đã được cập nhật thành công!
+        ✅ update successfully!
     </div>
 }
 
@@ -32,19 +32,19 @@
     <input type="hidden" asp-for="Tag.Id" />
 
     <div class="form-group mb-3">
-        <label asp-for="Tag.Name" class="form-label">Tên thể loại</label>
+        <label asp-for="Tag.Name" class="form-label">Tag Name</label>
         <input asp-for="Tag.Name" class="form-control" placeholder="Nhập tên thể loại..." />
         <span asp-validation-for="Tag.Name" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Tag.Description" class="form-label">Mô tả</label>
+        <label asp-for="Tag.Description" class="form-label">Description</label>
         <textarea asp-for="Tag.Description" class="form-control" rows="3" placeholder="Nhập mô tả (tùy chọn)..."></textarea>
         <span asp-validation-for="Tag.Description" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Tag.Color" class="form-label">Màu hiển thị</label>
+        <label asp-for="Tag.Color" class="form-label">Color</label>
         <div class="input-group">
             <input asp-for="Tag.Color" class="form-control" placeholder="#FFFFFF" />
             <span class="input-group-text">
@@ -57,11 +57,11 @@
 
     <div class="form-group form-check mb-3">
         <input class="form-check-input" asp-for="Tag.IsActive" />
-        <label class="form-check-label" asp-for="Tag.IsActive">Kích hoạt</label>
+        <label class="form-check-label" asp-for="Tag.IsActive">Active</label>
     </div>
 
-    <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
-    <a asp-page="/Tags/Index" class="btn btn-secondary ms-2">⬅️ Quay lại danh sách</a>
+    <button type="submit" class="btn btn-primary">Save change</button>
+    <a asp-page="/Tags/Index" class="btn btn-secondary ms-2">Back to List</a>
 </form>
 
 @section Scripts {

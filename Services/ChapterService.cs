@@ -44,7 +44,7 @@ namespace PRN_MANGA_PROJECT.Services
         public async Task<PagedResult<ChapterViewModel>> GetChaptersByMangaIdPagedAsync(int mangaId, PaginationParams paginationParams)
         {
             var pagedResult = await _chapterRepository.GetChaptersByMangaIdPagedAsync(mangaId, paginationParams);
-            
+
             return new PagedResult<ChapterViewModel>
             {
                 Data = pagedResult.Data.Select(MapToViewModel).ToList(),
@@ -97,9 +97,9 @@ namespace PRN_MANGA_PROJECT.Services
 
             // Always fetch images from MangaDex API if MangaDex Chapter ID is valid
             _logger.LogInformation("=== Checking if images need to be fetched for new chapter {ChapterId} ===", createdChapter.Id);
-            _logger.LogInformation("MangaDex Chapter ID value: '{MangadexChapterId}' (IsNullOrEmpty: {IsEmpty})", 
+            _logger.LogInformation("MangaDex Chapter ID value: '{MangadexChapterId}' (IsNullOrEmpty: {IsEmpty})",
                 model.MangadexChapterId ?? "NULL", string.IsNullOrEmpty(model.MangadexChapterId));
-            
+
             if (!string.IsNullOrWhiteSpace(model.MangadexChapterId))
             {
                 _logger.LogInformation("Fetching images for newly created chapter {ChapterId} from MangaDex API. MangaDex ID: {MangadexChapterId}", createdChapter.Id, model.MangadexChapterId);
@@ -126,7 +126,7 @@ namespace PRN_MANGA_PROJECT.Services
         {
             _logger.LogInformation("=== FetchAndStoreChapterImagesAsync CALLED ===");
             _logger.LogInformation("Starting to fetch images for chapter {ChapterId} from MangaDex API (Chapter ID: {MangadexChapterId})", chapterId, mangadexChapterId);
-            
+
             if (string.IsNullOrWhiteSpace(mangadexChapterId))
             {
                 _logger.LogWarning("MangaDex Chapter ID is empty or null for chapter {ChapterId}. Cannot fetch images.", chapterId);
@@ -145,7 +145,7 @@ namespace PRN_MANGA_PROJECT.Services
             }
 
             var chapterDetailJson = await chapterDetailResponse.Content.ReadAsStringAsync();
-            _logger.LogInformation("Raw chapter detail JSON response for chapter {ChapterId} (first 500 chars): {JsonPreview}", 
+            _logger.LogInformation("Raw chapter detail JSON response for chapter {ChapterId} (first 500 chars): {JsonPreview}",
                 chapterId, chapterDetailJson.Length > 500 ? chapterDetailJson.Substring(0, 500) + "..." : chapterDetailJson);
 
             var chapterDetail = JsonSerializer.Deserialize<MangaDexChapterDetailResponse>(chapterDetailJson, new JsonSerializerOptions
@@ -160,7 +160,7 @@ namespace PRN_MANGA_PROJECT.Services
             }
 
             var externalUrl = chapterDetail.Data.Attributes.ExternalUrl;
-            _logger.LogInformation("Chapter detail for chapter {ChapterId}: ExternalUrl='{ExternalUrl}', Pages={Pages}", 
+            _logger.LogInformation("Chapter detail for chapter {ChapterId}: ExternalUrl='{ExternalUrl}', Pages={Pages}",
                 chapterId, externalUrl ?? "NULL", chapterDetail.Data.Attributes.Pages);
 
             // Update chapter with externalUrl if it exists
@@ -192,17 +192,17 @@ namespace PRN_MANGA_PROJECT.Services
             _logger.LogInformation("Successfully received response from MangaDex API for chapter {ChapterId}", chapterId);
 
             var jsonContent = await response.Content.ReadAsStringAsync();
-            _logger.LogInformation("Raw JSON response from MangaDex API for chapter {ChapterId} (first 500 chars): {JsonPreview}", 
+            _logger.LogInformation("Raw JSON response from MangaDex API for chapter {ChapterId} (first 500 chars): {JsonPreview}",
                 chapterId, jsonContent.Length > 500 ? jsonContent.Substring(0, 500) + "..." : jsonContent);
-            
+
             var apiResponse = JsonSerializer.Deserialize<MangaDexAtHomeResponse>(jsonContent, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            _logger.LogInformation("Deserialized API response for chapter {ChapterId}: Result='{Result}', BaseUrl='{BaseUrl}', Chapter is null: {ChapterIsNull}", 
-                chapterId, 
-                apiResponse?.Result ?? "NULL", 
+            _logger.LogInformation("Deserialized API response for chapter {ChapterId}: Result='{Result}', BaseUrl='{BaseUrl}', Chapter is null: {ChapterIsNull}",
+                chapterId,
+                apiResponse?.Result ?? "NULL",
                 apiResponse?.BaseUrl ?? "NULL",
                 apiResponse?.Chapter == null);
 
@@ -292,10 +292,10 @@ namespace PRN_MANGA_PROJECT.Services
         {
             [System.Text.Json.Serialization.JsonPropertyName("result")]
             public string Result { get; set; } = string.Empty;
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("baseUrl")]
             public string BaseUrl { get; set; } = string.Empty;
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("chapter")]
             public MangaDexChapterData Chapter { get; set; } = new();
         }
@@ -304,10 +304,10 @@ namespace PRN_MANGA_PROJECT.Services
         {
             [System.Text.Json.Serialization.JsonPropertyName("hash")]
             public string Hash { get; set; } = string.Empty;
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("data")]
             public List<string>? Data { get; set; }
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("dataSaver")]
             public List<string>? DataSaver { get; set; }
         }
@@ -316,7 +316,7 @@ namespace PRN_MANGA_PROJECT.Services
         {
             [System.Text.Json.Serialization.JsonPropertyName("result")]
             public string Result { get; set; } = string.Empty;
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("data")]
             public MangaDexChapterDetailData? Data { get; set; }
         }
@@ -325,7 +325,7 @@ namespace PRN_MANGA_PROJECT.Services
         {
             [System.Text.Json.Serialization.JsonPropertyName("id")]
             public string Id { get; set; } = string.Empty;
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("attributes")]
             public MangaDexChapterAttributes? Attributes { get; set; }
         }
@@ -334,13 +334,13 @@ namespace PRN_MANGA_PROJECT.Services
         {
             [System.Text.Json.Serialization.JsonPropertyName("externalUrl")]
             public string? ExternalUrl { get; set; }
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("pages")]
             public int? Pages { get; set; }
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("chapter")]
             public string? Chapter { get; set; }
-            
+
             [System.Text.Json.Serialization.JsonPropertyName("title")]
             public string? Title { get; set; }
         }
@@ -369,13 +369,13 @@ namespace PRN_MANGA_PROJECT.Services
 
             // Always fetch images if MangaDex Chapter ID is valid
             _logger.LogInformation("=== Checking if images need to be fetched for chapter {ChapterId} ===", id);
-            _logger.LogInformation("MangaDex ID changed: {Changed}, New ID: '{NewId}' (IsNullOrEmpty: {IsEmpty})", 
+            _logger.LogInformation("MangaDex ID changed: {Changed}, New ID: '{NewId}' (IsNullOrEmpty: {IsEmpty})",
                 mangadexIdChanged, model.MangadexChapterId ?? "NULL", string.IsNullOrEmpty(model.MangadexChapterId));
-            
+
             // Check if chapter has existing images
             var existingImageCount = await _context.ChapterImages.CountAsync(ci => ci.ChapterId == id);
             _logger.LogInformation("Chapter {ChapterId} currently has {ImageCount} images in database", id, existingImageCount);
-            
+
             // Always fetch images if MangaDex Chapter ID is valid (not empty)
             if (!string.IsNullOrWhiteSpace(model.MangadexChapterId))
             {
@@ -388,7 +388,7 @@ namespace PRN_MANGA_PROJECT.Services
                 catch (Exception ex)
                 {
                     // Log error but don't fail chapter update
-                    _logger.LogError(ex, "Error fetching images for chapter {ChapterId} with MangaDex ID {MangadexChapterId} during update: {ErrorMessage}", 
+                    _logger.LogError(ex, "Error fetching images for chapter {ChapterId} with MangaDex ID {MangadexChapterId} during update: {ErrorMessage}",
                         id, model.MangadexChapterId, ex.Message);
                 }
             }
@@ -445,7 +445,7 @@ namespace PRN_MANGA_PROJECT.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error refreshing images for chapter {ChapterId} with MangaDex ID {MangadexChapterId}: {ErrorMessage}", 
+                _logger.LogError(ex, "Error refreshing images for chapter {ChapterId} with MangaDex ID {MangadexChapterId}: {ErrorMessage}",
                     chapterId, chapter.MangadexChapterId, ex.Message);
                 return false;
             }

@@ -14,7 +14,7 @@
         var path = Context?.Request?.Path.Value?.ToLowerInvariant() ?? string.Empty;
         var isAdmin = path.StartsWith("/admin");
         var isTag = path.StartsWith("/Tags/index");
-        var isAccount = path.StartsWith("/viewaccount");
+        var isAccount = path.StartsWith("/Admin/viewaccount");
         var isManga = path.StartsWith("/admin/manga");
 
 
@@ -57,7 +57,7 @@
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action @(isTag ? "active" : "")"
                    href="/Tags/index">Tag</a>
-                <a class="list-group-item list-group-item-action @(isAccount ? "active" : "")" href="/viewaccount">Account</a>
+                <a class="list-group-item list-group-item-action @(isAccount ? "active" : "")" href="/Admin/viewaccount">Account</a>
                 <a class="list-group-item list-group-item-action @(isManga ? "active" : "")" href="/admin/manga">Manga</a>
             </div>
         </aside>

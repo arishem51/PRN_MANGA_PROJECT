@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -16,11 +17,6 @@ namespace PRN_MANGA_PROJECT
         {
             await context.Database.MigrateAsync();
 
-            if (context.Mangas.Any())
-            {
-                Console.WriteLine("⚠️ Dữ liệu đã tồn tại, bỏ qua seeding.");
-                return;
-            }
 
             var random = new Random();
 
@@ -45,7 +41,15 @@ namespace PRN_MANGA_PROJECT
             var sampleTitles = new[]
             {
                 "Naruto", "Bleach", "One Piece", "Attack on Titan", "My Hero Academia",
-                "Demon Slayer", "Jujutsu Kaisen", "Tokyo Ghoul", "Death Note", "Fairy Tail"
+                "Demon Slayer", "Jujutsu Kaisen", "Tokyo Ghoul", "Death Note", "Fairy Tail",
+                "Dragon Ball", "Fullmetal Alchemist", "Hunter x Hunter", "Berserk", "Vinland Saga",
+                "Vagabond", "Slam Dunk", "One-Punch Man", "Mob Psycho 100", "Chainsaw Man",
+                "Spy x Family", "Blue Lock", "Haikyu!!", "The Promised Neverland", "Dr. Stone",
+                "Fire Force", "Black Clover", "Kingdom", "Goodnight Punpun", "Monster",
+                "20th Century Boys", "Gintama", "JoJo's Bizarre Adventure", "Kaguya-sama: Love is War", "Your Lie in April",
+                "Steins;Gate", "Code Geass", "Neon Genesis Evangelion", "Sailor Moon", "Cardcaptor Sakura",
+                "Fruits Basket", "Horimiya", "Komi Can't Communicate", "Oshi no Ko", "Solo Leveling",
+                "Tower of God", "The God of High School", "Re:Zero", "Mushoku Tensei: Jobless Reincarnation", "That Time I Got Reincarnated as a Slime"
             };
 
             foreach (var title in sampleTitles)
@@ -172,7 +176,55 @@ namespace PRN_MANGA_PROJECT
             context.ChapterImages.AddRange(chapterImages);
             await context.SaveChangesAsync();
 
+
+            // ====== SEED 50 USERS ======
+            var passwordHasher = new PasswordHasher<User>();
+
+            var users = new List<User>();
+
+            string[] firstNames = { "Thang", "Minh", "Khoa", "Hieu", "Tuan", "Hoang", "Nam", "Duy", "Phuc", "Long" };
+            string[] lastNames = { "Nguyen", "Tran", "Le", "Pham", "Ho", "Bui", "Do", "Vo", "Dang", "Phan" };
+            string[] addresses = { "Hanoi", "HCMC", "Da Nang", "Can Tho", "Hai Phong" };
+
+            for (int i = 1; i <= 50; i++)
+            {
+                string firstName = firstNames[random.Next(firstNames.Length)];
+                string lastName = lastNames[random.Next(lastNames.Length)];
+
+                var user = new User
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = $"user{i}",
+                    NormalizedUserName = $"USER{i}",
+                    Email = $"user{i}@example.com",
+                    NormalizedEmail = $"USER{i}@EXAMPLE.COM",
+
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Gender = random.Next(2) == 0,
+                    Address = addresses[random.Next(addresses.Length)],
+
+                    BirthDate = DateTime.UtcNow.AddDays(-random.Next(5000, 15000)), // random tuổi 14–40
+                    EmailConfirmed = true,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString(),
+                    CreatedAt = DateTime.UtcNow.AddDays(-random.Next(30, 300)),
+                    IsActive = true
+                };
+
+                user.PasswordHash = passwordHasher.HashPassword(user, "Abc@123"); // mật khẩu chung
+
+                users.Add(user);
+            }
+
+            await context.Users.AddRangeAsync(users);
+            await context.SaveChangesAsync();
+
+
             Console.WriteLine("🎉 Seeding hoàn tất với ảnh thật từ MangaDex và gắn tag thành công!");
+
+
+
         }
 
         // ====== DTOs cho API MangaDex ======
