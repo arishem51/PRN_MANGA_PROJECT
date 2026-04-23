@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet ef *)",
+      "Bash(curl -s \"https://api.mangadex.org/manga?title=One%20Piece&limit=1&includes[]=cover_art\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); m=d['data'][0]; print\\(m['id']\\); cover=[r for r in m['relationships'] if r['type']=='cover_art'][0]; print\\(cover['attributes']['fileName']\\)\")"
+    ]
+  }
+}

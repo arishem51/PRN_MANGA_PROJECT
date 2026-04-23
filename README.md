@@ -230,5 +230,3 @@ https://api.mangadex.org/at-home/server/{chapterId} - Get chapter images
 https://api.mangadex.org/chapter/{chapterId} - detail chapter
 
 https://api.mangadex.org/chapter?manga={mangaId} - all chapter of a manga
-
-

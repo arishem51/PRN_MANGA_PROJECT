@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels;
 using PRN_MANGA_PROJECT.Repositories;
@@ -8,11 +10,13 @@ namespace PRN_MANGA_PROJECT.Services
     {
         private readonly IMangaRepository _mangaRepository;
         private readonly IBookmarkRepository _bookmarkRepository;
+        private readonly ApplicationDbContext _context;
 
-        public MangaService(IMangaRepository mangaRepository, IBookmarkRepository bookmarkRepository)
+        public MangaService(IMangaRepository mangaRepository, IBookmarkRepository bookmarkRepository, ApplicationDbContext context)
         {
             _mangaRepository = mangaRepository;
             _bookmarkRepository = bookmarkRepository;
+            _context = context;
         }
 
         public async Task<IEnumerable<MangaViewModel>> GetAllMangaAsync()
@@ -87,7 +91,7 @@ namespace PRN_MANGA_PROJECT.Services
 
         public async Task<MangaViewModel> UpdateMangaAsync(MangaViewModel mangaViewModel)
         {
-            var manga = await _mangaRepository.GetByIdAsync(mangaViewModel.Id);
+            var manga = await _mangaRepository.GetMangaWithTagsByIdForAdminAsync(mangaViewModel.Id);
             if (manga == null)
                 throw new ArgumentException("Manga not found");
 
@@ -99,8 +103,37 @@ namespace PRN_MANGA_PROJECT.Services
             manga.CoverImageUrl = mangaViewModel.CoverImageUrl;
             manga.UpdatedAt = DateTime.UtcNow;
 
+            // Update tags
+            var selectedTagIds = mangaViewModel.Tags?.Select(t => t.Id).ToList() ?? new List<int>();
+            var currentTagIds = manga.MangaTags.Select(mt => mt.TagId).ToList();
+
+            // Remove tags that are no longer selected
+            var tagsToRemove = manga.MangaTags.Where(mt => !selectedTagIds.Contains(mt.TagId)).ToList();
+            foreach (var tagToRemove in tagsToRemove)
+            {
+                manga.MangaTags.Remove(tagToRemove);
+            }
+
+            // Add new tags
+            var tagsToAdd = selectedTagIds.Where(tagId => !currentTagIds.Contains(tagId)).ToList();
+            foreach (var tagId in tagsToAdd)
+            {
+                var mangaTag = new MangaTag
+                {
+                    MangaId = manga.Id,
+                    TagId = tagId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                manga.MangaTags.Add(mangaTag);
+            }
+
             await _mangaRepository.UpdateAsync(manga);
-            return MapToViewModel(manga);
+            
+            var updatedManga = await _mangaRepository.GetMangaWithTagsByIdForAdminAsync(mangaViewModel.Id);
+            if (updatedManga == null)
+                throw new ArgumentException("Manga not found after update");
+            
+            return MapToViewModel(updatedManga);
         }
 
         public async Task DeleteMangaAsync(int id)
@@ -168,13 +201,15 @@ namespace PRN_MANGA_PROJECT.Services
                 CreatedAt = manga.CreatedAt,
                 UpdatedAt = manga.UpdatedAt,
                 IsActive = manga.IsActive,
-                Tags = manga.MangaTags.Select(mt => new TagViewModel
-                {
-                    Id = mt.Tag.Id,
-                    Name = mt.Tag.Name,
-                    Description = mt.Tag.Description,
-                    Color = mt.Tag.Color
-                }).ToList(),
+                Tags = manga.MangaTags
+                    .Where(mt => mt.Tag != null)
+                    .Select(mt => new TagViewModel
+                    {
+                        Id = mt.Tag!.Id,
+                        Name = mt.Tag.Name,
+                        Description = mt.Tag.Description,
+                        Color = mt.Tag.Color
+                    }).ToList(),
                 ChapterCount = manga.Chapters.Count(c => c.IsActive)
             };
         }

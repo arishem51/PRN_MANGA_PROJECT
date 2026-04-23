@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PRN_MANGA_PROJECT.Data;
 using PRN_MANGA_PROJECT.Models.Entities;
 
@@ -135,10 +135,36 @@ namespace PRN_MANGA_PROJECT.Repositories
 
         public async Task<(IEnumerable<Manga>, int)> GetMangaByTagPagedAsync(int tagId, int pageNumber, int pageSize)
         {
+            Console.WriteLine("tagId 2223 " + tagId);
             var query = _context.Mangas
                 .Include(m => m.MangaTags)
                 .ThenInclude(mt => mt.Tag)
                 .Where(m => m.IsActive && m.MangaTags.Any(mt => mt.TagId == tagId))
+                .OrderByDescending(m => m.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+
+            var data = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (data, totalCount);
+        }
+
+        public async Task<(IEnumerable<Manga>, int)> GetMangaByTagsPagedAsync(IEnumerable<int> tagIds, int pageNumber, int pageSize)
+        {
+            var tagIdsList = tagIds.ToList();
+            if (!tagIdsList.Any())
+            {
+                return (Enumerable.Empty<Manga>(), 0);
+            }
+
+            var query = _context.Mangas
+                .Include(m => m.MangaTags)
+                .ThenInclude(mt => mt.Tag)
+                .Where(m => m.IsActive && 
+                    tagIdsList.All(tagId => m.MangaTags.Any(mt => mt.TagId == tagId)))
                 .OrderByDescending(m => m.CreatedAt);
 
             var totalCount = await query.CountAsync();

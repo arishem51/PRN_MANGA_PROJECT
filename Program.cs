@@ -150,6 +150,42 @@ using (var scope2 = app.Services.CreateScope())
 {
     var roleService = scope2.ServiceProvider.GetRequiredService<IRoleService>();
     await roleService.SeedRole();
+
+    var userManager = scope2.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+    // Default admin
+    if (await userManager.FindByNameAsync("admin") == null)
+    {
+        var admin = new User
+        {
+            UserName = "admin",
+            Email = "admin@manga.com",
+            FirstName = "Admin",
+            LastName = "System",
+            IsActive = true,
+            EmailConfirmed = true,
+            CreatedAt = DateTime.UtcNow,
+        };
+        var result = await userManager.CreateAsync(admin, "Admin@123");
+        if (result.Succeeded) await userManager.AddToRoleAsync(admin, "Admin");
+    }
+
+    // Default reader
+    if (await userManager.FindByNameAsync("reader") == null)
+    {
+        var reader = new User
+        {
+            UserName = "reader",
+            Email = "reader@manga.com",
+            FirstName = "Default",
+            LastName = "Reader",
+            IsActive = true,
+            EmailConfirmed = true,
+            CreatedAt = DateTime.UtcNow,
+        };
+        var result = await userManager.CreateAsync(reader, "Reader@123");
+        if (result.Succeeded) await userManager.AddToRoleAsync(reader, "Reader");
+    }
 }
 
 // ===== Middleware =====

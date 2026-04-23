@@ -10,17 +10,21 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
     {
         private readonly IMangaService _mangaService;
         private readonly IChapterService _chapterService;
+        private readonly ITagService _tagService;
 
-        public EditModel(IMangaService mangaService, IChapterService chapterService)
+        public EditModel(IMangaService mangaService, IChapterService chapterService, ITagService tagService)
         {
             _mangaService = mangaService;
             _chapterService = chapterService;
+            _tagService = tagService;
         }
 
         [BindProperty]
         public EditInputModel Input { get; set; } = new();
 
         public PagedResult<ChapterViewModel> ChaptersPaged { get; set; } = new();
+        
+        public List<TagViewModel> AvailableTags { get; set; } = new();
 
         [BindProperty(SupportsGet = true)]
         public int ChapterPage { get; set; } = 1;
@@ -35,6 +39,9 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 return NotFound();
             }
 
+            // Load all available tags
+            AvailableTags = (await _tagService.GetActiveTagsAsync()).ToList();
+
             Input = new EditInputModel
             {
                 Id = manga.Id,
@@ -43,7 +50,8 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 Artist = manga.Artist,
                 Description = manga.Description,
                 Status = manga.Status,
-                CoverImageUrl = manga.CoverImageUrl
+                CoverImageUrl = manga.CoverImageUrl,
+                SelectedTagIds = manga.Tags?.Select(t => t.Id).ToList() ?? new List<int>()
             };
 
             // Load chapters for this manga with pagination
@@ -62,7 +70,8 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
         {
             if (!ModelState.IsValid)
             {
-                // Reload chapters if validation fails
+                // Reload tags and chapters if validation fails
+                AvailableTags = (await _tagService.GetActiveTagsAsync()).ToList();
                 var paginationParams = new PaginationParams
                 {
                     Page = ChapterPage,
@@ -77,6 +86,11 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 return BadRequest();
             }
 
+            // Convert selected tag IDs to TagViewModels
+            var selectedTags = Input.SelectedTagIds?
+                .Select(tagId => new TagViewModel { Id = tagId })
+                .ToList() ?? new List<TagViewModel>();
+
             var updated = await _mangaService.UpdateMangaAsync(new MangaViewModel
             {
                 Id = Input.Id,
@@ -85,7 +99,8 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
                 Artist = Input.Artist,
                 Description = Input.Description,
                 Status = Input.Status,
-                CoverImageUrl = Input.CoverImageUrl
+                CoverImageUrl = Input.CoverImageUrl,
+                Tags = selectedTags
             });
 
             TempData["SuccessMessage"] = $"Manga '{updated.Title}' was updated.";
@@ -117,6 +132,8 @@ namespace PRN_MANGA_PROJECT.Areas.Admin.Pages.Manga
         [StringLength(500)]
         [Url]
         public string? CoverImageUrl { get; set; }
+
+        public List<int> SelectedTagIds { get; set; } = new List<int>();
     }
 }
 

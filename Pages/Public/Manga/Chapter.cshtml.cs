@@ -11,7 +11,7 @@ using PRN_MANGA_PROJECT.Models.Entities;
 using PRN_MANGA_PROJECT.Models.ViewModels;
 using PRN_MANGA_PROJECT.Services.CommentService;
 using PRN_MANGA_PROJECT.Services.HistoryService;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using System.Xml.Linq;
 
@@ -102,7 +102,16 @@ namespace PRN_MANGA_PROJECT.Pages.Public.Manga
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId != null)
             {
-                await _readingHistoryService.AddOrUpdateHistoryAsync(userId, MangaId, chapterId);
+                try
+                {
+                    await _readingHistoryService.AddOrUpdateHistoryAsync(userId, MangaId, chapterId);
+                }
+                catch (DbUpdateException)
+                {
+                    // User in session no longer exists in DB (e.g. after DB reset) — sign them out
+                    await HttpContext.SignOutAsync();
+                    return RedirectToPage("/Auth/Login");
+                }
             }
 
 
